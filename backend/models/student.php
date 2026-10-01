@@ -11,7 +11,7 @@ function student_find_by_number(mysqli $conn, string $student_number): ?array
             last_name,
             program,
             year_level,
-            section AS block_section,
+            section,
             email,
             phone,
             password_hash,
@@ -43,7 +43,7 @@ function student_find_by_id(mysqli $conn, int $student_id): ?array
             last_name,
             program,
             year_level,
-            section AS block_section,
+            section,
             email,
             phone,
             enrollment_status
