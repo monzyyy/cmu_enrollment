@@ -35,10 +35,6 @@ $headerPagesUrl = BASE_URL;
     <!-- TOP ACTIONS -->
     <div class="top-actions">
 
-        <a href="<?= e($headerPagesUrl) ?>notifications.php" class="icon-link" aria-label="Notifications">
-            <i class="fa-solid fa-bell"></i>
-        </a>
-
         <a href="<?= e($headerPagesUrl) ?>cart.php" class="icon-link" aria-label="Cart">
             <i class="fa-solid fa-cart-shopping"></i>
         </a>
