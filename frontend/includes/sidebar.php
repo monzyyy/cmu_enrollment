@@ -20,7 +20,7 @@ $sidebarMenu = [
         'items' => [
             ['key' => 'evaluation', 'label' => 'Evaluation', 'icon' => 'fa-screwdriver-wrench', 'link' => '?page=services_main'],
             ['key' => 'clearance', 'label' => 'Clearance', 'icon' => 'fa-screwdriver-wrench', 'link' => '?page=services_main'],
-            ['key' => 'cor', 'label' => 'COR', 'icon' => 'fa-screwdriver- wrench', 'link' => '?page=services_main'],
+            ['key' => 'cor', 'label' => 'COR', 'icon' => 'fa-screwdriver-wrench', 'link' => '?page=services_main'],
         ],
     ],
     [
@@ -53,10 +53,10 @@ $sidebarMenu = [
 
     <a href="<?= e($sidebarPagesUrl) ?>?page=landing" class="brand">
         <img class="imglogo"
-            src="<?= BASE_URL ?>frontend/assets/img/image.png"
+            src="<?= BASE_URL ?>frontend/assets/img/logo.png"
             alt="Coolfreeze logo"
             class="card-img"
-            width="200px"
+            width="240px"
         >
     </a>
 
