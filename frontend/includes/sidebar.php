@@ -18,23 +18,16 @@ $sidebarMenu = [
     [
         'title' => 'Enrollment',
         'items' => [
-            ['key' => 'evaluation', 'label' => 'Evaluation', 'icon' => 'fa-screwdriver-wrench', 'link' => '?page=services_main'],
-            ['key' => 'clearance', 'label' => 'Clearance', 'icon' => 'fa-screwdriver-wrench', 'link' => '?page=services_main'],
-            ['key' => 'cor', 'label' => 'COR', 'icon' => 'fa-screwdriver-wrench', 'link' => '?page=services_main'],
+            ['key' => 'evaluation', 'label' => 'Evaluation', 'icon' => 'fa-clipboard-check', 'link' => '?page=services_main'],
+            ['key' => 'clearance', 'label' => 'Clearance', 'icon' => 'fa-file-signature', 'link' => '?page=services_main'],
+            ['key' => 'cor', 'label' => 'COR', 'icon' => 'fa-file-lines', 'link' => '?page=services_main'],
         ],
     ],
     [
         'title' => 'Status',
         'items' => [
-            ['key' => 'myenrollment', 'label' => 'My Enrollment', 'icon' => 'fa-cart-shopping', 'link' => '?page=cart_main'],
-            ['key' => 'myschedule', 'label' => 'My Schedule', 'icon' => 'fa-cart-shopping', 'link' => '?page=cart_main'],
-        ],
-    ],
-    [
-        'title' => 'System',
-        'items' => [
-            ['key' => 'profile', 'label' => 'Profile', 'icon' => 'fa-clipboard-list', 'link' => '?page=request_main'],
-            ['key' => 'settings', 'label' => 'Settings', 'icon' => 'fa-clipboard-list', 'link' => '?page=request_main'],
+            ['key' => 'myenrollment', 'label' => 'My Enrollment', 'icon' => 'fa-id-card', 'link' => '?page=cart_main'],
+            ['key' => 'myschedule', 'label' => 'My Schedule', 'icon' => 'fa-calendar-days', 'link' => '?page=cart_main'],
         ],
     ],
     [
