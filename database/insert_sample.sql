@@ -23,4 +23,6 @@ INSERT INTO students (
     phone,
     password_hash,
     enrollment_status
-) VALUES ('202400924','Ronald',NULL,'Pineda','BSIT',3,'D','ronaldpineda642@gmail.com','09122241752','ronaldzz122','Enrolled');
+) VALUES ('202400924','Ronald',NULL,'Pineda','BSIT',3,'D','ronaldpineda642@gmail.com','09122241752','ronaldzz122','Enrolled'),
+('202400764','Dennis',NULL,'Jorta','BSIT',3,'D','dennissantiagojorta@gmail.com','09318866752','Iamironman','Enrolled'),
+('202401207','Jhosua',NULL,'Alfaro','BSIT',3,'D','jhosuaalfaro28@gmail.com','09753876340','owa0710','Enrolled');
