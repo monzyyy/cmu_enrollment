@@ -51,15 +51,6 @@ $sidebarMenu = [
 <!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
 
-    <a href="<?= e($sidebarPagesUrl) ?>?page=landing" class="brand">
-        <img class="imglogo"
-            src="<?= BASE_URL ?>frontend/assets/img/logo.png"
-            alt="Coolfreeze logo"
-            class="card-img"
-            width="240px"
-        >
-    </a>
-
     <nav class="menu">
 
         <p class="menu-title">Dashboard</p>

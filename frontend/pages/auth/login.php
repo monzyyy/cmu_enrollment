@@ -74,7 +74,7 @@ if (!empty($_SESSION['student_id'])) {
 
         <!-- Submit -->
         <button type="submit"
-                class="mt-5 w-full rounded-lg bg-blue-50 py-3 text-sm font-bold text-[#0b2a4f] transition hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 disabled:cursor-not-allowed disabled:opacity-60">
+                class="mt-5 w-full rounded-lg bg-blue-100 py-3 text-sm font-bold text-[#0b2a4f] transition hover:bg-blue-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 disabled:cursor-not-allowed disabled:opacity-60">
           Log in
         </button>
       </form>

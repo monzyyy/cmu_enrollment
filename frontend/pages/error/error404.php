@@ -22,7 +22,7 @@
         </p>
         <div class="flex items-center gap-4 mt-6">
           <a
-            href="<?= BASE_URL ?>?page=home"
+            href="<?= BASE_URL ?>?page=home_main"
             class="bg-blue-500 hover:bg-blue-900 px-7 py-2.5 text-white rounded-md active:scale-95 transition-all"
           >
             Return Home
