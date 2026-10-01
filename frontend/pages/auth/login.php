@@ -41,7 +41,7 @@ if (!empty($_SESSION['student_id'])) {
       <!-- Form message (success / error) -->
       <div id="form-message" class="mt-4 hidden rounded-lg px-3 py-2 text-sm" role="alert"></div>
 
-      <form id="login-form" action="<?= BASE_URL . 'backend/auth/login.php' ?>" method="POST" class="mt-4" novalidate>
+      <form id="login-form" action="<?= BASE_URL . 'backend/api/login.php' ?>" method="POST" class="mt-4" novalidate>
 
         <!-- Student number -->
         <label for="student_number" class="block text-sm font-semibold">Student Number</label>
