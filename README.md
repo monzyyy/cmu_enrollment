@@ -4,8 +4,8 @@
 
 1. Go to htdocs by typing this in cli: `cd C:/xampp/htdocs`
 2. copy and paste this in the cli: `git clone https://github.com/MarkBorito/coolfreeze.git`
-3. Go to the coolfreeze project: `cd coolfreeze`
-4. Type this: `code .`
+3. Go to the coolfreeze project: `cd cmuenrollment`
+5. Type this: `code .`
 
 ---
 
