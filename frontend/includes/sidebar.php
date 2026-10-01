@@ -16,21 +16,25 @@ $sidebarPagesUrl = BASE_URL;
 
 $sidebarMenu = [
     [
-        'title' => 'Services',
+        'title' => 'Enrollment',
         'items' => [
-            ['key' => 'services', 'label' => 'Services', 'icon' => 'fa-screwdriver-wrench', 'link' => '?page=services_main'],
+            ['key' => 'evaluation', 'label' => 'Evaluation', 'icon' => 'fa-screwdriver-wrench', 'link' => '?page=services_main'],
+            ['key' => 'clearance', 'label' => 'Clearance', 'icon' => 'fa-screwdriver-wrench', 'link' => '?page=services_main'],
+            ['key' => 'cor', 'label' => 'COR', 'icon' => 'fa-screwdriver-wrench', 'link' => '?page=services_main'],
         ],
     ],
     [
-        'title' => 'Cart',
+        'title' => 'Status',
         'items' => [
-            ['key' => 'cart', 'label' => 'Service Cart', 'icon' => 'fa-cart-shopping', 'link' => '?page=cart_main'],
+            ['key' => 'myenrollment', 'label' => 'My Enrollment', 'icon' => 'fa-cart-shopping', 'link' => '?page=cart_main'],
+            ['key' => 'myschedule', 'label' => 'My Schedule', 'icon' => 'fa-cart-shopping', 'link' => '?page=cart_main'],
         ],
     ],
     [
-        'title' => 'Service Requests',
+        'title' => 'System',
         'items' => [
-            ['key' => 'requests', 'label' => 'My Requests', 'icon' => 'fa-clipboard-list', 'link' => '?page=request_main'],
+            ['key' => 'profile', 'label' => 'Profile', 'icon' => 'fa-clipboard-list', 'link' => '?page=request_main'],
+            ['key' => 'settings', 'label' => 'Settings', 'icon' => 'fa-clipboard-list', 'link' => '?page=request_main'],
         ],
     ],
     [
@@ -49,7 +53,7 @@ $sidebarMenu = [
 
     <a href="<?= e($sidebarPagesUrl) ?>?page=landing" class="brand">
         <img class="imglogo"
-            src="<?= BASE_URL ?>frontend/assets/img/coolfreeze_horizontal_logo.svg"
+            src="<?= BASE_URL ?>frontend/assets/img/logo.png"
             alt="Coolfreeze logo"
             class="card-img"
             width="240px"

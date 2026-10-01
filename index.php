@@ -13,18 +13,12 @@ if (MAINTENANCE_MODE && APP_ENV !== 'local') {
 $pages = [
     'home_main' => 'main/home_main.php',
     'login' => 'auth/login.php',
-    'register' => 'auth/register.php',
     'forget' => 'auth/forget.php',
     'verification' => 'auth/verification.php',
     'reset' => 'auth/reset.php',
     'set_password' => 'auth/set_password.php',
     'error404' => 'error/error404.php',
     'maintenance' => 'error/maintenance.php',
-    'services_main' => 'main/services_main.php',
-    'sample' => 'sample.php',
-    'request_main' => 'main/request_main.php',
-    'cart_main' => 'main/cart_main.php',
-    'profile_main' => 'main/profile_main.php',
 ];
 
 //                        change this 'register'. pick the page in the $pages
