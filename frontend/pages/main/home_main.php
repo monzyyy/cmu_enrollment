@@ -25,7 +25,21 @@ $userName = trim(
 
 $currentPage = 'home_main';
 
-$enrollmentStatus = $student['enrollment_status'];
+$settingsStmt = $conn->prepare(
+    'SELECT enrollment_status
+     FROM system_settings
+     WHERE setting_id = 1
+     LIMIT 1'
+);
+
+$settingsStmt->execute();
+
+$settings = $settingsStmt->get_result()->fetch_assoc();
+
+$settingsStmt->close();
+
+$enrollmentStatus = $settings['enrollment_status'] ?? 'CLOSED';
+$enrollmentPhase = $student['enrollment_phase'];
 
 ?>
 
@@ -76,7 +90,7 @@ $enrollmentStatus = $student['enrollment_status'];
             <!-- =========================
                  CLOSED
             ========================== -->
-            <?php if ($enrollmentStatus === 'Closed'): ?>
+            <?php if ($enrollmentStatus === 'CLOSED'): ?>
 
                 <section class="home-hero">
 
@@ -96,13 +110,39 @@ $enrollmentStatus = $student['enrollment_status'];
                         </h1>
 
                         <p class="hero-description">
-                            Enrollment opens June 1. Get your requirements ready.
+                            Enrollment is currently unavailable. Please wait for the enrollment period to open.
                         </p>
 
                         <a href="<?= BASE_URL ?>?page=profile"
-                           class="hero-button">
-                            Prepare your requirements
-                            <i class="fa-regular fa-clipboard"></i>
+                        class="hero-button">
+                            View Profile
+                            <i class="fa-regular fa-user"></i>
+                        </a>
+
+                    </div>
+
+                </section>
+
+            <?php elseif ($enrollmentPhase === 'NOT_STARTED'): ?>
+
+                <section class="home-hero">
+
+                    <div class="home-hero-content">
+
+                         <div class="status-badge status-open">
+                            <i class="fa-solid fa-circle-check"></i>
+                            Enrollment is now Open
+                        </div>
+
+                        <h1>Start Your Enrollment</h1>
+
+                        <p class="hero-description">
+                            Begin your enrollment by completing your professor evaluation.
+                        </p>
+
+                        <a href="<?= BASE_URL ?>?page=evaluation" class="hero-button">
+                            Start Evaluation
+                            <i class="fa-solid fa-arrow-right"></i>
                         </a>
 
                     </div>
@@ -113,7 +153,7 @@ $enrollmentStatus = $student['enrollment_status'];
             <!-- =========================
                  EVALUATION
             ========================== -->
-            <?php elseif ($enrollmentStatus === 'Evaluation'): ?>
+            <?php elseif ($enrollmentPhase === 'EVALUATION'): ?>
 
                 <section class="home-hero">
 
@@ -121,24 +161,17 @@ $enrollmentStatus = $student['enrollment_status'];
 
                         <div class="status-badge status-open">
                             <i class="fa-solid fa-circle-check"></i>
-                            Enrollment is now Open
+                            Evaluation Completed
                         </div>
 
-                        <p class="semester-label">
-                            1st Semester, S.Y. 2026–2027
-                        </p>
-
-                        <h1>
-                            Welcome Back, <?= e($student['first_name']) ?>!
-                        </h1>
+                        <h1>Evaluation Completed</h1>
 
                         <p class="hero-description">
-                            Complete your professor evaluation to continue your enrollment.
+                            Your professor evaluation is complete. Continue by completing your clearance.
                         </p>
 
-                        <a href="<?= BASE_URL ?>?page=evaluation"
-                           class="hero-button">
-                            Start Evaluation
+                        <a href="<?= BASE_URL ?>?page=clearance" class="hero-button">
+                            Start Clearance
                             <i class="fa-solid fa-arrow-right"></i>
                         </a>
 
@@ -150,33 +183,26 @@ $enrollmentStatus = $student['enrollment_status'];
             <!-- =========================
                  CLEARANCE
             ========================== -->
-            <?php elseif ($enrollmentStatus === 'Clearance'): ?>
+            <?php elseif ($enrollmentPhase === 'CLEARANCE'): ?>
 
                 <section class="home-hero">
 
                     <div class="home-hero-content">
 
-                        <div class="status-badge status-clearance">
+                        <div class="status-badge status-open">
                             <i class="fa-solid fa-circle-check"></i>
-                            Professor Evaluation Completed
+                            Clearance Completed
                         </div>
 
-                        <p class="semester-label">
-                            1st Semester, S.Y. 2026–2027
-                        </p>
-
-                        <h1>
-                            Complete your Clearance
-                        </h1>
+                        <h1>Clearance Completed</h1>
 
                         <p class="hero-description">
-                            Get the required signatures to continue your enrollment.
+                            Your clearance has been completed. You may now print and submit your COR.
                         </p>
 
-                        <a href="<?= BASE_URL ?>?page=clearance"
-                           class="hero-button">
-                            View Clearance
-                            <i class="fa-solid fa-arrow-right"></i>
+                        <a href="<?= BASE_URL ?>?page=cor" class="hero-button">
+                            View COR
+                            <i class="fa-solid fa-file-lines"></i>
                         </a>
 
                     </div>
@@ -187,33 +213,26 @@ $enrollmentStatus = $student['enrollment_status'];
             <!-- =========================
                  COR
             ========================== -->
-            <?php elseif ($enrollmentStatus === 'COR'): ?>
+            <?php elseif ($enrollmentPhase === 'COR'): ?>
 
                 <section class="home-hero">
 
                     <div class="home-hero-content">
 
-                        <div class="status-badge status-cor">
-                            <i class="fa-solid fa-file-circle-check"></i>
-                            Your COR is Ready
+                        <div class="status-badge status-open">
+                            <i class="fa-solid fa-clock"></i>
+                            Pending Registrar Review
                         </div>
 
-                        <p class="semester-label">
-                            1st Semester, S.Y. 2026–2027
-                        </p>
-
-                        <h1>
-                            Your COR is ready, <?= e($student['first_name']) ?>!
-                        </h1>
+                        <h1>COR Submitted</h1>
 
                         <p class="hero-description">
-                            Download, print, sign, and submit your Certificate of Registration.
+                            Your COR has been submitted and is waiting for Registrar review.
                         </p>
 
-                        <a href="<?= BASE_URL ?>?page=cor"
-                           class="hero-button">
-                            View COR Submission
-                            <i class="fa-solid fa-arrow-right"></i>
+                        <a href="<?= BASE_URL ?>?page=cor" class="hero-button">
+                            View COR Status
+                            <i class="fa-solid fa-file-lines"></i>
                         </a>
 
                     </div>
@@ -224,33 +243,26 @@ $enrollmentStatus = $student['enrollment_status'];
             <!-- =========================
                  ENROLLED
             ========================== -->
-            <?php elseif ($enrollmentStatus === 'Enrolled'): ?>
+            <?php elseif ($enrollmentPhase === 'ENROLLED'): ?>
 
                 <section class="home-hero">
 
                     <div class="home-hero-content">
 
-                        <div class="status-badge status-enrolled">
+                         <div class="status-badge status-open">
                             <i class="fa-solid fa-circle-check"></i>
-                            Officially Enrolled
+                            Enrollment Completed
                         </div>
 
-                        <p class="semester-label">
-                            1st Semester, S.Y. 2026–2027
-                        </p>
-
-                        <h1>
-                            You're officially enrolled!
-                        </h1>
+                        <h1>You're Officially Enrolled!</h1>
 
                         <p class="hero-description">
                             Your enrollment has been successfully processed.
                         </p>
 
-                        <a href="<?= BASE_URL ?>?page=my_enrollment"
-                           class="hero-button">
+                        <a href="<?= BASE_URL ?>?page=my_enrollment" class="hero-button">
                             View My Enrollment
-                            <i class="fa-solid fa-arrow-right"></i>
+                            <i class="fa-solid fa-id-card"></i>
                         </a>
 
                     </div>
@@ -266,10 +278,13 @@ $enrollmentStatus = $student['enrollment_status'];
 
             <section class="enrollment-progress">
 
-                <div class="progress-item <?= in_array($enrollmentStatus, ['Clearance', 'COR', 'Enrolled']) ? 'completed' : ($enrollmentStatus === 'Evaluation' ? 'current' : '') ?>">
+                <div class="progress-item
+                    <?= in_array($enrollmentPhase, ['EVALUATION', 'CLEARANCE', 'COR', 'ENROLLED'])
+                        ? 'completed'
+                        : ($enrollmentPhase === 'NOT_STARTED' ? 'current' : '') ?>">
 
                     <div class="progress-number">
-                        <?php if (in_array($enrollmentStatus, ['Clearance', 'COR', 'Enrolled'])): ?>
+                        <?php if (in_array($enrollmentPhase, ['EVALUATION', 'CLEARANCE', 'COR', 'ENROLLED'])): ?>
                             <i class="fa-solid fa-check"></i>
                         <?php else: ?>
                             1
@@ -277,17 +292,19 @@ $enrollmentStatus = $student['enrollment_status'];
                     </div>
 
                     <span>Evaluation</span>
-
                 </div>
 
 
                 <div class="progress-line"></div>
 
 
-                <div class="progress-item <?= in_array($enrollmentStatus, ['COR', 'Enrolled']) ? 'completed' : ($enrollmentStatus === 'Clearance' ? 'current' : '') ?>">
+                <div class="progress-item
+                    <?= in_array($enrollmentPhase, ['CLEARANCE', 'COR', 'ENROLLED'])
+                        ? 'completed'
+                        : ($enrollmentPhase === 'EVALUATION' ? 'current' : '') ?>">
 
                     <div class="progress-number">
-                        <?php if (in_array($enrollmentStatus, ['COR', 'Enrolled'])): ?>
+                        <?php if (in_array($enrollmentPhase, ['CLEARANCE', 'COR', 'ENROLLED'])): ?>
                             <i class="fa-solid fa-check"></i>
                         <?php else: ?>
                             2
@@ -295,17 +312,19 @@ $enrollmentStatus = $student['enrollment_status'];
                     </div>
 
                     <span>Clearance</span>
-
                 </div>
 
 
                 <div class="progress-line"></div>
 
 
-                <div class="progress-item <?= $enrollmentStatus === 'Enrolled' ? 'completed' : ($enrollmentStatus === 'COR' ? 'current' : '') ?>">
+                <div class="progress-item
+                    <?= in_array($enrollmentPhase, ['COR', 'ENROLLED'])
+                        ? 'completed'
+                        : ($enrollmentPhase === 'CLEARANCE' ? 'current' : '') ?>">
 
                     <div class="progress-number">
-                        <?php if ($enrollmentStatus === 'Enrolled'): ?>
+                        <?php if (in_array($enrollmentPhase, ['COR', 'ENROLLED'])): ?>
                             <i class="fa-solid fa-check"></i>
                         <?php else: ?>
                             3
@@ -313,31 +332,24 @@ $enrollmentStatus = $student['enrollment_status'];
                     </div>
 
                     <span>COR</span>
-
                 </div>
 
 
                 <div class="progress-line"></div>
 
 
-                <div class="progress-item <?= $enrollmentStatus === 'Enrolled' ? 'completed' : '' ?>">
+                <div class="progress-item
+                    <?= $enrollmentPhase === 'ENROLLED' ? 'completed' : '' ?>">
 
                     <div class="progress-number">
-
-                        <?php if ($enrollmentStatus === 'Enrolled'): ?>
-
+                        <?php if ($enrollmentPhase === 'ENROLLED'): ?>
                             <i class="fa-solid fa-check"></i>
-
                         <?php else: ?>
-
                             4
-
                         <?php endif; ?>
-
                     </div>
 
                     <span>Enrolled</span>
-
                 </div>
 
             </section>
@@ -401,21 +413,33 @@ $enrollmentStatus = $student['enrollment_status'];
 
                     <div class="stat-content">
 
-                        <p>Enrollment status</p>
+                        <p>Enrollment progress</p>
 
-                        <h2><?= e($enrollmentStatus) ?></h2>
+                        <h2>
+                            <?php
+                            $phaseLabels = [
+                                'NOT_STARTED' => 'Not Started',
+                                'EVALUATION'  => 'Evaluation Completed',
+                                'CLEARANCE'   => 'Clearance Completed',
+                                'COR'         => 'COR Submitted',
+                                'ENROLLED'    => 'Enrolled'
+                            ];
+
+                            echo e($phaseLabels[$enrollmentPhase] ?? 'Unknown');
+                            ?>
+                        </h2>
 
                         <span>
-                            <?= $enrollmentStatus === 'Enrolled'
-                                ? 'Enrollment completed'
-                                : 'Step ' .
-                                  (
-                                      $enrollmentStatus === 'Closed' ? '0' :
-                                      ($enrollmentStatus === 'Evaluation' ? '1' :
-                                      ($enrollmentStatus === 'Clearance' ? '2' :
-                                      ($enrollmentStatus === 'COR' ? '3' : '4')))
-                                  ) .
-                                  ' out of 4'
+                            <?php
+                            $phaseProgress = [
+                                'NOT_STARTED' => '0 out of 4',
+                                'EVALUATION'  => '1 out of 4',
+                                'CLEARANCE'   => '2 out of 4',
+                                'COR'         => '3 out of 4',
+                                'ENROLLED'    => '4 out of 4'
+                            ];
+
+                            echo $phaseProgress[$enrollmentPhase] ?? '0 out of 4';
                             ?>
                         </span>
 

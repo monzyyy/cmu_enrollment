@@ -22,7 +22,7 @@ $pages = [
 ];
 
 //                        change this 'register'. pick the page in the $pages
-$page = $_GET['page'] ?? 'home_main';
+$page = $_GET['page'] ?? 'login';
 
 if (
     !is_string($page) ||

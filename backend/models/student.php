@@ -15,7 +15,7 @@ function student_find_by_number(mysqli $conn, string $student_number): ?array
             email,
             phone,
             password_hash,
-            enrollment_status
+            enrollment_phase
          FROM students
          WHERE student_number = ?
          LIMIT 1'
@@ -46,7 +46,7 @@ function student_find_by_id(mysqli $conn, int $student_id): ?array
             section,
             email,
             phone,
-            enrollment_status
+            enrollment_phase
          FROM students
          WHERE student_id = ?
          LIMIT 1'

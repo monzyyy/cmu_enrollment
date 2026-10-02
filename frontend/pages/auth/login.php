@@ -19,7 +19,7 @@ if (!empty($_SESSION['student_id'])) {
 </head>
 
 <body class="min-h-screen bg-cover bg-center bg-no-repeat text-[#0b2a4f]"
-      style="background-image: url('<?= BASE_URL . 'frontend/assets/img/cmu.png' ?>');">
+      style="background-image: url('<?= BASE_URL . 'frontend/assets/img/CMUBG.png' ?>');">
 
   <main class="flex min-h-screen items-center justify-center p-4">
 
