@@ -1,4 +1,4 @@
-# CoolFreeze
+# User Centric Enrollment
 
 ## How to clone this project (using cli)
 
