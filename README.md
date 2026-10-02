@@ -4,7 +4,7 @@
 
 1. Go to htdocs by typing this in cli: `cd C:/xampp/htdocs`
 2. copy and paste this in the cli: `git clone https://github.com/monzyyy/cmu_enrollment.git`
-3. Go to the coolfreeze project: `cd cmuenrollment`
+3. Go to the cmu_enrollment project: `cd cmu_enrollment`
 5. Type this: `code .`
 
 ---
