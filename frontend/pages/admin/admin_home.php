@@ -270,7 +270,7 @@ while ($student = $result->fetch_assoc()) {
                         <strong><?= $notStartedStudents ?></strong>
 
                         <p class="admin-stat-green">
-                            120 students haven't started
+                            <?= $notStartedStudents ?> students haven't started
                         </p>
 
                     </div>
@@ -317,7 +317,7 @@ while ($student = $result->fetch_assoc()) {
 
                         <p class="admin-enrolled-count">
                             <i class="fa-regular fa-clock"></i>
-                            320 out of 2300
+                            <?= $enrolledStudents ?> students have completed enrollment
                         </p>
 
                     </div>
