@@ -1,0 +1,469 @@
+/* =========================================================
+   ADMIN DASHBOARD
+========================================================= */
+
+.admin-enrollment-card {
+    display: grid;
+
+    grid-template-columns: minmax(0, 1fr) 350px;
+
+    gap: 30px;
+
+    padding: 20px;
+
+    background: var(--white);
+
+    border: 1px solid var(--border);
+
+    border-radius: 14px;
+}
+
+
+/* =========================================================
+   ENROLLMENT STATUS
+========================================================= */
+
+.admin-enrollment-left {
+    min-width: 0;
+}
+
+.admin-status-row {
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    margin-bottom: 14px;
+}
+
+.admin-section-label {
+    font-size: 13px;
+
+    font-weight: 700;
+
+    color: var(--primary);
+}
+
+.admin-status-badge {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 6px 13px;
+
+    border-radius: 20px;
+
+    font-size: 12px;
+
+    font-weight: 700;
+}
+
+.admin-status-open {
+    background: #dcfce7;
+
+    color: #16803c;
+}
+
+.admin-status-closed {
+    background: #f3f4f6;
+
+    color: #667085;
+}
+
+.admin-status-dot {
+    width: 6px;
+    height: 6px;
+
+    border-radius: 50%;
+
+    background: #16a34a;
+}
+
+.admin-status-neutral {
+    background: #f3f4f6;
+    color: #667085;
+}
+
+.admin-status-closed .admin-status-dot {
+    background: #667085;
+}
+
+
+.admin-enrollment-left h1 {
+    margin: 0;
+
+    font-size: 26px;
+
+    line-height: 1.2;
+
+    font-weight: 800;
+
+    color: var(--primary);
+}
+
+.admin-enrollment-left p {
+    margin: 6px 0 16px;
+
+    font-size: 13px;
+
+    color: var(--text);
+}
+
+
+/* =========================================================
+   ENROLLMENT PERIOD BUTTON
+========================================================= */
+
+.admin-period-button {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    padding: 9px 13px;
+
+    border: 1px solid #dbeafe;
+
+    border-radius: 8px;
+
+    background: #eff6ff;
+
+    color: var(--primary);
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    transition: 0.15s ease;
+}
+
+.admin-period-button:hover {
+    background: #dbeafe;
+}
+
+.admin-period-button i {
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   ENROLLMENT INFORMATION
+========================================================= */
+
+.admin-enrollment-info {
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    gap: 11px;
+}
+
+.admin-info-row {
+    display: grid;
+
+    grid-template-columns: 120px 1fr;
+
+    align-items: center;
+
+    gap: 12px;
+}
+
+.admin-info-row span {
+    font-size: 9px;
+
+    font-weight: 800;
+
+    color: var(--primary);
+}
+
+.admin-info-row strong {
+    display: flex;
+
+    align-items: center;
+
+    min-height: 29px;
+
+    padding: 6px 10px;
+
+    border: 1px solid var(--border);
+
+    border-radius: 7px;
+
+    background: #f3f4f6;
+
+    color: #667085;
+
+    font-size: 12px;
+
+    font-weight: 500;
+}
+
+
+/* =========================================================
+   STATISTICS
+========================================================= */
+
+.admin-stat-grid {
+    display: grid;
+
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+
+    gap: 9px;
+}
+
+
+.admin-stat-card {
+    display: flex;
+
+    flex-direction: column;
+
+    min-width: 0;
+
+    overflow: hidden;
+
+    background: var(--white);
+
+    border: 1px solid var(--border);
+
+    border-radius: 13px;
+}
+
+
+.admin-stat-icon {
+    display: flex;
+
+    align-items: center;
+
+    height: 46px;
+
+    padding: 0 13px;
+
+    border-bottom: 1px solid var(--border);
+
+    color: var(--primary);
+
+    font-size: 16px;
+}
+
+
+.admin-stat-content {
+    padding: 12px 13px 14px;
+}
+
+.admin-stat-content h3 {
+    margin: 0 0 5px;
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    color: #5c6678;
+}
+
+.admin-stat-content strong {
+    display: block;
+
+    margin-bottom: 5px;
+
+    font-size: 25px;
+
+    line-height: 1;
+
+    font-weight: 800;
+
+    color: #172033;
+}
+
+.admin-stat-content p {
+    margin: 0;
+
+    font-size: 10px;
+
+    color: #7a8495;
+}
+
+.admin-stat-green {
+    color: #16803c !important;
+}
+
+.admin-enrolled-count {
+    display: flex;
+
+    align-items: center;
+
+    gap: 5px;
+}
+
+
+/* =========================================================
+   STUDENT TABLE
+========================================================= */
+
+.admin-student-table {
+    overflow: hidden;
+
+    background: var(--white);
+
+    border: 1px solid var(--border);
+
+    border-radius: 13px;
+}
+
+
+.admin-table-header,
+.admin-table-row {
+    display: grid;
+
+    grid-template-columns: 50px 140px 1.3fr 1fr 180px;
+
+    align-items: center;
+
+    column-gap: 10px;
+}
+
+
+.admin-table-header {
+    min-height: 35px;
+
+    padding: 0 13px;
+
+    background: #d1d5db;
+
+    color: #263247;
+
+    font-size: 9px;
+
+    font-weight: 800;
+}
+
+
+.admin-table-row {
+    min-height: 67px;
+
+    padding: 0 13px;
+
+    border-top: 1px solid #e4e7ec;
+
+    color: #596579;
+
+    font-size: 12px;
+}
+
+.admin-table-row:nth-child(odd) {
+    background: #f8fafc;
+}
+
+.admin-table-row:nth-child(even) {
+    background: #ffffff;
+}
+
+
+/* =========================================================
+   TABLE STATUS
+========================================================= */
+
+.admin-table-status {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    width: 100%;
+
+    min-height: 25px;
+
+    padding: 4px 12px;
+
+    border-radius: 20px;
+
+    font-size: 10px;
+
+    font-weight: 500;
+}
+
+.admin-status-pending {
+    background: #fff2bf;
+
+    color: #d97706;
+}
+
+.admin-status-passed {
+    background: #eff6ff;
+
+    color: #2563eb;
+}
+
+.admin-status-accepted {
+    background: #dcfce7;
+
+    color: #16803c;
+}
+
+.admin-status-enrolled {
+    background: #dcfce7;
+
+    color: #16803c;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1000px) {
+
+    .admin-enrollment-card {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-stat-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .admin-table-header,
+    .admin-table-row {
+        grid-template-columns:
+            40px
+            120px
+            1fr
+            100px
+            130px;
+    }
+
+}
+
+
+@media (max-width: 700px) {
+
+    .admin-stat-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-enrollment-info {
+        gap: 8px;
+    }
+
+    .admin-info-row {
+        grid-template-columns: 100px 1fr;
+    }
+
+    .admin-table-header {
+        display: none;
+    }
+
+    .admin-table-row {
+        grid-template-columns: 1fr 1fr;
+
+        gap: 8px;
+
+        padding: 12px;
+    }
+
+}

@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../models/user.php';
 require_once __DIR__ . '/../models/student.php';
 
 ini_set('display_errors', '0');
@@ -34,15 +35,15 @@ if (
 }
 
 
-$student_number = trim($_POST['student_number'] ?? '');
+$account_number = trim($_POST['student_number'] ?? '');
 $password = $_POST['password'] ?? '';
 
 
 $errors = [];
 
 
-if ($student_number === '') {
-    $errors['student_number'] = 'Enter your student number.';
+if ($account_number === '') {
+    $errors['student_number'] = 'Enter your account number.';
 }
 
 
@@ -61,14 +62,17 @@ if ($errors) {
 
 try {
 
-    $student = student_find_by_number($conn, $student_number);
+    $user = user_find_by_account_number(
+        $conn,
+        $account_number
+    );
 
 
-    if ($student) {
+    if ($user) {
 
         $valid = password_verify(
             $password,
-            $student['password_hash']
+            $user['password_hash']
         );
 
     } else {
@@ -93,7 +97,7 @@ try {
 
         respond([
             'success' => false,
-            'message' => 'Invalid student number or password.'
+            'message' => 'Invalid account number or password.'
         ], 401);
     }
 
@@ -107,29 +111,87 @@ try {
     );
 
 
-    $_SESSION['student_id'] =
-        (int) $student['student_id'];
+    $_SESSION['user_id'] =
+        (int) $user['user_id'];
 
 
-    $_SESSION['student_number'] =
-        $student['student_number'];
+    $_SESSION['account_number'] =
+        $user['account_number'];
 
 
-    $_SESSION['student_name'] =
-        trim(
-            $student['first_name'] . ' ' .
-            ($student['middle_name']
-                ? $student['middle_name'] . ' '
-                : '') .
-            $student['last_name']
+    $_SESSION['role'] =
+        $user['role'];
+
+
+    if ($user['role'] === 'STUDENT') {
+
+        $student = student_find_by_number(
+            $conn,
+            $account_number
         );
 
 
+        if (!$student) {
+
+            respond([
+                'success' => false,
+                'message' => 'Student account information could not be found.'
+            ], 500);
+        }
+
+
+        $_SESSION['student_id'] =
+            (int) $student['student_id'];
+
+
+        $_SESSION['student_number'] =
+            $student['student_number'];
+
+
+        $_SESSION['student_name'] =
+            trim(
+                $student['first_name'] . ' ' .
+                ($student['middle_name']
+                    ? $student['middle_name'] . ' '
+                    : '') .
+                $student['last_name']
+            );
+
+
+        respond([
+            'success' => true,
+            'message' => 'Login successful! Redirecting...',
+            'redirect' => BASE_URL . '?page=home_main'
+        ]);
+    }
+
+
+    if ($user['role'] === 'ADMIN') {
+
+        $_SESSION['username'] = 'Admin';
+
+        respond([
+            'success' => true,
+            'message' => 'Login successful! Redirecting...',
+            'redirect' => BASE_URL . '?page=admin_home'
+        ]);
+    }
+
+
+    if ($user['role'] === 'INSTRUCTOR') {
+
+        respond([
+            'success' => true,
+            'message' => 'Login successful! Redirecting...',
+            'redirect' => BASE_URL . '?page=instructor_home'
+        ]);
+    }
+
+
     respond([
-        'success' => true,
-        'message' => 'Login successful! Redirecting...',
-        'redirect' => BASE_URL . '?page=home_main'
-    ]);
+        'success' => false,
+        'message' => 'Invalid account role.'
+    ], 403);
 
 
 } catch (mysqli_sql_exception $e) {
@@ -140,4 +202,4 @@ try {
         'success' => false,
         'message' => 'Something went wrong. Please try again.'
     ], 500);
-}   
+}

@@ -4,6 +4,16 @@ CREATE DATABASE IF NOT EXISTS cmuenrollment_db
 
 USE cmuenrollment_db;
 
+CREATE TABLE IF NOT EXISTS users (
+    user_id        INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    account_number VARCHAR(50) NOT NULL,
+    password_hash  VARCHAR(255) NOT NULL,
+    role           ENUM('STUDENT', 'ADMIN', 'INSTRUCTOR') NOT NULL,
+    created_at     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    UNIQUE KEY uq_users_account_number (account_number)
+) ENGINE=InnoDB;
+
 CREATE TABLE IF NOT EXISTS system_settings (
     setting_id        INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     enrollment_status ENUM('OPEN', 'CLOSED') NOT NULL DEFAULT 'CLOSED',

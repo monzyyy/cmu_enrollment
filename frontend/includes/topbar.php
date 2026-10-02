@@ -18,7 +18,7 @@ if (!function_exists('e')) {
     }
 }
 
-$userName = $userName ?? ($_SESSION['username'] ?? 'Customer');
+$userName = $userName ?? ($_SESSION['username'] ?? 'User');
 
 
 // Folder that holds the customer pages. Keep in sync with sidebar.php.

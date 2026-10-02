@@ -1,5 +1,7 @@
 <?php
 
+require_role('STUDENT');
+
 require_once dirname(__DIR__, 3) . '/backend/bootstrap.php';
 require_once dirname(__DIR__, 3) . '/backend/models/student.php';
 
@@ -56,6 +58,7 @@ $enrollmentPhase = $student['enrollment_phase'];
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="<?= BASE_URL ?>frontend/assets/css/main.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>frontend/assets/css/student.css">
 
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">

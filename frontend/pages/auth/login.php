@@ -44,12 +44,12 @@ if (!empty($_SESSION['student_id'])) {
       <form id="login-form" action="<?= BASE_URL . 'backend/api/login.php' ?>" method="POST" class="mt-4" novalidate>
 
         <!-- Student number -->
-        <label for="student_number" class="block text-sm font-semibold">Student Number</label>
+        <label for="student_number" class="block text-sm font-semibold">Account ID</label>
         <div class="mt-1.5 flex items-center gap-3 rounded-lg bg-blue-50/90 px-3 focus-within:ring-2 focus-within:ring-blue-600">
           <i class="bi bi-person-badge text-lg"></i>
           <input type="text" id="student_number" name="student_number" autocomplete="username"
                  autocapitalize="off" spellcheck="false" required
-                 placeholder="Enter your student number"
+                 placeholder="Enter your account ID"
                  class="w-full bg-transparent py-3 text-sm placeholder:text-slate-500 focus:outline-none">
         </div>
         <p class="field-error mt-1 hidden text-xs text-red-700" data-for="student_number"></p>
