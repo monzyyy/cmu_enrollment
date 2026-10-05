@@ -431,3 +431,1391 @@
 .home-panel .schedule-item:nth-child(4) {
     background: var(--white);
 }
+
+/* =========================================================
+   COURSE OFFERING  (append to student.css)
+========================================================= */
+
+.page-heading h1 {
+    margin: 0 0 4px;
+
+    font-size: 26px;
+    line-height: 1.2;
+
+    color: #12284a;
+}
+
+.page-heading p {
+    max-width: 520px;
+
+    margin: 0;
+
+    font-size: 13px;
+    line-height: 1.45;
+
+    color: #3d516b;
+}
+
+
+/* ---------- card ---------- */
+
+.co-card {
+    display: flex;
+    flex-direction: column;
+
+    gap: 12px;
+
+    padding: 12px;
+
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+
+    background: var(--white);
+}
+
+
+/* ---------- shared icon bubble ---------- */
+
+.co-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    width: 30px;
+    height: 30px;
+
+    border-radius: 50%;
+
+    background: var(--blue-bg);
+
+    color: #1d385b;
+
+    font-size: 13px;
+}
+
+.co-info-item small,
+.co-total-box small {
+    display: block;
+
+    font-size: 10px;
+
+    color: #53647b;
+}
+
+.co-info-item strong,
+.co-total-box strong {
+    display: block;
+
+    font-size: 14px;
+    line-height: 1.3;
+
+    color: #12284a;
+}
+
+
+/* ---------- student info row ---------- */
+
+.co-info {
+    display: grid;
+
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+
+    padding-bottom: 12px;
+
+    border-bottom: 1px solid var(--border);
+}
+
+.co-info-item {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    min-width: 0;
+
+    padding: 8px 14px;
+
+    border-left: 1px solid var(--border);
+}
+
+.co-info-item:first-child {
+    border-left: 0;
+}
+
+.co-info-item.is-highlight {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+
+    background: var(--bluesubtle);
+}
+
+
+/* ---------- totals + action ---------- */
+
+.co-totals {
+    display: grid;
+
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+
+    gap: 12px;
+
+    align-items: stretch;
+}
+
+.co-total-box {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 10px 14px;
+
+    border: 1px solid var(--border);
+    border-radius: 12px;
+
+    background: var(--white);
+}
+
+.co-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 10px;
+
+    padding: 0 22px;
+
+    border: 1px solid var(--border);
+    border-radius: 10px;
+
+    background: var(--lightest-blue);
+
+    color: var(--primary-dark);
+
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.co-button:hover {
+    background: var(--blue-bg);
+}
+
+.co-button i {
+    font-size: 11px;
+}
+
+
+/* ---------- table ---------- */
+
+.co-table-wrap {
+    overflow-x: auto;
+
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+.co-table {
+    width: 100%;
+    min-width: 720px;
+
+    border-collapse: collapse;
+
+    font-size: 12px;
+}
+
+.co-table th {
+    padding: 11px 14px;
+
+    background: #d5d9e1;
+
+    color: #3d4a5f;
+
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-align: left;
+    text-transform: uppercase;
+}
+
+.co-table td {
+    padding: 12px 14px;
+
+    border-top: 1px solid var(--border);
+
+    background: var(--graystuble);
+
+    color: #3d4a5f;
+
+    line-height: 1.45;
+
+    vertical-align: middle;
+}
+
+.co-table tbody tr:first-child td {
+    border-top: 0;
+}
+
+.co-table .col-num {
+    width: 56px;
+}
+
+.co-table .col-units {
+    width: 70px;
+
+    text-align: center;
+}
+
+.co-table tbody tr:hover td {
+    background: var(--bluesubtle);
+}
+
+.co-empty {
+    padding: 28px 14px !important;
+
+    text-align: center;
+
+    color: var(--muted) !important;
+}
+
+
+/* ---------- footnote ---------- */
+
+.co-note {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 7px 10px;
+
+    border-radius: 999px;
+
+    background: var(--lightest-blue);
+
+    color: var(--primary);
+
+    font-size: 11px;
+}
+
+.co-note-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 24px;
+    height: 24px;
+
+    border-radius: 50%;
+
+    background: var(--blue-bg);
+
+    font-size: 12px;
+}
+
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 1100px) {
+
+    .co-info {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+
+        row-gap: 8px;
+    }
+
+    .co-info-item:nth-child(3) {
+        border-left: 0;
+    }
+}
+
+@media (max-width: 720px) {
+
+    .co-info,
+    .co-totals {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .co-info-item {
+        border-left: 0;
+    }
+
+    .co-button {
+        padding: 12px 22px;
+    }
+
+    .co-note {
+        border-radius: 12px;
+    }
+}
+/* =========================================================
+   FACULTY EVALUATION  (append to student.css, after the
+   Course Offering block - it reuses .page-heading, .co-card,
+   .co-icon, .co-table-wrap and .co-table from there)
+========================================================= */
+
+/* ---------- summary row ---------- */
+
+.ev-summary {
+    display: grid;
+
+    grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr);
+
+    gap: 12px;
+}
+
+.ev-phase,
+.ev-about {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+
+    background: var(--bluesubtle);
+}
+
+
+/* ---------- current phase ---------- */
+
+.ev-phase {
+    display: grid;
+
+    grid-template-columns: minmax(0, 1fr) 210px;
+
+    gap: 12px;
+
+    padding: 10px;
+}
+
+.ev-phase-info {
+    display: flex;
+    align-items: flex-start;
+
+    gap: 10px;
+
+    min-width: 0;
+}
+
+.ev-phase-info small {
+    display: block;
+
+    font-size: 10px;
+
+    color: #53647b;
+}
+
+.ev-phase-info h2 {
+    margin: 0 0 6px;
+
+    font-size: 15px;
+
+    color: #12284a;
+}
+
+.ev-phase-info p {
+    margin: 0;
+
+    font-size: 10px;
+    line-height: 1.45;
+
+    color: #53647b;
+}
+
+
+/* ---------- progress ---------- */
+
+.ev-progress {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    gap: 6px;
+
+    padding: 10px 12px;
+
+    border-radius: 10px;
+
+    background: var(--blue-bg);
+}
+
+.ev-progress strong {
+    align-self: flex-start;
+
+    padding: 2px 8px;
+
+    border-radius: 6px;
+
+    background: var(--white);
+
+    font-size: 15px;
+
+    color: var(--primary-dark);
+}
+
+.ev-progress-bar {
+    width: 100%;
+    height: 10px;
+
+    overflow: hidden;
+
+    border-radius: 10px;
+
+    background: var(--white);
+}
+
+.ev-progress-fill {
+    height: 100%;
+
+    border-radius: 10px;
+
+    background: var(--primary-dark);
+}
+
+.ev-progress span {
+    font-size: 10px;
+
+    color: #53647b;
+}
+
+
+/* ---------- about ---------- */
+
+.ev-about {
+    padding: 12px 14px;
+}
+
+.ev-about h2 {
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    margin: 0 0 6px;
+
+    font-size: 14px;
+
+    color: #12284a;
+}
+
+.ev-about p {
+    margin: 0;
+
+    font-size: 10px;
+    line-height: 1.5;
+
+    color: #53647b;
+}
+
+
+/* ---------- subjects ---------- */
+
+.ev-subjects {
+    display: flex;
+    flex-direction: column;
+
+    gap: 8px;
+
+    padding: 0 2px;
+}
+
+.ev-subjects-head h2 {
+    margin: 0;
+
+    font-size: 16px;
+
+    color: #12284a;
+}
+
+.ev-subjects-head p {
+    margin: 2px 0 0;
+
+    font-size: 10px;
+
+    color: #53647b;
+}
+
+.ev-table td {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.ev-table .col-status {
+    width: 190px;
+
+    text-align: center;
+}
+
+.ev-table .col-action {
+    width: 160px;
+
+    text-align: center;
+}
+
+
+/* ---------- status badge ---------- */
+
+.eval-badge {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 6px;
+
+    padding: 4px 12px;
+
+    border-radius: 20px;
+
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.eval-badge i {
+    font-size: 4px;
+}
+
+.eval-done {
+    background: var(--green-bg);
+
+    color: #28794d;
+}
+
+.eval-pending {
+    background: var(--danger-bg);
+
+    color: #b45353;
+}
+
+
+/* ---------- evaluate button ---------- */
+
+.eval-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 10px;
+
+    min-width: 108px;
+
+    padding: 8px 14px;
+
+    border: 1px solid var(--border);
+    border-radius: 8px;
+
+    background: var(--lightest-blue);
+
+    color: var(--primary-dark);
+
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.eval-button:hover {
+    background: var(--blue-bg);
+}
+
+.eval-button:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.eval-button i {
+    font-size: 12px;
+}
+
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 1100px) {
+
+    .ev-summary {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 720px) {
+
+    .ev-phase {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+/* =========================================================
+   CLEARANCE  (append to student.css, after the Course Offering
+   block - it reuses .page-heading and .co-icon from there)
+========================================================= */
+
+.page-heading.is-caps h1 {
+    text-transform: uppercase;
+}
+
+
+/* ---------- shared card ---------- */
+
+.cl-card {
+    display: flex;
+    flex-direction: column;
+
+    gap: 10px;
+
+    padding: 12px;
+
+    border: 1px solid var(--border);
+    border-radius: 12px;
+
+    background: var(--white);
+}
+
+.cl-card-head {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+}
+
+.cl-card-head h2 {
+    margin: 0;
+
+    font-size: 15px;
+
+    color: #12284a;
+}
+
+.cl-card-head p {
+    margin: 2px 0 0;
+
+    font-size: 10px;
+
+    color: #53647b;
+}
+
+
+/* ---------- student information ---------- */
+
+.cl-info {
+    display: grid;
+
+    grid-template-columns: repeat(6, auto);
+    justify-content: space-between;
+
+    gap: 0;
+}
+
+.cl-info-item {
+    min-width: 0;
+
+    padding: 0 16px;
+
+    border-left: 1px solid var(--border);
+}
+
+.cl-info-item:first-child {
+    padding-left: 0;
+
+    border-left: 0;
+}
+
+.cl-info-item:last-child {
+    padding-right: 0;
+}
+
+.cl-info-item small {
+    display: block;
+
+    font-size: 10px;
+
+    color: #53647b;
+}
+
+.cl-info-item strong {
+    display: block;
+
+    font-size: 14px;
+
+    color: #12284a;
+}
+
+
+/* ---------- steps ---------- */
+
+.cl-steps {
+    flex-direction: row;
+    align-items: center;
+
+    gap: 10px;
+}
+
+.cl-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    flex: 1;
+
+    gap: 3px;
+
+    min-width: 0;
+
+    padding: 8px;
+
+    border-radius: 10px;
+
+    background: var(--blue-bg);
+
+    text-align: center;
+}
+
+.cl-step .co-icon {
+    background: var(--white);
+}
+
+.cl-step h3 {
+    margin: 2px 0 0;
+
+    font-size: 14px;
+
+    color: #12284a;
+}
+
+.cl-step p {
+    margin: 0;
+
+    font-size: 9px;
+    line-height: 1.35;
+
+    color: #53647b;
+}
+
+.cl-step-arrow {
+    flex-shrink: 0;
+
+    font-size: 12px;
+
+    color: #12284a;
+}
+
+
+/* ---------- main grid ---------- */
+
+.cl-grid {
+    display: grid;
+
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+
+    gap: 12px;
+
+    align-items: start;
+}
+
+.cl-col {
+    display: flex;
+    flex-direction: column;
+
+    gap: 12px;
+}
+
+
+/* ---------- action buttons ---------- */
+
+.cl-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 10px;
+
+    width: 100%;
+
+    padding: 10px 14px;
+
+    border: 0;
+    border-radius: 8px;
+
+    background: var(--lightest-blue);
+
+    color: var(--primary-dark);
+
+    font-size: 13px;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+.cl-action:hover:not(:disabled) {
+    background: var(--blue-bg);
+}
+
+.cl-action:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.cl-action:disabled {
+    cursor: not-allowed;
+
+    opacity: 0.6;
+}
+
+
+/* ---------- dropzone ---------- */
+
+.cl-dropzone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: 6px;
+
+    min-height: 100px;
+
+    margin-bottom: 8px;
+    padding: 14px;
+
+    border: 1px dashed var(--primary);
+    border-radius: 8px;
+
+    background: var(--lightest-blue);
+
+    text-align: center;
+
+    cursor: pointer;
+}
+
+.cl-dropzone .co-icon {
+    background: var(--white);
+}
+
+.cl-dropzone:hover,
+.cl-dropzone.is-dragging {
+    background: var(--blue-bg);
+}
+
+.cl-dropzone:focus-within {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.cl-dropzone.is-disabled {
+    cursor: not-allowed;
+
+    opacity: 0.6;
+}
+
+.cl-dropzone.has-file {
+    border-style: solid;
+    border-color: var(--green);
+}
+
+.cl-dropzone.has-error {
+    border-color: var(--danger);
+}
+
+.cl-drop-title {
+    max-width: 100%;
+
+    overflow-wrap: anywhere;
+
+    font-size: 13px;
+
+    color: #12284a;
+}
+
+.cl-drop-hint {
+    font-size: 10px;
+
+    color: #53647b;
+}
+
+.cl-dropzone.has-error .cl-drop-hint {
+    color: #b45353;
+}
+
+
+/* ---------- submission status ---------- */
+
+.cl-status {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 14px;
+
+    border-radius: 8px;
+
+    background: var(--lightest-blue);
+
+    text-align: center;
+
+    font-size: 13px;
+
+    color: #12284a;
+}
+
+.cl-status i {
+    font-size: 16px;
+}
+
+.cl-status.is-pending {
+    background: var(--orange-bg);
+
+    color: #765c19;
+}
+
+.cl-status.is-approved {
+    background: var(--green-bg);
+
+    color: #28794d;
+}
+
+.cl-status.is-rejected {
+    background: var(--danger-bg);
+
+    color: #b45353;
+}
+
+
+/* ---------- signature checklist ---------- */
+
+.cl-table-wrap {
+    overflow-x: auto;
+
+    border: 1px solid var(--border);
+    border-radius: 10px;
+}
+
+.cl-table {
+    width: 100%;
+
+    border-collapse: collapse;
+
+    font-size: 12px;
+}
+
+.cl-table th {
+    padding: 12px 14px;
+
+    background: #1d4ed8;
+
+    color: var(--white);
+
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-align: left;
+    text-transform: uppercase;
+}
+
+.cl-table td {
+    padding: 10px 14px;
+
+    border-top: 1px solid var(--border);
+
+    background: var(--graystuble);
+
+    color: #3d4a5f;
+
+    vertical-align: middle;
+}
+
+.cl-table tbody tr:first-child td {
+    border-top: 0;
+}
+
+.cl-table .col-num {
+    width: 50px;
+}
+
+.cl-table .col-check {
+    width: 100px;
+
+    text-align: center;
+}
+
+.cl-checkbox {
+    width: 18px;
+    height: 18px;
+
+    margin: 0;
+
+    accent-color: var(--green);
+}
+
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 1100px) {
+
+    .cl-info {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+
+        row-gap: 12px;
+    }
+
+    .cl-info-item:nth-child(4) {
+        padding-left: 0;
+
+        border-left: 0;
+    }
+
+    .cl-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+
+    .cl-steps {
+        display: grid;
+
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .cl-step-arrow {
+        display: none;
+    }
+}
+
+@media (max-width: 560px) {
+
+    .cl-info,
+    .cl-steps {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .cl-info-item {
+        padding: 0;
+
+        border-left: 0;
+    }
+}
+/* =========================================================
+   PERSONAL INFORMATION  (append to student.css, after the
+   Course Offering block - it reuses .page-heading and
+   .co-icon from there)
+========================================================= */
+
+.sr-only {
+    position: absolute;
+
+    width: 1px;
+    height: 1px;
+
+    margin: -1px;
+    padding: 0;
+
+    overflow: hidden;
+
+    clip: rect(0, 0, 0, 0);
+
+    white-space: nowrap;
+
+    border: 0;
+}
+
+
+/* ---------- heading row ---------- */
+
+.pf-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 16px;
+}
+
+.pf-notice {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    max-width: 330px;
+
+    padding: 8px 12px;
+
+    border: 1px solid var(--border);
+    border-radius: 12px;
+
+    background: var(--lightest-blue);
+}
+
+.pf-notice .co-icon {
+    background: var(--blue-bg);
+
+    color: var(--primary);
+}
+
+.pf-notice p {
+    margin: 0;
+
+    font-size: 10px;
+    line-height: 1.45;
+
+    color: var(--primary);
+}
+
+
+/* ---------- cards ---------- */
+
+.pf-card {
+    display: flex;
+    flex-direction: column;
+
+    gap: 10px;
+
+    min-width: 0;
+
+    padding: 12px;
+
+    border: 1px solid var(--border);
+    border-radius: 12px;
+
+    background: var(--white);
+}
+
+.pf-card-head {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+}
+
+.pf-card-head h2 {
+    margin: 0;
+
+    font-size: 15px;
+
+    color: #12284a;
+}
+
+.pf-pair {
+    display: grid;
+
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 12px;
+}
+
+
+/* ---------- label + value rows ---------- */
+
+.pf-fields {
+    display: flex;
+    flex-direction: column;
+
+    gap: 3px;
+
+    min-width: 0;
+}
+
+.pf-field {
+    display: grid;
+
+    grid-template-columns: 112px minmax(0, 1fr);
+
+    align-items: center;
+
+    gap: 6px;
+}
+
+.pf-fields.is-wide .pf-field {
+    grid-template-columns: 124px minmax(0, 1fr);
+
+    gap: 8px;
+}
+
+.pf-label {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    text-transform: uppercase;
+
+    color: #12284a;
+}
+
+.pf-value {
+    min-height: 24px;
+
+    padding: 4px 10px;
+
+    overflow: hidden;
+
+    border-radius: 4px;
+
+    background: #eef1f6;
+
+    font-size: 11px;
+    line-height: 1.6;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    color: #53647b;
+}
+
+.pf-fields.is-wide .pf-value {
+    min-height: 27px;
+
+    padding: 5px 10px;
+}
+
+
+/* ---------- personal background layout ---------- */
+
+.pf-personal {
+    display: grid;
+
+    grid-template-columns: 140px minmax(0, 1fr) minmax(0, 1fr);
+
+    gap: 14px;
+
+    align-items: start;
+}
+
+
+/* ---------- photo ---------- */
+
+.pf-photo {
+    position: relative;
+
+    width: 140px;
+    height: 154px;
+
+    margin: 0;
+}
+
+.pf-photo img,
+.pf-photo-empty {
+    display: block;
+
+    width: 100%;
+    height: 100%;
+
+    border-radius: 10px;
+
+    object-fit: cover;
+}
+
+.pf-photo-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #eef1f6;
+
+    font-size: 44px;
+
+    color: #9aa7b8;
+}
+
+.pf-photo-button {
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 26px;
+    height: 26px;
+
+    border-radius: 50%;
+
+    background: var(--primary);
+
+    color: var(--white);
+
+    font-size: 12px;
+
+    cursor: pointer;
+}
+
+.pf-photo-button:hover {
+    background: var(--primary-dark);
+}
+
+.pf-photo:focus-within .pf-photo-button {
+    outline: 2px solid var(--primary-dark);
+    outline-offset: 2px;
+}
+
+
+/* ---------- education ---------- */
+
+.pf-education {
+    display: grid;
+
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    gap: 14px;
+}
+
+.pf-edu-block {
+    display: flex;
+    flex-direction: column;
+
+    gap: 6px;
+
+    min-width: 0;
+}
+
+.pf-edu-block h3 {
+    margin: 0;
+
+    font-size: 15px;
+
+    color: #12284a;
+}
+
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 1200px) {
+
+    .pf-personal {
+        grid-template-columns: 140px minmax(0, 1fr);
+    }
+
+    .pf-personal .pf-fields:last-child {
+        grid-column: 1 / -1;
+    }
+
+    .pf-education {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+
+    .pf-top {
+        flex-direction: column;
+    }
+
+    .pf-notice {
+        max-width: none;
+    }
+
+    .pf-pair {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+
+    .pf-personal {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .pf-photo {
+        margin: 0 auto;
+    }
+
+    .pf-field,
+    .pf-fields.is-wide .pf-field {
+        grid-template-columns: minmax(0, 1fr);
+
+        gap: 2px;
+
+        margin-bottom: 4px;
+    }
+}

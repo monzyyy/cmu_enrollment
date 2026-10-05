@@ -12,6 +12,11 @@ if (MAINTENANCE_MODE && APP_ENV !== 'local') {
 
 $pages = [
     'home_main' => 'main/home_main.php',
+    'course_offering' => 'main/course_offering.php',
+    'faculty_evaluation' => 'main/faculty_evaluation.php',
+    'clearance_main' => 'main/clearance_main.php',
+    'profile' => 'main/profile.php',
+
 
     'admin_home' => 'admin/admin_home.php',
     'enrollment_period' => 'admin/enrollment_period.php',
@@ -28,7 +33,7 @@ $pages = [
 ];
 
 //                        change this 'register'. pick the page in the $pages
-$page = $_GET['page'] ?? 'login';
+$page = $_GET['page'] ?? 'course_offering';
 
 if (
     !is_string($page) ||
