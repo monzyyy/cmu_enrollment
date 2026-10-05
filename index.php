@@ -20,6 +20,8 @@ $pages = [
 
     'admin_home' => 'admin/admin_home.php',
     'enrollment_period' => 'admin/enrollment_period.php',
+    'student_enrollment' => 'admin/student_enrollment.php',
+    'cor_submissions' => 'admin/cor_submissions.php',
 
     'login' => 'auth/login.php',
     'forget' => 'auth/forget.php',
@@ -29,7 +31,8 @@ $pages = [
     
     'error404' => 'error/error404.php',
     'maintenance' => 'error/maintenance.php',
-    
+    'sample' => 'sample.php',
+
 ];
 
 //                        change this 'register'. pick the page in the $pages

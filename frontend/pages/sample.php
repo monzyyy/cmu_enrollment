@@ -22,6 +22,11 @@ $currentPage = 'home';   // change based on page home | services | cart | reques
     <div class="main">
       <?php require FRONTEND_PATH . 'includes/topbar.php'?>
     </div>
+      <h1>Testing page</h1>
+      <p>Welcome, <?= $userName ?>!</p>
+      <?php
+        echo password_hash('richmond', PASSWORD_BCRYPT);
+        ?>
   </div>
   
 </body>

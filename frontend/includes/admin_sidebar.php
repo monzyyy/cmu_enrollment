@@ -129,16 +129,16 @@ $sidebarMenu = [
     [
         'title' => 'Enrollment',
         'items' => [
-            ['key' => 'enrollmentperiod', 'label' => 'Enrollment Period', 'icon' => 'fa-regular fa-calendar', 'link' => '?page=enrollment_period'],
-            ['key' => 'studentenrollment', 'label' => 'Student Enrollment', 'icon' => 'fa-solid fa-users', 'link' => '?page=student_enrollment'],
-            ['key' => 'corsubmissions', 'label' => 'COR Submissions', 'icon' => 'fa-regular fa-file-lines', 'link' => '?page=cor_submissions'],
+            ['key' => 'enrollment_period', 'label' => 'Enrollment Period', 'icon' => 'fa-regular fa-calendar', 'link' => '?page=enrollment_period'],
+            ['key' => 'student_enrollment', 'label' => 'Student Enrollment', 'icon' => 'fa-solid fa-users', 'link' => '?page=student_enrollment'],
+            ['key' => 'cor_submissions', 'label' => 'COR Submissions', 'icon' => 'fa-regular fa-file-lines', 'link' => '?page=cor_submissions'],
         ],
     ],
     [
         'title' => 'Academic',
         'items' => [
             ['key' => 'instructor',  'label' => 'Instructor', 'icon' => 'fa-regular fa-user', 'link' => '?page=instructor'],
-            ['key' => 'courseofferings',     'label' => "Course Offerings",  'icon' => 'fa-solid fa-table-list', 'link' => '?page=course_offerings'],
+            ['key' => 'course_offerings',     'label' => "Course Offerings",  'icon' => 'fa-solid fa-table-list', 'link' => '?page=course_offerings'],
             ['key' => 'evaluation', 'label' => 'Evaluation', 'icon' => 'fa-regular fa-star','link' => '?page=evaluation'],
         ],
     ],

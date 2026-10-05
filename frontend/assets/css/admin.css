@@ -951,3 +951,723 @@
     font-size: 13px;
     text-align: center;
 }
+
+/* =========================================================
+   STUDENT ENROLLMENT
+   ========================================================= */
+
+.admin-student-enrollment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+}
+
+.admin-student-enrollment-header h1 {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 700;
+}
+
+.admin-student-enrollment-header p {
+    margin: 6px 0 0;
+    color: #777;
+    font-size: 14px;
+}
+
+
+/* SUMMARY CARDS */
+
+.admin-enrollment-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.admin-enrollment-summary-card {
+    background: #ffffff;
+    border: 1px solid #e8e8e8;
+    border-radius: 12px;
+    padding: 20px 22px;
+}
+
+.admin-enrollment-summary-card span {
+    display: block;
+    margin-bottom: 8px;
+    color: #777;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.admin-enrollment-summary-card strong {
+    display: block;
+    font-size: 28px;
+    font-weight: 700;
+    color: #222;
+}
+
+
+/* STUDENT TABLE CARD */
+
+.admin-student-enrollment-card {
+    background: #ffffff;
+    border: 1px solid #e8e8e8;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.admin-student-enrollment-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 22px 24px;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.admin-student-enrollment-card-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.admin-student-enrollment-card-header p {
+    margin: 5px 0 0;
+    color: #777;
+    font-size: 13px;
+}
+
+
+/* TABLE */
+
+.admin-student-enrollment-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.admin-student-enrollment-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 850px;
+}
+
+.admin-student-enrollment-table th {
+    padding: 14px 20px;
+    background: #fafafa;
+    border-bottom: 1px solid #eeeeee;
+    text-align: left;
+    color: #777;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.admin-student-enrollment-table td {
+    padding: 16px 20px;
+    border-bottom: 1px solid #eeeeee;
+    color: #333;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.admin-student-enrollment-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.admin-student-enrollment-table tbody tr:hover {
+    background: #fafafa;
+}
+
+
+/* PHASE BADGES */
+
+.admin-enrollment-phase {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.admin-phase-not-started {
+    background: #f1f1f1;
+    color: #666;
+}
+
+.admin-phase-evaluation {
+    background: #fff4d6;
+    color: #9a6b00;
+}
+
+.admin-phase-clearance {
+    background: #e8f3ff;
+    color: #2468a8;
+}
+
+.admin-phase-cor {
+    background: #f0eaff;
+    color: #6b4bb1;
+}
+
+.admin-phase-enrolled {
+    background: #e7f7ed;
+    color: #24804a;
+}
+
+
+/* EMPTY STATE */
+
+.admin-student-enrollment-empty {
+    padding: 40px 20px !important;
+    text-align: center !important;
+    color: #888 !important;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+
+    .admin-enrollment-summary {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+@media (max-width: 600px) {
+
+    .admin-student-enrollment-header h1 {
+        font-size: 22px;
+    }
+
+    .admin-enrollment-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-enrollment-summary-card {
+        padding: 18px 20px;
+    }
+
+    .admin-student-enrollment-card-header {
+        padding: 18px 20px;
+    }
+
+}
+
+/* =========================================================
+   STUDENT ENROLLMENT SEARCH + PAGINATION
+   ========================================================= */
+
+.admin-student-enrollment-card-header {
+    gap: 20px;
+}
+
+.admin-student-enrollment-search {
+    margin-left: auto;
+}
+
+.admin-student-enrollment-search-box {
+    position: relative;
+    width: 260px;
+}
+
+.admin-student-enrollment-search-box i {
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+    font-size: 13px;
+}
+
+.admin-student-enrollment-search-box input {
+    width: 100%;
+    height: 40px;
+    padding: 0 14px 0 36px;
+    border: 1px solid #dddddd;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #333;
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.admin-student-enrollment-search-box input:focus {
+    border-color: #999;
+}
+
+
+/* RESULT COUNT */
+
+.admin-student-enrollment-table-info {
+    display: flex;
+    align-items: center;
+    padding: 14px 24px;
+    border-bottom: 1px solid #eeeeee;
+    color: #777;
+    font-size: 12px;
+}
+
+
+/* PAGINATION */
+
+.admin-student-enrollment-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 24px;
+    border-top: 1px solid #eeeeee;
+}
+
+.admin-student-enrollment-pagination > a {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 12px;
+    border: 1px solid #dddddd;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #555;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.admin-student-enrollment-pagination > a:hover {
+    background: #f7f7f7;
+}
+
+.admin-student-enrollment-pagination > a.disabled {
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+
+.admin-student-enrollment-page-numbers {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.admin-student-enrollment-page-numbers a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 7px;
+    color: #555;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.admin-student-enrollment-page-numbers a:hover {
+    background: #f3f3f3;
+}
+
+.admin-student-enrollment-page-numbers a.active {
+    background: #222;
+    color: #ffffff;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 700px) {
+
+    .admin-student-enrollment-card-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .admin-student-enrollment-search {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .admin-student-enrollment-search-box {
+        width: 100%;
+    }
+
+    .admin-student-enrollment-pagination {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+}
+
+/* =========================================================
+   COR SUBMISSIONS
+   ========================================================= */
+
+.admin-cor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+}
+
+.admin-cor-header h1 {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 700;
+}
+
+.admin-cor-header p {
+    margin: 6px 0 0;
+    color: #777;
+    font-size: 14px;
+}
+
+
+/* SUMMARY */
+
+.admin-cor-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.admin-cor-summary-card {
+    background: #ffffff;
+    border: 1px solid #e8e8e8;
+    border-radius: 12px;
+    padding: 20px 22px;
+}
+
+.admin-cor-summary-card span {
+    display: block;
+    margin-bottom: 8px;
+    color: #777;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.admin-cor-summary-card strong {
+    display: block;
+    color: #222;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+
+/* MAIN CARD */
+
+.admin-cor-card {
+    background: #ffffff;
+    border: 1px solid #e8e8e8;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.admin-cor-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding: 22px 24px;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.admin-cor-card-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.admin-cor-card-header p {
+    margin: 5px 0 0;
+    color: #777;
+    font-size: 13px;
+}
+
+
+/* SEARCH */
+
+.admin-cor-search {
+    margin-left: auto;
+}
+
+.admin-cor-search-box {
+    position: relative;
+    width: 260px;
+}
+
+.admin-cor-search-box i {
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+    font-size: 13px;
+}
+
+.admin-cor-search-box input {
+    width: 100%;
+    height: 40px;
+    padding: 0 14px 0 36px;
+    border: 1px solid #dddddd;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #333;
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.admin-cor-search-box input:focus {
+    border-color: #999;
+}
+
+
+/* TOOLBAR */
+
+.admin-cor-toolbar {
+    display: flex;
+    align-items: center;
+    padding: 14px 24px;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.admin-cor-filter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.admin-cor-filter label {
+    color: #777;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.admin-cor-filter select {
+    height: 36px;
+    padding: 0 32px 0 10px;
+    border: 1px solid #dddddd;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #333;
+    font-family: inherit;
+    font-size: 12px;
+    outline: none;
+}
+
+
+/* TABLE INFO */
+
+.admin-cor-table-info {
+    display: flex;
+    align-items: center;
+    padding: 14px 24px;
+    border-bottom: 1px solid #eeeeee;
+    color: #777;
+    font-size: 12px;
+}
+
+
+/* TABLE */
+
+.admin-cor-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.admin-cor-table {
+    width: 100%;
+    min-width: 900px;
+    border-collapse: collapse;
+}
+
+.admin-cor-table th {
+    padding: 14px 20px;
+    background: #fafafa;
+    border-bottom: 1px solid #eeeeee;
+    text-align: left;
+    color: #777;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.admin-cor-table td {
+    padding: 16px 20px;
+    border-bottom: 1px solid #eeeeee;
+    color: #333;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.admin-cor-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.admin-cor-table tbody tr:hover {
+    background: #fafafa;
+}
+
+
+/* STATUS */
+
+.admin-cor-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.admin-cor-status-pending {
+    background: #fff4d6;
+    color: #9a6b00;
+}
+
+.admin-cor-status-approved {
+    background: #e7f7ed;
+    color: #24804a;
+}
+
+.admin-cor-status-rejected {
+    background: #fdeaea;
+    color: #b43b3b;
+}
+
+
+/* VIEW BUTTON */
+
+.admin-cor-view-button {
+    padding: 7px 13px;
+    border: 1px solid #dddddd;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #444;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.admin-cor-view-button:hover {
+    background: #f5f5f5;
+}
+
+
+/* EMPTY */
+
+.admin-cor-empty {
+    padding: 40px 20px !important;
+    text-align: center !important;
+    color: #888 !important;
+}
+
+
+/* PAGINATION */
+
+.admin-cor-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 24px;
+    border-top: 1px solid #eeeeee;
+}
+
+.admin-cor-pagination > a {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 12px;
+    border: 1px solid #dddddd;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #555;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.admin-cor-pagination > a:hover {
+    background: #f7f7f7;
+}
+
+.admin-cor-pagination > a.disabled {
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+.admin-cor-page-numbers {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+.admin-cor-page-numbers a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 7px;
+    color: #555;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.admin-cor-page-numbers a:hover {
+    background: #f3f3f3;
+}
+
+.admin-cor-page-numbers a.active {
+    background: #222;
+    color: #ffffff;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+
+    .admin-cor-summary {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+@media (max-width: 700px) {
+
+    .admin-cor-card-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .admin-cor-search {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .admin-cor-search-box {
+        width: 100%;
+    }
+
+    .admin-cor-pagination {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+}
