@@ -1,7 +1,7 @@
 USE cmuenrollment_db;
 
 -- =========================================================
--- 1. Create the users table
+-- 1. Create users table
 -- =========================================================
 
 CREATE TABLE IF NOT EXISTS users (
@@ -51,12 +51,7 @@ SELECT
     student_number,
     password_hash,
     'STUDENT'
-FROM students
-WHERE NOT EXISTS (
-    SELECT 1
-    FROM users u
-    WHERE u.account_number = students.student_number
-);
+FROM students;
 
 
 -- =========================================================
@@ -66,13 +61,12 @@ WHERE NOT EXISTS (
 UPDATE students s
 INNER JOIN users u
     ON u.account_number = s.student_number
-SET s.user_id = u.user_id
-WHERE s.user_id IS NULL;
+SET s.user_id = u.user_id;
 
 
 -- =========================================================
--- 6. Convert the old enrollment status
---    into the new enrollment phase
+-- 6. Convert old enrollment status
+--    to the new enrollment phase
 -- =========================================================
 
 UPDATE students
@@ -105,7 +99,7 @@ CREATE TABLE IF NOT EXISTS system_settings (
 
 
 -- =========================================================
--- 8. Create the default system settings record
+-- 8. Create default system settings
 -- =========================================================
 
 INSERT INTO system_settings (
@@ -123,9 +117,7 @@ VALUES (
     '2026 - 2027',
     '2026-06-01',
     '2026-06-15'
-)
-ON DUPLICATE KEY UPDATE
-    setting_id = setting_id;
+);
 
 
 -- =========================================================
