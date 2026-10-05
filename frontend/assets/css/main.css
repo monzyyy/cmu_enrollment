@@ -472,3 +472,72 @@ select {
 
     overflow-y: auto;
 }
+
+.admin-edit-period-modal {
+    width: min(100%, 480px);
+    text-align: left;
+}
+
+.admin-edit-period-modal h2 {
+    text-align: center;
+}
+
+.admin-edit-period-modal > p {
+    text-align: center;
+}
+
+.admin-edit-period-form {
+    margin-top: 24px;
+}
+
+.admin-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-bottom: 16px;
+}
+
+.admin-form-group label {
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.admin-form-group input,
+.admin-form-group select {
+    width: 100%;
+    min-height: 40px;
+    padding: 9px 11px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: var(--white);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.admin-form-group input:focus,
+.admin-form-group select:focus {
+    border-color: var(--primary);
+}
+
+.admin-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.admin-form-row .admin-form-group {
+    min-width: 0;
+}
+
+@media (max-width: 520px) {
+
+    .admin-form-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+}

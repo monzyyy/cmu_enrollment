@@ -6,12 +6,16 @@ $currentPage = 'admin_home';
 
 
 $stmt = $conn->prepare(
-    'SELECT enrollment_status
+    'SELECT
+        enrollment_status,
+        semester,
+        school_year,
+        start_date,
+        end_date
      FROM system_settings
      WHERE setting_id = 1
      LIMIT 1'
 );
-
 $stmt->execute();
 
 $result = $stmt->get_result();
@@ -192,7 +196,13 @@ while ($student = $result->fetch_assoc()) {
 
                         <span>SEMESTER:</span>
 
-                        <strong>1st Semester</strong>
+                        <strong>
+                            <?= htmlspecialchars(
+                            $settings['semester'] ?? 'Not set',
+                            ENT_QUOTES,
+                            'UTF-8'
+                            ) ?>
+                        </strong>
 
                     </div>
 
@@ -200,7 +210,13 @@ while ($student = $result->fetch_assoc()) {
 
                         <span>SCHOOL YEAR:</span>
 
-                        <strong>2026 - 2027</strong>
+                        <strong>
+                            <?= htmlspecialchars(
+                            $settings['school_year'] ?? 'Not set',
+                            ENT_QUOTES,
+                            'UTF-8'
+                            ) ?>
+                        </strong>
 
                     </div>
 
@@ -208,7 +224,11 @@ while ($student = $result->fetch_assoc()) {
 
                         <span>START DATE:</span>
 
-                        <strong>June 1, 2026</strong>
+                        <strong>
+                            <?= !empty($settings['start_date'])
+                            ? date('F j, Y', strtotime($settings['start_date']))
+                            : 'Not set' ?>
+                        </strong>
 
                     </div>
 
@@ -216,7 +236,11 @@ while ($student = $result->fetch_assoc()) {
 
                         <span>END DATE:</span>
 
-                        <strong>June 15, 2026</strong>
+                        <strong>
+                            <?= !empty($settings['end_date'])
+                            ? date('F j, Y', strtotime($settings['end_date']))
+                            : 'Not set' ?>
+                        </strong>
 
                     </div>
 

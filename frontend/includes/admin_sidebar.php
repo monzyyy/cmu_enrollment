@@ -1,4 +1,4 @@
-<aside class="sidebar">
+<!-- <aside class="sidebar">
 
     <nav class="menu">
 
@@ -106,5 +106,92 @@
         </button>
 
     </form>
+
+</aside> -->
+
+<?php
+
+
+if (!function_exists('e')) {
+    function e($value)
+    {
+        return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+    }
+}
+
+$currentPage = $currentPage ?? '';
+
+$sidebarPagesUrl = BASE_URL;
+
+// Single source of truth for the menu. 'key' is matched against $currentPage.
+
+$sidebarMenu = [
+    [
+        'title' => 'Enrollment',
+        'items' => [
+            ['key' => 'enrollmentperiod', 'label' => 'Enrollment Period', 'icon' => 'fa-regular fa-calendar', 'link' => '?page=enrollment_period'],
+            ['key' => 'studentenrollment', 'label' => 'Student Enrollment', 'icon' => 'fa-solid fa-users', 'link' => '?page=student_enrollment'],
+            ['key' => 'corsubmissions', 'label' => 'COR Submissions', 'icon' => 'fa-regular fa-file-lines', 'link' => '?page=cor_submissions'],
+        ],
+    ],
+    [
+        'title' => 'Academic',
+        'items' => [
+            ['key' => 'instructor',  'label' => 'Instructor', 'icon' => 'fa-regular fa-user', 'link' => '?page=instructor'],
+            ['key' => 'courseofferings',     'label' => "Course Offerings",  'icon' => 'fa-solid fa-table-list', 'link' => '?page=course_offerings'],
+            ['key' => 'evaluation', 'label' => 'Evaluation', 'icon' => 'fa-regular fa-star','link' => '?page=evaluation'],
+        ],
+    ],
+    [
+        'title' => 'Management',
+        'items' => [
+            ['key' => 'students',  'label' => 'Students', 'icon' => 'fa-regular fa-user', 'link' => '?page=students'],
+            ['key' => 'notifications',     'label' => "Notifications",  'icon' => 'fa-regular fa-bell', 'link' => '?page=notifications'],
+            ['key' => 'reports', 'label' => 'Reports', 'icon' => 'fa-solid fa-chart-column','link' => '?page=reports'],
+            ['key' => 'profile',  'label' => 'Profile', 'icon' => 'fa-regular fa-user', 'link' => '?page=profile'],
+            ['key' => 'settings',     'label' => "Settings",  'icon' => 'fa-solid fa-gear', 'link' => '?page=settings'],
+        ],
+    ],
+];
+?>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+
+    <nav class="menu">
+
+        <p class="menu-title">Dashboard</p>
+
+        <a href="<?= e($sidebarPagesUrl) ?>?page=admin_home" class="menu-link <?= $currentPage === 'admin_home' ? 'active' : '' ?>">
+            <i class="fa-solid fa-house"></i>
+            Home
+        </a>
+
+        <?php foreach ($sidebarMenu as $section): ?>
+
+            <p class="menu-title"><?= e($section['title']) ?></p>
+
+            <?php foreach ($section['items'] as $item): ?>
+
+                <a href="<?= e($sidebarPagesUrl . $item['link']) ?>"
+                   class="menu-link <?= $currentPage === $item['key'] ? 'active' : '' ?>">
+                    <i class="fa-solid <?= e($item['icon']) ?>"></i>
+                    <?= e($item['label']) ?>
+                </a>
+
+            <?php endforeach; ?>
+
+        <?php endforeach; ?>
+
+    </nav>
+
+    <!-- LOGOUT -->
+    <form action="<?= BASE_URL ?>backend/api/logout.php" method="POST" class="logout-form">
+        <button type="submit" class="logout">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            Log out
+        </button>
+    </form>
+
 
 </aside>

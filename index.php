@@ -14,6 +14,7 @@ $pages = [
     'home_main' => 'main/home_main.php',
 
     'admin_home' => 'admin/admin_home.php',
+    'enrollment_period' => 'admin/enrollment_period.php',
 
     'login' => 'auth/login.php',
     'forget' => 'auth/forget.php',
