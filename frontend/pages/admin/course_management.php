@@ -6,32 +6,151 @@ require_role('ADMIN');
 
 $currentPage = 'course_management';
 
-$courses = [];
+$coursesPerPage = 7;
 
-$sql = '
-    SELECT
-        course_id,
-        course_code,
-        course_name,
-        units,
-        is_active
-    FROM courses
-    ORDER BY
-        is_active DESC,
-        course_code ASC
-';
+$currentCoursePage = max(
+    1,
+    (int) ($_GET['course_page'] ?? 1)
+);
 
-$result = $conn->query($sql);
+$search = trim($_GET['search'] ?? '');
+
+
+/* TOTAL COURSES */
+
+$result = $conn->query(
+    'SELECT COUNT(*) AS total
+     FROM courses'
+);
+
+$totalCourses = 0;
 
 if ($result) {
 
-    while ($row = $result->fetch_assoc()) {
-        $courses[] = $row;
-    }
+    $row = $result->fetch_assoc();
 
+    $totalCourses =
+        (int) ($row['total'] ?? 0);
 }
 
-$totalCourses = count($courses);
+
+/* COUNT FILTERED COURSES */
+
+if ($search !== '') {
+
+    $countStmt = $conn->prepare(
+        'SELECT COUNT(*) AS total
+         FROM courses
+         WHERE
+            course_code LIKE ?
+            OR course_name LIKE ?'
+    );
+
+    $searchValue = '%' . $search . '%';
+
+    $countStmt->bind_param(
+        'ss',
+        $searchValue,
+        $searchValue
+    );
+
+} else {
+
+    $countStmt = $conn->prepare(
+        'SELECT COUNT(*) AS total
+         FROM courses'
+    );
+}
+
+$countStmt->execute();
+
+$countResult =
+    $countStmt->get_result()->fetch_assoc();
+
+$totalFilteredCourses =
+    (int) ($countResult['total'] ?? 0);
+
+$countStmt->close();
+
+
+/* PAGINATION */
+
+$totalCoursePages = max(
+    1,
+    (int) ceil(
+        $totalFilteredCourses /
+        $coursesPerPage
+    )
+);
+
+$currentCoursePage = min(
+    $currentCoursePage,
+    $totalCoursePages
+);
+
+$courseOffset =
+    ($currentCoursePage - 1) *
+    $coursesPerPage;
+
+
+/* GET COURSES */
+
+if ($search !== '') {
+
+    $stmt = $conn->prepare(
+        'SELECT
+            course_id,
+            course_code,
+            course_name,
+            units,
+            is_active
+         FROM courses
+         WHERE
+            course_code LIKE ?
+            OR course_name LIKE ?
+         ORDER BY
+            is_active DESC,
+            course_code ASC
+         LIMIT ? OFFSET ?'
+    );
+
+    $stmt->bind_param(
+        'ssii',
+        $searchValue,
+        $searchValue,
+        $coursesPerPage,
+        $courseOffset
+    );
+
+} else {
+
+    $stmt = $conn->prepare(
+        'SELECT
+            course_id,
+            course_code,
+            course_name,
+            units,
+            is_active
+         FROM courses
+         ORDER BY
+            is_active DESC,
+            course_code ASC
+         LIMIT ? OFFSET ?'
+    );
+
+    $stmt->bind_param(
+        'ii',
+        $coursesPerPage,
+        $courseOffset
+    );
+}
+
+$stmt->execute();
+
+$courses =
+    $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+$stmt->close();
 
 ?>
 
@@ -154,17 +273,29 @@ $totalCourses = count($courses);
                     </div>
 
 
-                    <div class="course-management-search">
+                    <form
+                        method="GET"
+                        action="<?= e(BASE_URL) ?>"
+                        class="course-management-search"
+                    >
+
+                        <input
+                            type="hidden"
+                            name="page"
+                            value="course_management"
+                        >
 
                         <i class="fa-solid fa-magnifying-glass"></i>
 
                         <input
                             type="text"
-                            id="courseSearch"
+                            name="search"
+                            value="<?= e($search) ?>"
                             placeholder="Search course..."
+                            autocomplete="off"
                         >
 
-                    </div>
+                    </form>
 
                 </div>
 
@@ -172,6 +303,41 @@ $totalCourses = count($courses);
                 <!-- TABLE -->
 
                 <div class="course-management-table-wrap">
+
+                    <?php if ($totalFilteredCourses > 0): ?>
+
+                        <?php
+
+                        $displayStart =
+                            $courseOffset + 1;
+
+                        $displayEnd = min(
+                            $courseOffset + $coursesPerPage,
+                            $totalFilteredCourses
+                        );
+
+                        ?>
+
+                        <div class="admin-cor-table-info">
+
+                            <span>
+                                Showing <?= $displayStart ?>–<?= $displayEnd ?>
+                                of <?= $totalFilteredCourses ?> courses
+                            </span>
+
+                        </div>
+
+                    <?php else: ?>
+
+                        <div class="admin-cor-table-info">
+
+                            <span>
+                                No courses found
+                            </span>
+
+                        </div>
+
+                    <?php endif; ?>
 
                     <table class="course-management-table">
 
@@ -300,6 +466,73 @@ $totalCourses = count($courses);
                     </table>
 
                 </div>
+
+                <?php if ($totalCoursePages > 1): ?>
+
+                <div class="admin-student-enrollment-pagination">
+
+                    <a
+                        href="<?= e(
+                            BASE_URL
+                            . '?page=course_management'
+                            . '&search=' . urlencode($search)
+                            . '&course_page='
+                            . ($currentCoursePage - 1)
+                        ) ?>"
+                        class="<?= $currentCoursePage <= 1 ? 'disabled' : '' ?>"
+                    >
+                        <i class="fa-solid fa-chevron-left"></i>
+                        Previous
+                    </a>
+
+
+                    <div class="admin-student-enrollment-page-numbers">
+
+                        <?php for (
+                            $pageNumber = 1;
+                            $pageNumber <= $totalCoursePages;
+                            $pageNumber++
+                        ): ?>
+
+                            <a
+                                href="<?= e(
+                                    BASE_URL
+                                    . '?page=course_management'
+                                    . '&search=' . urlencode($search)
+                                    . '&course_page='
+                                    . $pageNumber
+                                ) ?>"
+                                class="<?= $pageNumber === $currentCoursePage
+                                    ? 'active'
+                                    : '' ?>"
+                            >
+                                <?= $pageNumber ?>
+                            </a>
+
+                        <?php endfor; ?>
+
+                    </div>
+
+
+                    <a
+                        href="<?= e(
+                            BASE_URL
+                            . '?page=course_management'
+                            . '&search=' . urlencode($search)
+                            . '&course_page='
+                            . ($currentCoursePage + 1)
+                        ) ?>"
+                        class="<?= $currentCoursePage >= $totalCoursePages
+                            ? 'disabled'
+                            : '' ?>"
+                    >
+                        Next
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </a>
+
+                </div>
+
+            <?php endif; ?>
 
             </section>
 

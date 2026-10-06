@@ -1,3 +1,4 @@
+-- course_offerings.sql
 USE cmuenrollment_db;
 
 -- =========================================================

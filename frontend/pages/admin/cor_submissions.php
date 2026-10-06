@@ -405,27 +405,6 @@ function cor_status_class(string $status): string
                     </div>
 
 
-                    <!-- SEARCH -->
-
-                    <form
-                        method="GET"
-                        action="<?= e(BASE_URL) ?>"
-                        class="admin-cor-search"
-                    >
-
-                        <input
-                            type="hidden"
-                            name="page"
-                            value="cor_submissions"
-                        >
-
-                        <input
-                            type="hidden"
-                            name="status"
-                            value="<?= e($statusFilter) ?>"
-                        >
-
-
                         <div class="admin-cor-search-box">
 
                             <i class="fa-solid fa-magnifying-glass"></i>

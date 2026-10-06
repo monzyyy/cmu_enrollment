@@ -34,7 +34,7 @@ $sidebarMenu = [
     [
         'title' => 'Management',
         'items' => [
-            ['key' => 'students',  'label' => 'Students', 'icon' => 'fa-user', 'link' => '?page=students'],
+            ['key' => 'student_management',  'label' => 'Students', 'icon' => 'fa-user', 'link' => '?page=student_management'],
             ['key' => 'notifications',     'label' => "Notifications",  'icon' => 'fa-bell', 'link' => '?page=notifications'],
             ['key' => 'reports', 'label' => 'Reports', 'icon' => 'fa-chart-column','link' => '?page=reports'],
             ['key' => 'profile',  'label' => 'Profile', 'icon' => 'fa-user', 'link' => '?page=profile'],

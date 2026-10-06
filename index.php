@@ -25,6 +25,7 @@ $pages = [
     'cor_submissions' => 'admin/cor_submissions.php',
     'course_offerings' => 'admin/course_offerings.php',
     'course_management' => 'admin/course_management.php',
+    'student_management' => 'admin/student_management.php',
 
     'login' => 'auth/login.php',
     'forget' => 'auth/forget.php',

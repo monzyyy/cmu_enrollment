@@ -27,6 +27,8 @@ $studentName = trim(
     ($student['last_name'] ?? '')
 );
 
+$userName = $studentName;
+
 $currentPage = 'cor';
 
 $programName = $student['program'] ?? '';
