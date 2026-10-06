@@ -15,6 +15,7 @@ $pages = [
     'course_offering' => 'main/course_offering.php',
     'faculty_evaluation' => 'main/faculty_evaluation.php',
     'clearance_main' => 'main/clearance_main.php',
+    'cor' => 'main/cor.php',
     'profile' => 'main/profile.php',
 
 
@@ -22,6 +23,8 @@ $pages = [
     'enrollment_period' => 'admin/enrollment_period.php',
     'student_enrollment' => 'admin/student_enrollment.php',
     'cor_submissions' => 'admin/cor_submissions.php',
+    'course_offerings' => 'admin/course_offerings.php',
+    'course_management' => 'admin/course_management.php',
 
     'login' => 'auth/login.php',
     'forget' => 'auth/forget.php',
@@ -36,7 +39,7 @@ $pages = [
 ];
 
 //                        change this 'register'. pick the page in the $pages
-$page = $_GET['page'] ?? 'course_offering';
+$page = $_GET['page'] ?? 'login';
 
 if (
     !is_string($page) ||

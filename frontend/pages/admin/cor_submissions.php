@@ -27,7 +27,7 @@ if (!in_array($statusFilter, $allowedStatuses, true)) {
 
 /* PAGINATION */
 
-$studentsPerPage = 10;
+$studentsPerPage = 5;
 
 $currentPageNumber = max(
     1,
@@ -129,6 +129,7 @@ $sql = '
         c.cor_submission_id,
         c.student_id,
         c.file_name,
+        c.file_path,
         c.submitted_at,
         c.status,
 
@@ -686,10 +687,18 @@ function cor_status_class(string $status): string
                                         <button
                                             type="button"
                                             class="admin-cor-view-button"
+                                            data-submission-id="<?= (int) $submission['cor_submission_id'] ?>"
+                                            data-student-number="<?= e($submission['student_number']) ?>"
+                                            data-student-name="<?= e($fullName) ?>"
+                                            data-program="<?= e($submission['program']) ?>"
+                                            data-year="<?= (int) $submission['year_level'] ?>"
+                                            data-section="<?= e($submission['section']) ?>"
+                                            data-submitted="<?= e(date('M j, Y h:i A', strtotime($submission['submitted_at']))) ?>"
+                                            data-status="<?= e($submission['status']) ?>"
+                                            data-file-name="<?= e($submission['file_name']) ?>"
+                                            data-file-path="<?= e($submission['file_path']) ?>"
                                         >
-
                                             View
-
                                         </button>
 
                                     </td>
@@ -799,10 +808,606 @@ function cor_status_class(string $status): string
 
 </div>
 
+</div>
+
+<!-- COR VIEW MODAL -->
+
+<div
+    class="admin-cor-modal"
+    id="corViewModal"
+    aria-hidden="true"
+>
+
+    <div class="admin-cor-modal-overlay" id="corModalOverlay"></div>
+
+
+    <div
+        class="admin-cor-modal-content"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="corModalTitle"
+    >
+
+        <!-- HEADER -->
+
+        <div class="admin-cor-modal-header">
+
+            <div>
+
+                <h2 id="corModalTitle">
+                    COR Submission
+                </h2>
+
+                <p>
+                    Review the submitted Certificate of Registration.
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="admin-cor-modal-close"
+                id="corModalClose"
+                aria-label="Close"
+            >
+
+                <i class="fa-solid fa-xmark"></i>
+
+            </button>
+
+        </div>
+
+
+        <!-- STUDENT INFORMATION -->
+
+        <div class="admin-cor-modal-info">
+
+            <div>
+                <small>Student Number</small>
+                <strong id="modalStudentNumber">-</strong>
+            </div>
+
+            <div>
+                <small>Student Name</small>
+                <strong id="modalStudentName">-</strong>
+            </div>
+
+            <div>
+                <small>Program</small>
+                <strong id="modalProgram">-</strong>
+            </div>
+
+            <div>
+                <small>Year & Section</small>
+                <strong id="modalYearSection">-</strong>
+            </div>
+
+            <div>
+                <small>Submitted</small>
+                <strong id="modalSubmitted">-</strong>
+            </div>
+
+            <div>
+                <small>Status</small>
+                <strong id="modalStatus">-</strong>
+            </div>
+
+            <div
+                class="admin-cor-review-message"
+                id="corReviewMessage">
+            </div>
+
+        </div>
+
+
+        <!-- FILE -->
+
+        <div class="admin-cor-modal-file">
+
+            <div class="admin-cor-modal-file-header">
+
+                <div>
+
+                    <h3>
+                        Submitted COR
+                    </h3>
+
+                    <span id="modalFileName">
+                        -
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="admin-cor-file-preview"
+                id="corFilePreview"
+            >
+
+                <div class="admin-cor-file-placeholder">
+
+                    <i class="fa-solid fa-file"></i>
+
+                    <p>
+                        Loading document...
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="admin-cor-rejection-area" id="corRejectionArea">
+
+                <label for="corRejectionReason">
+                    Rejection Reason
+                </label>
+
+                <textarea
+                    id="corRejectionReason"
+                    rows="4"
+                    placeholder="Enter the reason for rejecting this COR..."
+                ></textarea>
+
+            </div>
+
+            <div class="admin-cor-modal-actions">
+
+                <button
+                    type="button"
+                    class="admin-cor-reject-button"
+                    id="corRejectButton"
+                >
+                    <i class="fa-solid fa-xmark"></i>
+                    Reject COR
+                </button>
+
+                <button
+                    type="button"
+                    class="admin-cor-approve-button"
+                    id="corApproveButton"
+                >
+                    <i class="fa-solid fa-check"></i>
+                    Approve COR
+                </button>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+</div>
+
+<div
+    class="admin-cor-image-modal"
+    id="corImageModal"
+    aria-hidden="true"
+>
+
+    <div
+        class="admin-cor-image-overlay"
+        id="corImageModalOverlay"
+    ></div>
+
+    <div class="admin-cor-image-content">
+
+        <button
+            type="button"
+            class="admin-cor-image-close"
+            id="corImageModalClose"
+            aria-label="Close image preview"
+        >
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <img
+            id="corMaximizedImage"
+            src=""
+            alt="Maximized COR"
+        >
+
+    </div>
+
+</div>
+
 
 <script
     src="<?= BASE_URL ?>frontend/assets/js/custom.js"
 ></script>
+
+<script>
+
+const corModalClose =
+    document.getElementById('corModalClose');
+
+const corModalOverlay =
+    document.getElementById('corModalOverlay');
+
+const corViewModal =
+    document.getElementById('corViewModal');
+
+const viewButtons =
+    document.querySelectorAll('.admin-cor-view-button');
+
+const modalFileName =
+    document.getElementById('modalFileName');
+
+const corApproveButton =
+    document.getElementById('corApproveButton');
+
+const corRejectButton =
+    document.getElementById('corRejectButton');
+
+let currentSubmissionId = null;
+
+corRejectButton.addEventListener(
+    'click',
+    function () {
+
+        const submissionId = currentSubmissionId;
+
+        const rejectionReason =
+            document.getElementById(
+                'corRejectionReason'
+            ).value.trim();
+
+
+        if (rejectionReason === '') {
+
+            alert(
+                'Please enter a rejection reason.'
+            );
+
+            return;
+        }
+
+
+        const formData =
+            new FormData();
+
+        formData.append(
+            'submission_id',
+            submissionId
+        );
+
+        formData.append(
+            'action',
+            'REJECT'
+        );
+
+        formData.append(
+            'rejection_reason',
+            rejectionReason
+        );
+
+
+        fetch(
+            '<?= BASE_URL ?>backend/api/review_cor.php',
+            {
+                method: 'POST',
+                body: formData
+            }
+        )
+        .then(function (response) {
+            return response.json();
+        })
+        .then(function (data) {
+
+            if (!data.success) {
+
+                alert(data.message);
+
+                return;
+            }
+
+
+            alert(data.message);
+
+            location.reload();
+
+        })
+        .catch(function () {
+
+            alert(
+                'Something went wrong while rejecting the COR.'
+            );
+
+        });
+
+    }
+);
+
+
+
+viewButtons.forEach(function (button) {
+
+    button.addEventListener('click', function () {
+
+        currentSubmissionId = Number(this.dataset.submissionId);
+        document.getElementById('corRejectionReason').value = '';
+
+        const submissionId =
+            this.dataset.submissionId;
+
+        const fileName =
+            this.dataset.fileName;
+
+        const fileExtension =
+            fileName
+                .split('.')
+                .pop()
+                .toLowerCase();
+
+
+        const corFilePreview =
+            document.getElementById('corFilePreview');
+
+        corFilePreview.innerHTML = '';
+
+
+        if (
+            fileExtension === 'png' ||
+            fileExtension === 'jpg' ||
+            fileExtension === 'jpeg'
+        ) {
+
+            const image =
+                document.createElement('img');
+
+            image.src =
+                '<?= BASE_URL ?>backend/api/view_cor.php?id=' +
+                submissionId;
+
+            image.alt =
+                'Submitted COR';
+
+            image.className =
+                'admin-cor-preview-image';
+
+            image.style.cursor = 'zoom-in';
+
+            image.addEventListener('click', function () {
+
+                const corImageModal =
+                    document.getElementById('corImageModal');
+
+                const corMaximizedImage =
+                    document.getElementById('corMaximizedImage');
+
+                corMaximizedImage.src = this.src;
+
+                corImageModal.classList.add('show');
+
+                corImageModal.setAttribute(
+                    'aria-hidden',
+                    'false'
+                );
+
+            });
+
+            corFilePreview.appendChild(image);
+
+        }
+
+        const studentNumber =
+            this.dataset.studentNumber;
+
+        const studentName =
+            this.dataset.studentName;
+
+        const program =
+            this.dataset.program;
+
+        const year =
+            this.dataset.year;
+
+        const section =
+            this.dataset.section;
+
+        const submitted =
+            this.dataset.submitted;
+
+        const status =
+            this.dataset.status;
+
+        const corReviewMessage =
+            document.getElementById('corReviewMessage');
+
+        if (status === 'PENDING') {
+
+            corReviewMessage.textContent =
+                'This COR is waiting for review.';
+
+            corApproveButton.style.display = '';
+            corRejectButton.style.display = '';
+
+        } else if (status === 'APPROVED') {
+
+            corReviewMessage.textContent =
+                'This COR has already been approved.';
+
+            corApproveButton.style.display = 'none';
+            corRejectButton.style.display = 'none';
+
+        } else if (status === 'REJECTED') {
+
+            corReviewMessage.textContent =
+                'This COR was rejected. The student may submit a corrected copy.';
+
+            corApproveButton.style.display = 'none';
+            corRejectButton.style.display = 'none';
+
+        } else {
+
+            corReviewMessage.textContent = '';
+
+            corApproveButton.style.display = 'none';
+            corRejectButton.style.display = 'none';
+
+        }
+
+        
+        document.getElementById(
+            'modalFileName'
+        ).textContent = fileName;
+
+        document.getElementById(
+            'modalStudentNumber'
+        ).textContent = studentNumber;
+
+
+        document.getElementById(
+            'modalStudentName'
+        ).textContent = studentName;
+
+
+        document.getElementById(
+            'modalProgram'
+        ).textContent = program;
+
+
+        document.getElementById(
+            'modalYearSection'
+        ).textContent =
+            year + ' Year • ' + section;
+
+
+        document.getElementById(
+            'modalSubmitted'
+        ).textContent = submitted;
+
+
+        document.getElementById(
+            'modalStatus'
+        ).textContent = status;
+
+
+        corViewModal.classList.add('show');
+
+        corViewModal.setAttribute(
+            'aria-hidden',
+            'false'
+        );
+
+
+
+    });
+
+});
+
+function closeCorModal() {
+
+    corViewModal.classList.remove('show');
+
+    corViewModal.setAttribute(
+        'aria-hidden',
+        'true'
+    );
+
+}
+
+const corImageModal =
+    document.getElementById('corImageModal');
+
+const corImageModalClose =
+    document.getElementById('corImageModalClose');
+
+const corImageModalOverlay =
+    document.getElementById('corImageModalOverlay');
+
+function closeCorImageModal() {
+
+    corImageModal.classList.remove('show');
+
+    corImageModal.setAttribute(
+        'aria-hidden',
+        'true'
+    );
+
+    document.getElementById(
+        'corMaximizedImage'
+    ).src = '';
+
+}
+
+corImageModalClose.addEventListener(
+    'click',
+    closeCorImageModal
+);
+
+corImageModalOverlay.addEventListener(
+    'click',
+    closeCorImageModal
+);
+
+
+corModalClose.addEventListener(
+    'click',
+    closeCorModal
+);
+
+
+corModalOverlay.addEventListener(
+    'click',
+    closeCorModal
+);
+
+corApproveButton.addEventListener(
+    'click',
+    function () {
+
+        const submissionId = currentSubmissionId;
+
+
+        const formData =
+            new FormData();
+
+        formData.append('submission_id', submissionId);
+        formData.append('action', 'APPROVE');
+
+
+        fetch(
+            '<?= BASE_URL ?>backend/api/review_cor.php',
+            {
+                method: 'POST',
+                body: formData
+            }
+        )
+        .then(function (response) {
+            return response.json();
+        })
+        .then(function (data) {
+
+            if (!data.success) {
+
+                alert(data.message);
+
+                return;
+
+            }
+
+
+            alert(data.message);
+
+            location.reload();
+
+        })
+        .catch(function () {
+
+            alert(
+                'Something went wrong while approving the COR.'
+            );
+
+        });
+
+    }
+);
+
+</script>
 
 </body>
 

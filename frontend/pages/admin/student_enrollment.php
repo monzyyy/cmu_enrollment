@@ -42,7 +42,7 @@ if ($result) {
 
 $search = trim($_GET['search'] ?? '');
 
-$studentsPerPage = 10;
+$studentsPerPage = 5;
 
 $currentStudentPage = max(
     1,

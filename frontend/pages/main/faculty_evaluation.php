@@ -25,7 +25,7 @@ $userName = trim(
     $student['last_name']
 );
 
-$currentPage = 'evaluation';
+$currentPage = 'faculty_evaluation';
 
 /* ---------------------------------------------------------
    SUBJECTS TO EVALUATE

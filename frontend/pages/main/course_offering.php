@@ -31,10 +31,41 @@ $currentPage = 'course_offering';
    STUDENT INFO
    TODO: replace the fallbacks with your real column names.
 --------------------------------------------------------- */
-$semesterLabel = '2nd Semester, AY 2026-2027';
-$programName   = $student['program']    ?? 'BS Information Technology';
-$yearLevel     = $student['year_level'] ?? '3rd Year';
-$sectionName   = $student['section']    ?? 'BSIT - 3D';
+$semester = '';
+$schoolYear = '';
+
+$settingsResult = $conn->query(
+    'SELECT semester, school_year
+     FROM system_settings
+     LIMIT 1'
+);
+
+if ($settingsResult && $settingsResult->num_rows > 0) {
+    $settings = $settingsResult->fetch_assoc();
+
+    $semester = $settings['semester'];
+    $schoolYear = $settings['school_year'];
+}
+
+$semesterLabel = $semester . ', S.Y. ' . $schoolYear;
+
+$programName = $student['program'];
+
+$yearLevelNumber = (int) $student['year_level'];
+
+if ($yearLevelNumber === 1) {
+    $yearLevelLabel = '1st Year';
+} elseif ($yearLevelNumber === 2) {
+    $yearLevelLabel = '2nd Year';
+} elseif ($yearLevelNumber === 3) {
+    $yearLevelLabel = '3rd Year';
+} elseif ($yearLevelNumber === 4) {
+    $yearLevelLabel = '4th Year';
+} else {
+    $yearLevelLabel = $yearLevelNumber . 'th Year';
+}
+
+$sectionName = $student['section'];
 
 /* ---------------------------------------------------------
    COURSES
@@ -49,16 +80,86 @@ $sectionName   = $student['section']    ?? 'BSIT - 3D';
         ORDER BY course_code'
    );
 --------------------------------------------------------- */
-$courses = [
-    ['code' => 'IT 301',  'name' => 'Database System',                      'schedule' => 'Mon 8:00 AM - 11:00 AM',   'room' => 'Room 301',  'instructor' => 'Prof. Juan Dela Cruz', 'units' => 3],
-    ['code' => 'IT 302',  'name' => 'Web Development',                      'schedule' => 'Tues 8:00 AM - 11:00 AM',  'room' => 'Room 302',  'instructor' => 'Prof. Ronald Pineda',  'units' => 3],
-    ['code' => 'IT 303',  'name' => 'System Analysis and Design',           'schedule' => 'Wed 8:00 AM - 11:00 AM',   'room' => 'Room 303',  'instructor' => 'Prof. Sanggre Alena',  'units' => 3],
-    ['code' => 'IT 304',  'name' => 'Networking 1',                         'schedule' => 'Thurs 8:00 AM - 11:00 AM', 'room' => 'Room 304',  'instructor' => 'Prof. Fhukerat',       'units' => 3],
-    ['code' => 'IT 305',  'name' => 'System Integration and Architecture',  'schedule' => 'Fri 8:00 AM - 11:00 AM',   'room' => 'Room 305',  'instructor' => 'Doc. Ryzza Mae Digong', 'units' => 3],
-    ['code' => 'IT 306',  'name' => 'Integrative Programming',              'schedule' => 'Sat 8:00 AM - 11:00 AM',   'room' => 'Room 306',  'instructor' => 'Atty. Pepsi Paloma',   'units' => 3],
-    ['code' => 'GE 101',  'name' => 'Purposive Communication',              'schedule' => 'Sun 8:00 AM - 11:00 AM',   'room' => 'Room 307',  'instructor' => 'Prof. Uncle Dags',     'units' => 3],
-    ['code' => 'PE 102',  'name' => 'Physical Fitness 1',                   'schedule' => 'Mon 12:00 PM - 3:00 PM',   'room' => 'Gymnasium', 'instructor' => 'Prof. Maria Hiwaga',   'units' => 3],
-];
+$courses = [];
+
+$stmt = $conn->prepare(
+    'SELECT
+        co.offering_id,
+        c.course_code,
+        c.course_name,
+        c.units,
+        co.instructor_name,
+        GROUP_CONCAT(
+            CONCAT(
+                COALESCE(cos.day_of_week, ""),
+                " ",
+                IF(
+                    cos.start_time IS NOT NULL
+                    AND cos.end_time IS NOT NULL,
+                    CONCAT(
+                        DATE_FORMAT(cos.start_time, "%h:%i %p"),
+                        " - ",
+                        DATE_FORMAT(cos.end_time, "%h:%i %p")
+                    ),
+                    ""
+                ),
+                IF(
+                    cos.room IS NOT NULL
+                    AND cos.room <> "",
+                    CONCAT(" · ", cos.room),
+                    ""
+                )
+            )
+            ORDER BY cos.schedule_id
+            SEPARATOR "||"
+        ) AS schedules
+     FROM course_offerings co
+
+     INNER JOIN courses c
+        ON c.course_id = co.course_id
+
+     LEFT JOIN course_offering_schedules cos
+        ON cos.offering_id = co.offering_id
+
+     WHERE co.program = ?
+       AND co.year_level = ?
+       AND co.section = ?
+       AND co.semester = ?
+       AND co.school_year = ?
+
+     GROUP BY
+        co.offering_id,
+        c.course_code,
+        c.course_name,
+        c.units,
+        co.instructor_name
+
+     ORDER BY c.course_code ASC'
+);
+
+$stmt->bind_param(
+    'sisss',
+    $student['program'],
+    $student['year_level'],
+    $student['section'],
+    $semester,
+    $schoolYear
+);
+
+$stmt->execute();
+
+$result = $stmt->get_result();
+
+while ($row = $result->fetch_assoc()) {
+
+    $row['schedules'] = $row['schedules'] !== null
+        ? explode('||', $row['schedules'])
+        : [];
+
+    $courses[] = $row;
+}
+
+$stmt->close();
 
 $totalCourses = count($courses);
 $totalUnits   = array_sum(array_column($courses, 'units'));
@@ -148,7 +249,7 @@ $totalUnits   = array_sum(array_column($courses, 'units'));
                         <span class="co-icon"><i class="fa-regular fa-id-badge"></i></span>
                         <div>
                             <small>Year Level</small>
-                            <strong><?= e($yearLevel) ?></strong>
+                            <strong><?= e($yearLevelLabel) ?></strong>
                         </div>
                     </div>
 
@@ -221,15 +322,62 @@ $totalUnits   = array_sum(array_column($courses, 'units'));
                                 <?php foreach ($courses as $i => $course): ?>
 
                                     <tr>
-                                        <td class="col-num"><?= $i + 1 ?></td>
-                                        <td><?= e($course['code']) ?></td>
-                                        <td><?= e($course['name']) ?></td>
-                                        <td>
-                                            <?= e($course['schedule']) ?><br>
-                                            <?= e($course['room']) ?>
+
+                                        <td class="col-num">
+                                            <?= $i + 1 ?>
                                         </td>
-                                        <td><?= e($course['instructor']) ?></td>
-                                        <td class="col-units"><?= e($course['units']) ?></td>
+
+                                        <td>
+                                            <?= e($course['course_code']) ?>
+                                        </td>
+
+                                        <td>
+                                            <?= e($course['course_name']) ?>
+                                        </td>
+
+                                        <td>
+
+                                            <?php if (!empty($course['schedules'])): ?>
+
+                                                <?php foreach ($course['schedules'] as $schedule): ?>
+
+                                                    <div class="co-schedule-item">
+                                                        <i class="fa-regular fa-clock"></i>
+                                                        <?= e($schedule) ?>
+                                                    </div>
+
+                                                <?php endforeach; ?>
+
+                                            <?php else: ?>
+
+                                                <span class="co-not-assigned">
+                                                    Not finalized
+                                                </span>
+
+                                            <?php endif; ?>
+
+                                        </td>
+
+                                        <td>
+
+                                            <?php if (!empty($course['instructor_name'])): ?>
+
+                                                <?= e($course['instructor_name']) ?>
+
+                                            <?php else: ?>
+
+                                                <span class="co-not-assigned">
+                                                    Not assigned
+                                                </span>
+
+                                            <?php endif; ?>
+
+                                        </td>
+
+                                        <td class="col-units">
+                                            <?= e($course['units']) ?>
+                                        </td>
+
                                     </tr>
 
                                 <?php endforeach; ?>

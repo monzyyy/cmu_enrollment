@@ -18,9 +18,9 @@ $sidebarMenu = [
     [
         'title' => 'Enrollment',
         'items' => [
-            ['key' => 'evaluation', 'label' => 'Evaluation', 'icon' => 'fa-clipboard-check', 'link' => '?page=faculty_evaluation'],
+            ['key' => 'faculty_evaluation', 'label' => 'Evaluation', 'icon' => 'fa-clipboard-check', 'link' => '?page=faculty_evaluation'],
             ['key' => 'clearance_main', 'label' => 'Clearance', 'icon' => 'fa-file-signature', 'link' => '?page=clearance_main'],
-            ['key' => 'cor', 'label' => 'COR', 'icon' => 'fa-file-lines', 'link' => '?page=services_main'],
+            ['key' => 'cor', 'label' => 'COR', 'icon' => 'fa-file-lines', 'link' => '?page=cor'],
             
         ],
     ],

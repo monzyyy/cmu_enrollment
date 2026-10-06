@@ -6,8 +6,8 @@ INSERT INTO users (
     role
 )
 VALUES (
-    '202401111',
-    '$2y$10$WK/mr46L21eixD6974RXqeb6mQaTBwhqK6FJwV8Fj597bGlBKx4mm',
+    '202402222',
+    '$2y$10$NyivLFe5NbqkyURcCStEz.AQI5hZwz4geZbQi4aRCxbqn0E23XlDW',
     'STUDENT'
 );
 
@@ -27,17 +27,17 @@ INSERT INTO students (
 )
 SELECT
     user_id,
-    '202401111',
-    'Richmond',
+    '202402222',
+    'Monzy',
     NULL,
-    'Quizon',
+    'Hayna',
     'BSIT',
     3,
     '3D',
-    'richmond@gmail.com',
+    'monzyhayna@gmail.com',
     '09123456789',
     password_hash,
     'NOT_STARTED'
 FROM users
-WHERE account_number = '202401111'
+WHERE account_number = '202402222'
   AND role = 'STUDENT';
