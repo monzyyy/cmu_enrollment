@@ -25,7 +25,7 @@ $currentPage = 'home';   // change based on page home | services | cart | reques
       <h1>Testing page</h1>
       <p>Welcome, <?= $userName ?>!</p>
       <?php
-        echo password_hash('richmond', PASSWORD_BCRYPT);
+        echo password_hash('whosgab', PASSWORD_BCRYPT);
         ?>
   </div>
   
