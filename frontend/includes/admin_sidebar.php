@@ -3,7 +3,15 @@
 if (!function_exists('e')) {
     function e($value)
     {
-        return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+        if (is_array($value)) {
+            return '';
+        }
+
+        return htmlspecialchars(
+            (string) $value,
+            ENT_QUOTES,
+            'UTF-8'
+        );
     }
 }
 
