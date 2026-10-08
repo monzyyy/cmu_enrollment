@@ -112,9 +112,26 @@ if (!empty($_SESSION['student_id'])) {
         dataType: 'json'
       })
       .done(function (res) {
-        $form[0].reset();
-        showMessage(res.message, true);
-        window.location.replace(res.redirect);
+          if (!res.success) {
+              showMessage(
+                  res.message || 'Login failed.',
+                  false
+              );
+              $('#password').val('');
+              $btn
+                  .prop('disabled', false)
+                  .text('Log in');
+
+              return;
+          }
+          $form[0].reset();
+          showMessage(
+              res.message,
+              true
+          );
+          window.location.replace(
+              res.redirect
+          );
       })
       .fail(function (xhr) {
         const res = xhr.responseJSON || {};

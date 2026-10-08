@@ -10,10 +10,11 @@ function user_find_by_account_number(
             user_id,
             account_number,
             password_hash,
-            role
-         FROM users
-         WHERE account_number = ?
-         LIMIT 1'
+            role,
+            is_active
+        FROM users
+        WHERE account_number = ?
+        LIMIT 1'
     );
 
     $stmt->bind_param('s', $account_number);

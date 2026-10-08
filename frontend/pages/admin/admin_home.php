@@ -61,22 +61,77 @@ $notStartedStudents = (int) $studentCounts['not_started_students'];
 $corStudents = (int) $studentCounts['cor_students'];
 $enrolledStudents = (int) $studentCounts['enrolled_students'];
 
-$students = [];
+$studentsPerPage = 5;
 
-$result = $conn->query(
-    "SELECT
+$currentStudentPage = max(
+    1,
+    (int) ($_GET['student_page'] ?? 1)
+);
+
+
+/* TOTAL STUDENTS */
+
+$totalStudentResult = $conn->query(
+    'SELECT COUNT(*) AS total
+     FROM students'
+);
+
+$totalStudentRecords = 0;
+
+if ($totalStudentResult) {
+    $row = $totalStudentResult->fetch_assoc();
+
+    $totalStudentRecords =
+        (int) ($row['total'] ?? 0);
+}
+
+
+/* PAGINATION */
+
+$totalStudentPages = max(
+    1,
+    (int) ceil(
+        $totalStudentRecords /
+        $studentsPerPage
+    )
+);
+
+$currentStudentPage = min(
+    $currentStudentPage,
+    $totalStudentPages
+);
+
+$studentOffset =
+    ($currentStudentPage - 1) *
+    $studentsPerPage;
+
+
+/* GET STUDENTS */
+
+$stmt = $conn->prepare(
+    'SELECT
         student_number,
         first_name,
         middle_name,
         last_name,
         enrollment_phase
      FROM students
-     ORDER BY student_id ASC"
+     ORDER BY student_id ASC
+     LIMIT ? OFFSET ?'
 );
 
-while ($student = $result->fetch_assoc()) {
-    $students[] = $student;
-}
+$stmt->bind_param(
+    'ii',
+    $studentsPerPage,
+    $studentOffset
+);
+
+$stmt->execute();
+
+$students =
+    $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+$stmt->close();
 ?>
 
 <!DOCTYPE html>
@@ -358,6 +413,29 @@ while ($student = $result->fetch_assoc()) {
 
             <section class="admin-student-table">
 
+                <?php if ($totalStudentRecords > 0): ?>
+
+                    <?php
+                    $displayStart =
+                        $studentOffset + 1;
+
+                    $displayEnd = min(
+                        $studentOffset + $studentsPerPage,
+                        $totalStudentRecords
+                    );
+                    ?>
+
+                    <div class="admin-cor-table-info">
+
+                        <span>
+                            Showing <?= $displayStart ?>–<?= $displayEnd ?>
+                            of <?= $totalStudentRecords ?> students
+                        </span>
+
+                    </div>
+
+                <?php endif; ?>
+
                 <div class="admin-table-header">
 
                     <span>#</span>
@@ -392,7 +470,7 @@ while ($student = $result->fetch_assoc()) {
                     <div class="admin-table-row">
 
                         <span>
-                            <?= $index + 1 ?>
+                            <?= $studentOffset + $index + 1 ?>
                         </span>
 
                         <span>
@@ -430,6 +508,70 @@ while ($student = $result->fetch_assoc()) {
                 <?php endforeach; ?>
 
             </section>
+
+            <?php if ($totalStudentPages > 1): ?>
+
+                <div class="admin-student-enrollment-pagination">
+
+                    <a
+                        href="<?= e(
+                            BASE_URL
+                            . '?page=admin_home'
+                            . '&student_page='
+                            . ($currentStudentPage - 1)
+                        ) ?>"
+                        class="<?= $currentStudentPage <= 1 ? 'disabled' : '' ?>"
+                    >
+                        <i class="fa-solid fa-chevron-left"></i>
+                        Previous
+                    </a>
+
+
+                    <div class="admin-student-enrollment-page-numbers">
+
+                        <?php for (
+                            $pageNumber = 1;
+                            $pageNumber <= $totalStudentPages;
+                            $pageNumber++
+                        ): ?>
+
+                            <a
+                                href="<?= e(
+                                    BASE_URL
+                                    . '?page=admin_home'
+                                    . '&student_page='
+                                    . $pageNumber
+                                ) ?>"
+                                class="<?= $pageNumber === $currentStudentPage
+                                    ? 'active'
+                                    : '' ?>"
+                            >
+                                <?= $pageNumber ?>
+                            </a>
+
+                        <?php endfor; ?>
+
+                    </div>
+
+
+                    <a
+                        href="<?= e(
+                            BASE_URL
+                            . '?page=admin_home'
+                            . '&student_page='
+                            . ($currentStudentPage + 1)
+                        ) ?>"
+                        class="<?= $currentStudentPage >= $totalStudentPages
+                            ? 'disabled'
+                            : '' ?>"
+                    >
+                        Next
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </a>
+
+                </div>
+
+            <?php endif; ?>
 
         </div>
 

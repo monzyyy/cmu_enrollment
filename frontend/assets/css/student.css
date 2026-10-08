@@ -1136,9 +1136,9 @@
 /* ---------- steps ---------- */
 
 .cl-steps {
+    display: flex;
     flex-direction: row;
     align-items: center;
-
     gap: 10px;
 }
 
@@ -1818,4 +1818,133 @@
 
         margin-bottom: 4px;
     }
+}
+
+.home-hero-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 16px;
+    align-items: stretch;
+}
+
+.home-hero-layout .home-hero {
+    height: 100%;
+}
+
+.enrollment-info-card {
+    padding: 20px;
+    background: #ffffff;
+    border: 1px solid #dfe7f0;
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-sizing: border-box;
+}
+
+.enrollment-info-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.enrollment-info-label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #71839a;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.enrollment-info-header h2 {
+    margin: 0;
+    font-size: 16px;
+    color: #12284a;
+}
+
+.enrollment-info-header > i {
+    font-size: 18px;
+    color: #5276a8;
+}
+
+.enrollment-info-details {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin: 24px 0;
+}
+
+.enrollment-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.enrollment-info-item span {
+    font-size: 11px;
+    color: #7b8da4;
+}
+
+.enrollment-info-item strong {
+    font-size: 13px;
+    font-weight: 600;
+    color: #243952;
+}
+
+.enrollment-info-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 9px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.enrollment-info-status.is-open {
+    background: #edf9f2;
+    color: #198754;
+}
+
+.enrollment-info-status.is-closed {
+    background: #fff1f2;
+    color: #b02a37;
+}
+
+.enrollment-info-status i {
+    font-size: 13px;
+}
+@media (max-width: 900px) {
+
+    .home-hero-layout {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+.co-schedule-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin-bottom: 4px;
+    line-height: 1.4;
+}
+
+.co-schedule-item:last-child {
+    margin-bottom: 0;
+}
+
+.co-schedule-item i {
+    margin-top: 3px;
+    color: #6f86a3;
+    font-size: 10px;
+    flex-shrink: 0;
+}
+
+.co-not-assigned {
+    color: #8a99aa;
+    font-size: 11px;
 }

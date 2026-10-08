@@ -1,3 +1,4 @@
+-- migrate_to_current.sql
 USE cmuenrollment_db;
 
 -- =========================================================

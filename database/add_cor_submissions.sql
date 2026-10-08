@@ -1,3 +1,4 @@
+--add_cor_submissions.sql
 USE cmuenrollment_db;
 
 CREATE TABLE IF NOT EXISTS cor_submissions (

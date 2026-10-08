@@ -18,15 +18,35 @@ $currentPage = 'home';   // change based on page home | services | cart | reques
 </head>
 <body>
   <div class="layout">
+  <!-- LOGO -->
+    <div class="imglogo">
+        <!-- <img src="<?= BASE_URL ?>frontend/assets/images/cmu-logo.png"
+             alt="City of Malabon University"> -->
+             <span>CMU</span>
+    </div>
+
     <?php require FRONTEND_PATH . 'includes/sidebar.php' ?>
     <div class="main">
       <?php require FRONTEND_PATH . 'includes/topbar.php'?>
+        <div class="content">
+          <h1>Testing page</h1>
+            <p>Welcome, <?= $userName ?>!</p>
+            <?php
+              echo password_hash('monzy', PASSWORD_BCRYPT);
+              ?>
+        </div>
     </div>
+<<<<<<< HEAD
       <h1>Testing page</h1>
       <p>Welcome, <?= $userName ?>!</p>
       <?php
         echo password_hash('whosgab', PASSWORD_BCRYPT);
         ?>
+=======
+
+    
+  
+>>>>>>> 5c73036a3bbae1840659e935aea14c28ff4e5147
   </div>
   
 </body>

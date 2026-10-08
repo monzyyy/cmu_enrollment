@@ -131,7 +131,7 @@ $steps = [
             <!-- =========================
                  PAGE HEADING
             ========================== -->
-            <section class="page-heading is-caps">
+            <section class="page-heading">
                 <h1>Clearance</h1>
                 <p>Student Clearance Form</p>
             </section>
@@ -143,8 +143,21 @@ $steps = [
             <section class="cl-card">
 
                 <div class="cl-card-head">
-                    <span class="co-icon"><i class="fa-regular fa-user"></i></span>
-                    <h2>Student Information</h2>
+
+                    <div class="co-icon">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+
+                    <div>
+
+                        <h2>Student Information</h2>
+
+                        <p>
+                            Your enrollment information
+                        </p>
+
+                    </div>
+
                 </div>
 
                 <div class="cl-info">

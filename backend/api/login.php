@@ -67,6 +67,15 @@ try {
         $account_number
     );
 
+    if ((int) $user['is_active'] !== 1) {
+
+        echo json_encode([
+            'success' => false,
+            'message' => 'This account is inactive. Please contact the administrator.'
+        ]);
+
+        exit;
+    }
 
     if ($user) {
 

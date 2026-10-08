@@ -28,7 +28,12 @@ $userName = trim(
 $currentPage = 'home_main';
 
 $settingsStmt = $conn->prepare(
-    'SELECT enrollment_status
+    'SELECT
+        enrollment_status,
+        semester,
+        school_year,
+        start_date,
+        end_date
      FROM system_settings
      WHERE setting_id = 1
      LIMIT 1'
@@ -42,6 +47,56 @@ $settingsStmt->close();
 
 $enrollmentStatus = $settings['enrollment_status'] ?? 'CLOSED';
 $enrollmentPhase = $student['enrollment_phase'];
+
+$semester = $settings['semester'] ?? '';
+$schoolYear = $settings['school_year'] ?? '';
+$startDate = $settings['start_date'] ?? null;
+$endDate = $settings['end_date'] ?? null;
+
+$latestCorSubmission = null;
+$corStatus = 'NOT_SUBMITTED';
+
+$corStmt = $conn->prepare(
+    'SELECT
+        status,
+        rejection_reason
+     FROM cor_submissions
+     WHERE student_id = ?
+     ORDER BY cor_submission_id DESC
+     LIMIT 1'
+);
+
+$corStmt->bind_param('i', $studentId);
+$corStmt->execute();
+
+$latestCorSubmission = $corStmt->get_result()->fetch_assoc();
+
+$corStmt->close();
+
+$corStatus = $latestCorSubmission['status'] ?? 'NOT_SUBMITTED';
+
+$enrollmentPeriod = '';
+
+if ($startDate && $endDate) {
+
+    $startTimestamp = strtotime($startDate);
+    $endTimestamp = strtotime($endDate);
+
+    if (date('Y-m', $startTimestamp) === date('Y-m', $endTimestamp)) {
+
+        $enrollmentPeriod =
+            date('F j', $startTimestamp) .
+            '–' .
+            date('j', $endTimestamp);
+
+    } else {
+
+        $enrollmentPeriod =
+            date('F j', $startTimestamp) .
+            '–' .
+            date('F j', $endTimestamp);
+    }
+}
 
 ?>
 
@@ -89,6 +144,8 @@ $enrollmentPhase = $student['enrollment_phase'];
 
         <!-- PAGE CONTENT -->
         <div class="content">
+
+            <div class="home-hero-layout">
 
             <!-- =========================
                  CLOSED
@@ -219,27 +276,67 @@ $enrollmentPhase = $student['enrollment_phase'];
             <?php elseif ($enrollmentPhase === 'COR'): ?>
 
                 <section class="home-hero">
-
                     <div class="home-hero-content">
 
-                        <div class="status-badge status-open">
-                            <i class="fa-solid fa-clock"></i>
-                            Pending Registrar Review
-                        </div>
+                        <?php if ($corStatus === 'NOT_SUBMITTED'): ?>
 
-                        <h1>COR Submitted</h1>
+                            <div class="status-badge status-open">
+                                <i class="fa-solid fa-file-circle-plus"></i>
+                                COR Not Yet Submitted
+                            </div>
 
-                        <p class="hero-description">
-                            Your COR has been submitted and is waiting for Registrar review.
-                        </p>
+                            <h1>Submit Your COR</h1>
 
-                        <a href="<?= BASE_URL ?>?page=cor" class="hero-button">
-                            View COR Status
-                            <i class="fa-solid fa-file-lines"></i>
-                        </a>
+                            <p class="hero-description">
+                                Your signed COR has not been submitted yet.
+                                Please upload it to continue your enrollment.
+                            </p>
+
+                            <a href="<?= BASE_URL ?>?page=cor" class="hero-button">
+                                Submit COR
+                                <i class="fa-solid fa-file-arrow-up"></i>
+                            </a>
+
+                        <?php elseif ($corStatus === 'REJECTED'): ?>
+
+                            <div class="status-badge status-closed">
+                                <i class="fa-solid fa-circle-xmark"></i>
+                                COR Rejected
+                            </div>
+
+                            <h1>COR Needs Correction</h1>
+
+                            <p class="hero-description">
+                                Your COR was rejected.
+                                Please review the reason and submit a corrected copy.
+                            </p>
+
+                            <a href="<?= BASE_URL ?>?page=cor" class="hero-button">
+                                View COR
+                                <i class="fa-solid fa-file-lines"></i>
+                            </a>
+
+                        <?php else: ?>
+
+                            <div class="status-badge status-open">
+                                <i class="fa-solid fa-clock"></i>
+                                Pending Registrar Review
+                            </div>
+
+                            <h1>COR Submitted</h1>
+
+                            <p class="hero-description">
+                                Your COR has been submitted and is waiting for Registrar review.
+                            </p>
+
+                            <a href="<?= BASE_URL ?>?page=cor" class="hero-button">
+                                View COR Status
+                                <i class="fa-solid fa-file-lines"></i>
+                            </a>
+
+                        <?php endif; ?>
 
                     </div>
-
                 </section>
 
 
@@ -273,6 +370,76 @@ $enrollmentPhase = $student['enrollment_phase'];
                 </section>
 
             <?php endif; ?>
+                <aside class="enrollment-info-card">
+
+                    <div class="enrollment-info-header">
+
+                        <div>
+                            <span class="enrollment-info-label">
+                                Enrollment
+                            </span>
+
+                            <h2>Enrollment Information</h2>
+                        </div>
+
+                        <i class="fa-solid fa-calendar-days"></i>
+
+                    </div>
+
+
+                    <div class="enrollment-info-details">
+
+                        <div class="enrollment-info-item">
+                            <span>Semester</span>
+
+                            <strong>
+                                <?= e($semester ?: 'Not set') ?>
+                            </strong>
+                        </div>
+
+
+                        <div class="enrollment-info-item">
+                            <span>School Year</span>
+
+                            <strong>
+                                <?= e($schoolYear ?: 'Not set') ?>
+                            </strong>
+                        </div>
+
+
+                        <div class="enrollment-info-item">
+                            <span>Enrollment Period</span>
+
+                            <strong>
+                                <?= e($enrollmentPeriod ?: 'Not set') ?>
+                            </strong>
+                        </div>
+
+                    </div>
+
+
+                    <div class="enrollment-info-status
+                        <?= $enrollmentStatus === 'OPEN'
+                            ? 'is-open'
+                            : 'is-closed' ?>">
+
+                        <i class="fa-solid
+                            <?= $enrollmentStatus === 'OPEN'
+                                ? 'fa-circle-check'
+                                : 'fa-circle-xmark' ?>"></i>
+
+                        <span>
+                            Enrollment is
+                            <?= $enrollmentStatus === 'OPEN'
+                                ? 'Open'
+                                : 'Closed' ?>
+                        </span>
+
+                    </div>
+
+                </aside>
+
+            </div>
 
 
             <!-- =========================
@@ -322,12 +489,14 @@ $enrollmentPhase = $student['enrollment_phase'];
 
 
                 <div class="progress-item
-                    <?= in_array($enrollmentPhase, ['COR', 'ENROLLED'])
+                    <?= $enrollmentPhase === 'ENROLLED'
                         ? 'completed'
-                        : ($enrollmentPhase === 'CLEARANCE' ? 'current' : '') ?>">
+                        : (in_array($enrollmentPhase, ['CLEARANCE', 'COR'])
+                            ? 'current'
+                            : '') ?>">
 
                     <div class="progress-number">
-                        <?php if (in_array($enrollmentPhase, ['COR', 'ENROLLED'])): ?>
+                        <?php if ($enrollmentPhase === 'ENROLLED'): ?>
                             <i class="fa-solid fa-check"></i>
                         <?php else: ?>
                             3
