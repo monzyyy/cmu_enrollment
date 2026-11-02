@@ -305,30 +305,38 @@ $progressPercent = $totalSubjects > 0
                                                     </span>
                                                 <?php endif; ?>
                                             </td>
-                                            <td class="col-action">
-                                                <?php if (!$subject['has_instructor']): ?>
-                                                    <span class="eval-button"
-                                                        style="opacity: 0.5; cursor: not-allowed;">
-                                                        Not Available
-                                                    </span>
-                                                <?php elseif ($subject['evaluated']): ?>
+                                            
+                                        <td class="col-action">
 
-                                                    <span class="eval-button"
-                                                        style="opacity: 0.5; cursor: not-allowed;">
-                                                        <i class="fa-solid fa-check"></i>
-                                                        Completed
-                                                    </span>
+                                            <?php if (!$subject['has_instructor']): ?>
 
-                                                <?php else: ?>
+                                                <span class="eval-button"
+                                                    style="opacity: 0.5; cursor: not-allowed;">
+                                                    Awaiting Assignment
+                                                </span>
 
-                                                    <span class="eval-button"
-                                                        style="opacity: 0.6; cursor: not-allowed;">
-                                                        Form Coming Next
-                                                    </span>
+                                            <?php elseif ($subject['evaluated']): ?>
 
-                                                <?php endif; ?>
+                                                <span class="eval-button"
+                                                    style="opacity: 0.5; cursor: not-allowed;">
+                                                    <i class="fa-solid fa-check"></i>
+                                                    Completed
+                                                </span>
 
-                                            </td>
+                                            <?php else: ?>
+
+                                                <a
+                                                    href="<?= BASE_URL ?>?page=evaluation_form&amp;course=<?= (int)$subject['id'] ?>"
+                                                    class="eval-button"
+                                                >
+                                                    <i class="fa-solid fa-pencil"></i>
+                                                    Evaluate
+                                                </a>
+
+                                            <?php endif; ?>
+
+                                        </td>
+
 
                                         </tr>
 

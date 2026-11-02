@@ -14,6 +14,7 @@ $pages = [
     'home_main' => 'main/home_main.php',
     'course_offering' => 'main/course_offering.php',
     'faculty_evaluation' => 'main/faculty_evaluation.php',
+    'evaluation_form' => 'main/evaluation_form.php',
     'clearance_main' => 'main/clearance_main.php',
     'cor' => 'main/cor.php',
     'profile' => 'main/profile.php',

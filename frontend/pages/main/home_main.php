@@ -200,7 +200,7 @@ if ($startDate && $endDate) {
                             Begin your enrollment by completing your professor evaluation.
                         </p>
 
-                        <a href="<?= BASE_URL ?>?page=evaluation" class="hero-button">
+                        <a href="<?= BASE_URL ?>?page=faculty_evaluation" class="hero-button">
                             Start Evaluation
                             <i class="fa-solid fa-arrow-right"></i>
                         </a>
