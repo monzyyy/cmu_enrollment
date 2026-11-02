@@ -28,16 +28,13 @@ $sidebarMenu = [
         'title' => 'Status',
         'items' => [
             ['key' => 'myenrollment', 'label' => 'My Enrollment', 'icon' => 'fa-id-card', 'link' => '?page=cart_main'],
-            ['key' => 'myschedule', 'label' => 'My Schedule', 'icon' => 'fa-calendar-days', 'link' => '?page=cart_main'],
-            ['key' => 'course_offering', 'label' => 'Course Offering', 'icon' => 'fa-file-lines', 'link' => '?page=course_offering'],
+            ['key' => 'course_offering', 'label' => 'My Schedule', 'icon' => 'fa-file-lines', 'link' => '?page=course_offering'],
         ],
     ],
     [
         'title' => 'System',
         'items' => [
             ['key' => 'profile',  'label' => 'Profile',          'icon' => 'fa-user',            'link' => '?page=profile'],
-            ['key' => 'faqs',     'label' => "Helps and FAQ's",  'icon' => 'fa-circle-question', 'link' => 'faqs.php'],
-            ['key' => 'settings', 'label' => 'Settings',         'icon' => 'fa-gear',            'link' => 'settings.php'],
         ],
     ],
 ];

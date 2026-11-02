@@ -3,7 +3,15 @@
 if (!function_exists('e')) {
     function e($value)
     {
-        return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+        if (is_array($value)) {
+            return '';
+        }
+
+        return htmlspecialchars(
+            (string) $value,
+            ENT_QUOTES,
+            'UTF-8'
+        );
     }
 }
 
@@ -25,20 +33,14 @@ $sidebarMenu = [
     [
         'title' => 'Academic',
         'items' => [
-            ['key' => 'instructor',  'label' => 'Instructor', 'icon' => 'fa-user', 'link' => '?page=instructor'],
-            ['key' => 'course_management',     'label' => "Course Management",  'icon' => 'fa-book-open', 'link' => '?page=course_management'],
-            ['key' => 'course_offerings',     'label' => "Course Offerings",  'icon' => 'fa-table-list', 'link' => '?page=course_offerings'],
-            ['key' => 'evaluation', 'label' => 'Evaluation', 'icon' => 'fa-star','link' => '?page=evaluation'],
+            ['key' => 'course_management',     'label' => "Subject Management",  'icon' => 'fa-book-open', 'link' => '?page=course_management'],
+            ['key' => 'course_offerings',     'label' => "Schedule Management",  'icon' => 'fa-table-list', 'link' => '?page=course_offerings'],
         ],
     ],
     [
         'title' => 'Management',
         'items' => [
             ['key' => 'student_management',  'label' => 'Students', 'icon' => 'fa-user', 'link' => '?page=student_management'],
-            ['key' => 'notifications',     'label' => "Notifications",  'icon' => 'fa-bell', 'link' => '?page=notifications'],
-            ['key' => 'reports', 'label' => 'Reports', 'icon' => 'fa-chart-column','link' => '?page=reports'],
-            ['key' => 'profile',  'label' => 'Profile', 'icon' => 'fa-user', 'link' => '?page=profile'],
-            ['key' => 'settings',     'label' => "Settings",  'icon' => 'fa-gear', 'link' => '?page=settings'],
         ],
     ],
 ];

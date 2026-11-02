@@ -27,35 +27,108 @@ $userName = trim(
 
 $currentPage = 'faculty_evaluation';
 
-/* ---------------------------------------------------------
-   SUBJECTS TO EVALUATE
-   TODO: replace this sample array with a query that joins the
-   student's courses with their evaluation records, e.g.
 
-   $stmt = $conn->prepare(
-       'SELECT c.course_id, c.course_code, c.course_name, c.instructor,
-              (e.evaluation_id IS NOT NULL) AS evaluated
-        FROM course_offerings c
-        LEFT JOIN evaluations e
-               ON e.course_id = c.course_id AND e.student_id = ?
-        WHERE c.section_id = ?
-        ORDER BY c.course_code'
-   );
---------------------------------------------------------- */
-$subjects = [
-    ['id' => 1, 'code' => 'IT 301', 'name' => 'Database System',                     'instructor' => 'Prof. Juan Dela Cruz',  'evaluated' => true],
-    ['id' => 2, 'code' => 'IT 302', 'name' => 'Web Development',                     'instructor' => 'Prof. Ronald Pineda',   'evaluated' => true],
-    ['id' => 3, 'code' => 'IT 303', 'name' => 'System Analysis and Design',          'instructor' => 'Prof. Sanggre Alena',   'evaluated' => true],
-    ['id' => 4, 'code' => 'IT 304', 'name' => 'Networking 1',                        'instructor' => 'Prof. Fhukerat',        'evaluated' => true],
-    ['id' => 5, 'code' => 'IT 305', 'name' => 'System Integration and Architecture', 'instructor' => 'Doc. Ryzza Mae Digong', 'evaluated' => true],
-    ['id' => 6, 'code' => 'IT 306', 'name' => 'Integrative Programming',             'instructor' => 'Atty. Pepsi Paloma',    'evaluated' => true],
-    ['id' => 7, 'code' => 'GE 101', 'name' => 'Purposive Communication',             'instructor' => 'Prof. Uncle Dags',      'evaluated' => true],
- ['id' => 8, 'code' => 'PE 102', 'name' => 'Physical Fitness 1',                  'instructor' => 'Prof. Maria Hiwaga',    'evaluated' => false],
-];
+/* ------------------------------------------
+   DYNAMIC FACULTY EVALUATION SUBJECTS
+------------------------------------------ */
 
-$totalSubjects     = count($subjects);
-$evaluatedCount    = count(array_filter($subjects, fn($s) => $s['evaluated']));
-$progressPercent   = $totalSubjects > 0 ? round(($evaluatedCount / $totalSubjects) * 100) : 0;
+// Get current semester and school year
+$settingsQuery = $conn->query("
+    SELECT semester, school_year
+    FROM system_settings
+    WHERE setting_id = 1
+    LIMIT 1
+");
+
+$settings = $settingsQuery->fetch_assoc();
+
+$semester = $settings['semester'] ?? '';
+$schoolYear = $settings['school_year'] ?? '';
+
+// Get subjects for the logged-in student
+$sql = "
+    SELECT
+        co.offering_id AS id,
+        c.course_code AS code,
+        c.course_name AS name,
+        co.instructor_name AS instructor,
+
+        CASE
+            WHEN pe.evaluation_id IS NOT NULL
+            THEN 1
+            ELSE 0
+        END AS evaluated
+
+    FROM course_offerings co
+
+    INNER JOIN courses c
+        ON co.course_id = c.course_id
+
+    LEFT JOIN professor_evaluations pe
+        ON pe.offering_id = co.offering_id
+        AND pe.student_id = ?
+
+    WHERE co.program = ?
+        AND co.year_level = ?
+        AND co.section = ?
+        AND co.semester = ?
+        AND co.school_year = ?
+        AND c.is_active = 1
+
+    ORDER BY c.course_code ASC
+";
+
+$stmt = $conn->prepare($sql);
+
+$stmt->bind_param(
+    "isisss",
+    $studentId,
+    $student['program'],
+    $student['year_level'],
+    $student['section'],
+    $semester,
+    $schoolYear
+);
+
+$stmt->execute();
+
+$result = $stmt->get_result();
+
+$subjects = [];
+
+while ($row = $result->fetch_assoc()) {
+
+    $hasInstructor = !empty(
+        trim($row['instructor'] ?? '')
+    );
+
+    $subjects[] = [
+        'id' => (int) $row['id'],
+        'code' => $row['code'],
+        'name' => $row['name'],
+        'instructor' => $hasInstructor
+            ? $row['instructor']
+            : 'Awaiting Faculty Assignment',
+        'has_instructor' => $hasInstructor,
+        'evaluated' => (bool) $row['evaluated']
+    ];
+}
+
+$stmt->close();
+
+// Calculate actual evaluation progress
+$totalSubjects = count($subjects);
+
+$evaluatedCount = count(
+    array_filter(
+        $subjects,
+        fn($subject) => $subject['evaluated']
+    )
+);
+
+$progressPercent = $totalSubjects > 0
+    ? round(($evaluatedCount / $totalSubjects) * 100)
+    : 0;
 
 ?>
 
@@ -214,25 +287,49 @@ $progressPercent   = $totalSubjects > 0 ? round(($evaluatedCount / $totalSubject
                                             <td><?= e($subject['code']) ?></td>
                                             <td><?= e($subject['name']) ?></td>
                                             <td><?= e($subject['instructor']) ?></td>
-
                                             <td class="col-status">
-                                                <?php if ($subject['evaluated']): ?>
-                                                    <span class="eval-badge eval-done">Evaluated</span>
+                                                <?php if (!$subject['has_instructor']): ?>
+                                                    <span class="eval-badge eval-pending">
+                                                        <i class="fa-solid fa-clock"></i>
+                                                        Awaiting Faculty Assignment
+                                                    </span>
+                                                <?php elseif ($subject['evaluated']): ?>
+                                                    <span class="eval-badge eval-done">
+                                                        <i class="fa-solid fa-check-circle"></i>
+                                                        Evaluated
+                                                    </span>
                                                 <?php else: ?>
                                                     <span class="eval-badge eval-pending">
                                                         <i class="fa-solid fa-circle"></i>
-                                                        Not yet evaluated
+                                                        Not Yet Evaluated
                                                     </span>
                                                 <?php endif; ?>
                                             </td>
-
                                             <td class="col-action">
-                                                <a href="<?= BASE_URL ?>?page=evaluation_form&amp;course=<?= (int) $subject['id'] ?>"
-                                                   class="eval-button">
-                                                    <i class="fa-solid fa-pencil"></i>
-                                                    Evaluate
-                                                </a>
+                                                <?php if (!$subject['has_instructor']): ?>
+                                                    <span class="eval-button"
+                                                        style="opacity: 0.5; cursor: not-allowed;">
+                                                        Not Available
+                                                    </span>
+                                                <?php elseif ($subject['evaluated']): ?>
+
+                                                    <span class="eval-button"
+                                                        style="opacity: 0.5; cursor: not-allowed;">
+                                                        <i class="fa-solid fa-check"></i>
+                                                        Completed
+                                                    </span>
+
+                                                <?php else: ?>
+
+                                                    <span class="eval-button"
+                                                        style="opacity: 0.6; cursor: not-allowed;">
+                                                        Form Coming Next
+                                                    </span>
+
+                                                <?php endif; ?>
+
                                             </td>
+
                                         </tr>
 
                                     <?php endforeach; ?>

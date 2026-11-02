@@ -173,7 +173,7 @@ $totalUnits   = array_sum(array_column($courses, 'units'));
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>CMU | Course Offering</title>
+    <title>CMU | My Schedule</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -213,7 +213,7 @@ $totalUnits   = array_sum(array_column($courses, 'units'));
                  PAGE HEADING
             ========================== -->
             <section class="page-heading">
-                <h1>Course Offering</h1>
+                <h1>My Schedule</h1>
                 <p>
                     View your pre-assigned courses for the current semester.
                     These subjects are based on your block section and cannot be modified.
@@ -282,11 +282,6 @@ $totalUnits   = array_sum(array_column($courses, 'units'));
                             <strong><?= e($totalUnits) ?></strong>
                         </div>
                     </div>
-
-                    <a href="<?= BASE_URL ?>?page=my_schedule" class="co-button">
-                        View Schedule
-                        <i class="fa-solid fa-chevron-right"></i>
-                    </a>
 
                 </div>
 

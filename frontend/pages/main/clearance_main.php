@@ -168,7 +168,7 @@ $steps = [
                     </div>
 
                     <div class="cl-info-item">
-                        <small>Name</small>
+                        <small>Student Name</small>
                         <strong><?= e($userName) ?></strong>
                     </div>
 
