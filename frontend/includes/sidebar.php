@@ -27,7 +27,7 @@ $sidebarMenu = [
     [
         'title' => 'Status',
         'items' => [
-            ['key' => 'myenrollment', 'label' => 'My Enrollment', 'icon' => 'fa-id-card', 'link' => '?page=cart_main'],
+            ['key' => 'myenrollment', 'label' => 'My Enrollment', 'icon' => 'fa-id-card', 'link' => '?page=my_enrollment'],
             ['key' => 'course_offering', 'label' => 'My Schedule', 'icon' => 'fa-file-lines', 'link' => '?page=course_offering'],
         ],
     ],

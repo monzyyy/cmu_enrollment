@@ -66,7 +66,7 @@ if (!empty($_SESSION['student_id'])) {
 
         <!-- Remember me / Forgot password -->
         <div class="mt-3 flex items-center justify-between text-xs">
-          <a href="<?= BASE_URL . '?page=forgot_password' ?>"
+          <a href="<?= BASE_URL . '?page=forget' ?>"
              class="text-blue-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600">
             Forgot Password?
           </a>

@@ -61,7 +61,7 @@ try {
 
 
     $stmt = $conn->prepare(
-        'SELECT enrollment_status
+        'SELECT enrollment_status, semester, school_year
          FROM system_settings
          WHERE setting_id = 1
          LIMIT 1
@@ -142,6 +142,15 @@ try {
 
     $stmt->close();
 
+
+    $stmt = $conn->prepare('UPDATE enrollment_periods SET status=?, closed_at=CASE WHEN ?="CLOSED" THEN COALESCE(closed_at,NOW()) ELSE NULL END WHERE semester=? AND REPLACE(school_year," ","")=REPLACE(?," ","")');
+    $stmt->bind_param('ssss', $action, $action, $settings['semester'], $settings['school_year']);
+    $stmt->execute();
+    $stmt->close();
+    $stmt = $conn->prepare('SELECT period_id FROM enrollment_periods WHERE semester=? AND REPLACE(school_year," ","")=REPLACE(?," ","") LIMIT 1');
+    $stmt->bind_param('ss',$settings['semester'],$settings['school_year']);
+    $stmt->execute(); $period=$stmt->get_result()->fetch_assoc(); $stmt->close();
+    if (!$period) throw new RuntimeException('Current period missing from enrollment_periods.');
 
     $conn->commit();
 

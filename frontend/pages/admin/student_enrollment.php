@@ -609,6 +609,102 @@ function enrollment_phase_class(string $phase): string
 
 </div>
 
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchForm = document.querySelector('.admin-student-enrollment-search');
+        const searchInput = searchForm?.querySelector('input[name="search"]');
+        const tableCard = document.querySelector('.admin-student-enrollment-card');
+
+        if (!searchForm || !searchInput || !tableCard) return;
+
+        let debounceTimer;
+        let activeRequest;
+        let requestNumber = 0;
+
+        async function updateStudentTable(url, updateHistory = true) {
+            const thisRequest = ++requestNumber;
+            if (activeRequest) activeRequest.abort();
+            activeRequest = new AbortController();
+
+            try {
+                const response = await fetch(url.toString(), {
+                    signal: activeRequest.signal,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    credentials: 'same-origin'
+                });
+                if (!response.ok) throw new Error('Search request failed');
+
+                const html = await response.text();
+                if (thisRequest !== requestNumber) return;
+
+                const documentResult = new DOMParser().parseFromString(html, 'text/html');
+                const parts = [
+                    '.admin-student-enrollment-table-info',
+                    '.admin-student-enrollment-table-wrapper',
+                    '.admin-student-enrollment-pagination'
+                ];
+                const newCard = documentResult.querySelector('.admin-student-enrollment-card');
+                if (!newCard || !newCard.querySelector(parts[0]) || !newCard.querySelector(parts[1])) {
+                    throw new Error('Student table was not found in the response');
+                }
+
+                for (const selector of parts) {
+                    const current = tableCard.querySelector(selector);
+                    const replacement = newCard.querySelector(selector);
+                    if (current && replacement) current.replaceWith(replacement.cloneNode(true));
+                    else if (current) current.remove();
+                    else if (replacement) tableCard.appendChild(replacement.cloneNode(true));
+                }
+
+                if (updateHistory) window.history.replaceState(null, '', url.toString());
+            } catch (error) {
+                if (error.name !== 'AbortError' && thisRequest === requestNumber) {
+                    console.error('Unable to update student search:', error);
+                    const info = tableCard.querySelector('.admin-student-enrollment-table-info span');
+                    if (info) info.textContent = 'Unable to update results. Please try again.';
+                }
+            }
+        }
+
+        function searchUrl(page = 1) {
+            const url = new URL(searchForm.action, window.location.href);
+            url.searchParams.set('page', 'student_enrollment');
+            const term = searchInput.value.trim();
+            if (term) url.searchParams.set('search', term);
+            else url.searchParams.delete('search');
+            url.searchParams.set('student_page', String(page));
+            return url;
+        }
+
+        searchInput.addEventListener('input', function () {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => updateStudentTable(searchUrl()), 300);
+        });
+
+        searchForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            clearTimeout(debounceTimer);
+            updateStudentTable(searchUrl());
+        });
+
+        tableCard.addEventListener('click', function (event) {
+            const link = event.target.closest('.admin-student-enrollment-pagination a');
+            if (!link || link.classList.contains('disabled')) return;
+            event.preventDefault();
+            clearTimeout(debounceTimer);
+            const url = new URL(link.href, window.location.href);
+            updateStudentTable(url);
+        });
+
+        window.addEventListener('popstate', function () {
+            clearTimeout(debounceTimer);
+            const url = new URL(window.location.href);
+            searchInput.value = url.searchParams.get('search') || '';
+            updateStudentTable(url, false);
+        });
+    });
+    </script>
+
 <script src="<?= BASE_URL ?>frontend/assets/js/custom.js"></script>
 
 </body>

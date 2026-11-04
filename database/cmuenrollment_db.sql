@@ -611,3 +611,147 @@ CREATE TABLE IF NOT EXISTS student_course_enrollments (
         ON DELETE RESTRICT
         ON UPDATE CASCADE
 );
+
+
+
+-- eto ung sample professor for previous semesters
+
+
+INSERT INTO course_offerings
+(
+    course_id,
+    program,
+    year_level,
+    section,
+    semester,
+    school_year,
+    instructor_name
+)
+SELECT
+    c.course_id,
+    'BS Information Technology',
+    3,
+    'BSIT 3D',
+    '2nd Semester',
+    '2025 - 2026',
+    sample.instructor_name
+FROM (
+    SELECT 'IT 301' AS course_code,
+           'Sample Professor A' AS instructor_name
+    UNION ALL
+    SELECT 'IT 302', 'Sample Professor B'
+    UNION ALL
+    SELECT 'IT 303', 'Sample Professor C'
+) AS sample
+INNER JOIN courses c
+    ON c.course_code = sample.course_code
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM course_offerings co
+    WHERE co.course_id = c.course_id
+      AND co.program = 'BS Information Technology'
+      AND co.year_level = 3
+      AND co.section = 'BSIT 3D'
+      AND co.semester = '2nd Semester'
+      AND co.school_year = '2025 - 2026'
+);
+
+INSERT INTO student_course_enrollments
+    (student_id, offering_id, enrollment_type)
+SELECT
+    s.student_id,
+    co.offering_id,
+    'REGULAR'
+FROM students s
+INNER JOIN course_offerings co
+    ON co.program = 'BS Information Technology'
+    AND co.year_level = 3
+    AND co.section = 'BSIT 3D'
+    AND co.semester = '2nd Semester'
+    AND co.school_year = '2025 - 2026'
+WHERE s.student_number = '202400745'
+  AND NOT EXISTS (
+      SELECT 1
+      FROM student_course_enrollments sce
+      WHERE sce.student_id = s.student_id
+        AND sce.offering_id = co.offering_id
+  );
+
+
+CREATE TABLE clearance_submissions (
+    clearance_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+
+    student_id INT UNSIGNED NOT NULL,
+
+    semester VARCHAR(50) NOT NULL,
+    school_year VARCHAR(20) NOT NULL,
+
+    file_path VARCHAR(255) NOT NULL,
+    original_filename VARCHAR(255) NOT NULL,
+
+    status ENUM(
+        'PENDING',
+        'APPROVED',
+        'REJECTED'
+    ) NOT NULL DEFAULT 'PENDING',
+
+    rejection_reason TEXT NULL,
+
+    reviewed_by INT UNSIGNED NULL,
+    reviewed_at DATETIME NULL,
+
+    submitted_at DATETIME NOT NULL
+        DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_clearance_student
+        FOREIGN KEY (student_id)
+        REFERENCES students(student_id)
+        ON DELETE CASCADE,
+
+    INDEX idx_clearance_student_period (
+        student_id,
+        semester,
+        school_year
+    ),
+
+    INDEX idx_clearance_status (status)
+);
+
+-- CMU Enrollment System: Step 1 - non-destructive enrollment-period schema
+-- BACK UP YOUR DATABASE before running this script.
+-- Run ONCE in phpMyAdmin, against your cmuenrollment database.
+-- This migration does NOT reset students or change the current enrollment period.
+
+CREATE TABLE IF NOT EXISTS enrollment_periods (
+  period_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  semester VARCHAR(50) NOT NULL,
+  school_year VARCHAR(20) NOT NULL,
+  start_date DATE DEFAULT NULL,
+  end_date DATE DEFAULT NULL,
+  status ENUM('OPEN','CLOSED') NOT NULL DEFAULT 'CLOSED',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  closed_at DATETIME DEFAULT NULL,
+  PRIMARY KEY (period_id),
+  UNIQUE KEY uq_enrollment_period (semester, school_year)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Register the current period without changing system_settings.
+INSERT INTO enrollment_periods (semester, school_year, start_date, end_date, status)
+SELECT semester, school_year, start_date, end_date, enrollment_status
+FROM system_settings
+WHERE setting_id = 1 AND semester IS NOT NULL AND school_year IS NOT NULL
+ON DUPLICATE KEY UPDATE period_id = period_id;
+
+-- Each COR submission must belong to a specific period going forward.
+-- Nullable at first: existing COR records have no reliable period metadata.
+ALTER TABLE cor_submissions
+  ADD COLUMN period_id INT UNSIGNED NULL AFTER student_id,
+  ADD INDEX idx_cor_student_period_status (student_id, period_id, status),
+  ADD CONSTRAINT fk_cor_submission_period
+    FOREIGN KEY (period_id) REFERENCES enrollment_periods(period_id);
+
+-- Check existing COR records. Assign period_id only after verifying their true period.
+SELECT cor_submission_id, student_id, file_name, submitted_at, status, period_id
+FROM cor_submissions ORDER BY submitted_at DESC;
+
+SELECT period_id, semester, school_year, status FROM enrollment_periods;

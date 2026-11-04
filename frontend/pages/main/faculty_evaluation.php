@@ -4,6 +4,7 @@ require_role('STUDENT');
 
 require_once dirname(__DIR__, 3) . '/backend/bootstrap.php';
 require_once dirname(__DIR__, 3) . '/backend/models/student.php';
+require_once dirname(__DIR__, 3) . '/backend/helpers/evaluation_completion.php';
 
 $studentId = $_SESSION['student_id'] ?? null;
 
@@ -44,8 +45,15 @@ $settings = $settingsQuery->fetch_assoc();
 
 $semester = $settings['semester'] ?? '';
 $schoolYear = $settings['school_year'] ?? '';
+try {
+    [$previousSemester, $previousSchoolYear] = evaluationPreviousTerm($semester, $schoolYear);
+} catch (RuntimeException $e) {
+    $previousSemester = '';
+    $previousSchoolYear = '';
+}
 
-// Get subjects for the logged-in student
+
+
 $sql = "
     SELECT
         co.offering_id AS id,
@@ -59,36 +67,29 @@ $sql = "
             ELSE 0
         END AS evaluated
 
-    FROM course_offerings co
+    FROM student_course_enrollments sce
+
+    INNER JOIN course_offerings co
+        ON sce.offering_id = co.offering_id
 
     INNER JOIN courses c
         ON co.course_id = c.course_id
 
     LEFT JOIN professor_evaluations pe
         ON pe.offering_id = co.offering_id
-        AND pe.student_id = ?
+        AND pe.student_id = sce.student_id
 
-    WHERE co.program = ?
-        AND co.year_level = ?
-        AND co.section = ?
-        AND co.semester = ?
-        AND co.school_year = ?
-        AND c.is_active = 1
+    WHERE sce.student_id = ?
+      AND co.semester = ?
+      AND co.school_year = ?
 
     ORDER BY c.course_code ASC
 ";
 
+
 $stmt = $conn->prepare($sql);
 
-$stmt->bind_param(
-    "isisss",
-    $studentId,
-    $student['program'],
-    $student['year_level'],
-    $student['section'],
-    $semester,
-    $schoolYear
-);
+$stmt->bind_param("iss", $studentId, $previousSemester, $previousSchoolYear);
 
 $stmt->execute();
 
@@ -181,8 +182,7 @@ $progressPercent = $totalSubjects > 0
             <section class="page-heading">
                 <h1>Faculty Evaluation</h1>
                 <p>
-                    Rate your instructors for the current semester.
-                    You need to evaluate every subject before you can move on to clearance.
+                    Evaluate your professors from the previous semester. Complete all required evaluations to unlock the Clearance process.
                 </p>
             </section>
 

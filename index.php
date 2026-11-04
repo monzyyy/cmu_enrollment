@@ -17,12 +17,14 @@ $pages = [
     'evaluation_form' => 'main/evaluation_form.php',
     'clearance_main' => 'main/clearance_main.php',
     'cor' => 'main/cor.php',
+    'my_enrollment' => 'main/my_enrollment.php',
     'profile' => 'main/profile.php',
 
 
     'admin_home' => 'admin/admin_home.php',
     'enrollment_period' => 'admin/enrollment_period.php',
     'student_enrollment' => 'admin/student_enrollment.php',
+    'clearance_submissions' => 'admin/clearance_submissions.php',
     'cor_submissions' => 'admin/cor_submissions.php',
     'course_offerings' => 'admin/course_offerings.php',
     'course_management' => 'admin/course_management.php',

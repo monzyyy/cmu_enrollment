@@ -359,6 +359,7 @@ $stmt->close();
                     method="GET"
                     action="<?= BASE_URL ?>"
                     class="course-offering-filters"
+                    id="courseOfferingFilterForm"
                 >
 
                     <input
@@ -549,20 +550,6 @@ $stmt->close();
 
                     </div>
 
-
-                    <div class="course-offering-filter-button">
-
-                        <button
-                            type="submit"
-                        >
-
-                            <i class="fa-solid fa-filter"></i>
-
-                            Apply Filter
-
-                        </button>
-
-                    </div>
 
                 </form>
 
@@ -1499,6 +1486,36 @@ $stmt->close();
 <script>
 
 document.addEventListener('DOMContentLoaded', function () {
+
+    // Automatically apply Course Offering filters when their values change.
+    const filterForm = document.getElementById('courseOfferingFilterForm');
+    if (filterForm) {
+        const semesterFilter = filterForm.querySelector('#semester');
+        const schoolYearFilter = filterForm.querySelector('#school_year');
+        const programFilter = filterForm.querySelector('#program');
+        const yearFilter = filterForm.querySelector('#year_level');
+        const sectionFilter = filterForm.querySelector('#section');
+        let schoolYearTimer;
+
+        function applyCourseFilters() {
+            clearTimeout(schoolYearTimer);
+            // A normal GET navigation preserves existing server-side filtering.
+            filterForm.requestSubmit();
+        }
+
+        [semesterFilter, programFilter, yearFilter, sectionFilter].forEach(function (field) {
+            if (field) field.addEventListener('change', applyCourseFilters);
+        });
+
+        if (schoolYearFilter) {
+            schoolYearFilter.addEventListener('input', function () {
+                clearTimeout(schoolYearTimer);
+                schoolYearTimer = setTimeout(applyCourseFilters, 700);
+            });
+            schoolYearFilter.addEventListener('change', applyCourseFilters);
+        }
+    }
+
 
 
     /*

@@ -22,6 +22,120 @@ if (!$studentId) {
 }
 
 
+
+
+// Only accept POST requests.
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+
+    echo json_encode([
+        'success' => false,
+        'message' => 'Method not allowed.'
+    ]);
+    exit;
+}
+
+// Check the current enrollment period.
+$stmt = $conn->prepare(
+    'SELECT enrollment_status, semester, school_year
+     FROM system_settings
+     WHERE setting_id = 1
+     LIMIT 1'
+);
+
+$stmt->execute();
+$settings = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+
+if (!$settings || $settings['enrollment_status'] !== 'OPEN') {
+    http_response_code(403);
+
+    echo json_encode([
+        'success' => false,
+        'message' => 'The enrollment period is closed.'
+    ]);
+    exit;
+}
+
+// Find the current period record. Never assign a submission to an unknown period.
+$stmt = $conn->prepare(
+    'SELECT period_id FROM enrollment_periods
+     WHERE semester = ? AND school_year = ? LIMIT 1'
+);
+$stmt->bind_param('ss', $settings['semester'], $settings['school_year']);
+$stmt->execute();
+$periodRow = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+if (!$periodRow) {
+    http_response_code(409);
+    echo json_encode([
+        'success' => false,
+        'message' => 'The current enrollment period is not registered. Contact the Registrar.'
+    ]);
+    exit;
+}
+$currentPeriodId = (int) $periodRow['period_id'];
+
+// Verify the student's enrollment phase.
+$stmt = $conn->prepare(
+    'SELECT enrollment_phase
+     FROM students
+     WHERE student_id = ?
+     LIMIT 1'
+);
+
+$stmt->bind_param('i', $studentId);
+$stmt->execute();
+
+$student = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+
+if (
+    !$student ||
+    $student['enrollment_phase'] !== 'CLEARANCE'
+) {
+    http_response_code(403);
+
+    echo json_encode([
+        'success' => false,
+        'message' => 'COR is locked. Complete Evaluation and Clearance approval first.'
+    ]);
+    exit;
+}
+
+// Verify approved Clearance for the active semester.
+$stmt = $conn->prepare(
+    'SELECT clearance_id
+     FROM clearance_submissions
+     WHERE student_id = ?
+       AND semester = ?
+       AND school_year = ?
+       AND status = "APPROVED"
+     LIMIT 1'
+);
+
+$stmt->bind_param(
+    'iss',
+    $studentId,
+    $settings['semester'],
+    $settings['school_year']
+);
+
+$stmt->execute();
+
+$approvedClearance = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+
+if (!$approvedClearance) {
+    http_response_code(403);
+
+    echo json_encode([
+        'success' => false,
+        'message' => 'An approved Clearance is required before submitting COR.'
+    ]);
+    exit;
+}
+
 /*
  * Make sure the request contains a file.
  */
@@ -97,11 +211,12 @@ $stmt = $conn->prepare(
     'SELECT cor_submission_id
      FROM cor_submissions
      WHERE student_id = ?
-       AND status = "PENDING"
+       AND period_id = ?
+       AND status IN ("PENDING", "APPROVED")
      LIMIT 1'
 );
 
-$stmt->bind_param('i', $studentId);
+$stmt->bind_param('ii', $studentId, $currentPeriodId);
 
 $stmt->execute();
 
@@ -199,18 +314,20 @@ $databaseFilePath =
 $stmt = $conn->prepare(
     'INSERT INTO cor_submissions (
         student_id,
+        period_id,
         file_name,
         file_path,
         submitted_at,
         status
      )
-     VALUES (?, ?, ?, NOW(), "PENDING")'
+     VALUES (?, ?, ?, ?, NOW(), "PENDING")'
 );
 
 
 $stmt->bind_param(
-    'iss',
+    'iiss',
     $studentId,
+    $currentPeriodId,
     $file['name'],
     $databaseFilePath
 );

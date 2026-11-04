@@ -4,6 +4,7 @@ require_role('STUDENT');
 
 require_once dirname(__DIR__, 3) . '/backend/bootstrap.php';
 require_once dirname(__DIR__, 3) . '/backend/models/student.php';
+require_once dirname(__DIR__, 3) . '/backend/helpers/evaluation_completion.php';
 
 $studentId = $_SESSION['student_id'] ?? null;
 
@@ -12,6 +13,8 @@ if (!$studentId) {
     exit;
 }
 
+// Recover completed evaluations from before the phase update was fixed.
+syncCompletedEvaluationPhase($conn, (int) $studentId);
 $student = student_find_by_id($conn, (int) $studentId);
 
 if (!$student) {
@@ -35,26 +38,134 @@ $studentNumber = $student['student_number'] ?? '2024-1234';
 $programName   = $student['program']        ?? 'BS Information Technology';
 $yearLevel     = $student['year_level']     ?? '3rd Year';
 $sectionName   = $student['section']        ?? 'BSIT - 3D';
-$academicYear  = '2026-2027';
 
-/* ---------------------------------------------------------
-   CLEARANCE STATUS
-   NOT_SUBMITTED | PENDING | APPROVED | REJECTED
-   TODO: load the real value from your clearance table.
---------------------------------------------------------- */
+/* -----------------------------------------
+   ACTIVE ENROLLMENT PERIOD
+----------------------------------------- */
+
+$periodStmt = $conn->prepare("
+    SELECT semester, school_year, enrollment_status
+    FROM system_settings
+    ORDER BY setting_id DESC
+    LIMIT 1
+");
+
+$periodStmt->execute();
+$period = $periodStmt->get_result()->fetch_assoc();
+$periodStmt->close();
+
+$academicYear = $period['school_year'] ?? 'Not Set';
+$currentSemester = $period['semester'] ?? '';
+$enrollmentOpen = (
+    ($period['enrollment_status'] ?? '') === 'OPEN'
+);
+
+/* -----------------------------------------
+   STUDENT ENROLLMENT PHASE
+----------------------------------------- */
+
+$enrollmentPhase = $student['enrollment_phase']
+    ?? 'NOT_STARTED';
+
+$clearanceUnlocked = in_array(
+    $enrollmentPhase,
+    ['EVALUATION', 'CLEARANCE', 'COR', 'ENROLLED'],
+    true
+);
+
+/* -----------------------------------------
+   CLEARANCE SUBMISSION STATUS
+----------------------------------------- */
+
 $clearanceStatus = 'NOT_SUBMITTED';
+$rejectionReason = '';
+
+if ($currentSemester !== '' && $academicYear !== 'Not Set') {
+
+    $clearanceStmt = $conn->prepare("
+        SELECT status, rejection_reason
+        FROM clearance_submissions
+        WHERE student_id = ?
+          AND semester = ?
+          AND school_year = ?
+        ORDER BY clearance_id DESC
+        LIMIT 1
+    ");
+
+    $clearanceStmt->bind_param(
+        'iss',
+        $studentId,
+        $currentSemester,
+        $academicYear
+    );
+
+    $clearanceStmt->execute();
+    $clearanceRecord = $clearanceStmt
+        ->get_result()
+        ->fetch_assoc();
+
+    $clearanceStmt->close();
+
+    if ($clearanceRecord) {
+        $clearanceStatus = $clearanceRecord['status'];
+        $rejectionReason =
+            $clearanceRecord['rejection_reason'] ?? '';
+    }
+}
+
+/* -----------------------------------------
+   STATUS DISPLAY
+----------------------------------------- */
 
 $statusMap = [
-    'NOT_SUBMITTED' => ['icon' => 'fa-file-circle-question', 'class' => '',             'text' => 'Your clearance form has not been submitted yet'],
-    'PENDING'       => ['icon' => 'fa-clock',                'class' => 'is-pending',   'text' => 'Your clearance form is waiting for review'],
-    'APPROVED'      => ['icon' => 'fa-circle-check',         'class' => 'is-approved',  'text' => 'Your clearance form has been approved'],
-    'REJECTED'      => ['icon' => 'fa-circle-xmark',         'class' => 'is-rejected',  'text' => 'Your clearance form was rejected. Please upload a new copy'],
+    'NOT_SUBMITTED' => [
+        'icon' => 'fa-file-circle-question',
+        'class' => '',
+        'text' => 'Your clearance form has not been submitted yet'
+    ],
+    'PENDING' => [
+        'icon' => 'fa-clock',
+        'class' => 'is-pending',
+        'text' => 'Your clearance form is waiting for review'
+    ],
+    'APPROVED' => [
+        'icon' => 'fa-circle-check',
+        'class' => 'is-approved',
+        'text' => 'Your clearance form has been approved'
+    ],
+    'REJECTED' => [
+        'icon' => 'fa-circle-xmark',
+        'class' => 'is-rejected',
+        'text' => 'Your clearance form was rejected. Please upload a new copy'
+    ]
 ];
 
-$statusView = $statusMap[$clearanceStatus] ?? $statusMap['NOT_SUBMITTED'];
+$statusView = $statusMap[$clearanceStatus]
+    ?? $statusMap['NOT_SUBMITTED'];
 
-// Students can only upload while nothing is waiting or approved.
-$canUpload = in_array($clearanceStatus, ['NOT_SUBMITTED', 'REJECTED'], true);
+/* -----------------------------------------
+   UPLOAD PERMISSION
+----------------------------------------- */
+
+$canUpload = (
+    $enrollmentOpen &&
+    $enrollmentPhase === 'EVALUATION' &&
+    in_array(
+        $clearanceStatus,
+        ['NOT_SUBMITTED', 'REJECTED'],
+        true
+    )
+);
+
+/* -----------------------------------------
+   CSRF TOKEN
+----------------------------------------- */
+
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] =
+        bin2hex(random_bytes(32));
+}
+
 
 /* ---------------------------------------------------------
    SIGNATURE CHECKLIST
@@ -238,8 +349,8 @@ $steps = [
                             </div>
                         </div>
 
-                        <a href="<?= BASE_URL ?>backend/api/download_clearance.php"
-                           class="cl-action">
+                        <a href="<?= $clearanceUnlocked && $enrollmentOpen ? BASE_URL . 'backend/api/download_clearance.php' : '#' ?>"
+                           class="cl-action" <?= $clearanceUnlocked && $enrollmentOpen ? '' : 'aria-disabled="true" onclick="return false;" title="Complete professor evaluation and wait for the enrollment period to open" style="opacity:.55;cursor:not-allowed;"' ?>>
                             <i class="fa-solid fa-download"></i>
                             Download Clearance Form
                         </a>
@@ -262,6 +373,16 @@ $steps = [
                               method="POST"
                               enctype="multipart/form-data"
                               id="clearanceForm">
+               
+                            <input
+                                type="hidden"
+                                name="csrf_token"
+                                value="<?= htmlspecialchars(
+                                    $_SESSION['csrf_token'],
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ) ?>"
+                            >
 
                             <label class="cl-dropzone <?= $canUpload ? '' : 'is-disabled' ?>"
                                    id="dropzone"
@@ -311,6 +432,21 @@ $steps = [
                             <i class="fa-regular <?= e($statusView['icon']) ?>"></i>
                             <?= e($statusView['text']) ?>
                         </div>
+                        
+                        <?php if (
+                            $clearanceStatus === 'REJECTED' &&
+                            !empty($rejectionReason)
+                        ): ?>
+                            <p style="
+                                color: #dc3545;
+                                margin-top: 12px;
+                                font-size: 13px;
+                            ">
+                                <strong>Reason for rejection:</strong>
+                                <?= e($rejectionReason) ?>
+                            </p>
+                        <?php endif; ?>
+
 
                     </div>
 
@@ -346,10 +482,8 @@ $steps = [
                                         <td><?= e($row['office']) ?></td>
                                         <td class="col-check">
                                             <input type="checkbox"
-                                                   class="cl-checkbox"
-                                                   disabled
-                                                   <?= $row['signed'] ? 'checked' : '' ?>
-                                                   aria-label="<?= e($row['office']) ?> signed">
+                                            class="cl-checkbox"
+                                            aria-label="<?= e($row['office']) ?>">
                                         </td>
                                     </tr>
 
@@ -417,6 +551,53 @@ $steps = [
     }
 
     input.addEventListener('change', check);
+    
+    const form = document.getElementById('clearanceForm');
+
+    form.addEventListener('submit', async function (event) {
+        event.preventDefault();
+
+        if (!input.files.length || submitBtn.disabled) {
+            return;
+        }
+
+        submitBtn.disabled = true;
+
+        const originalButton = submitBtn.innerHTML;
+
+        submitBtn.innerHTML =
+            '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
+
+        try {
+            const formData = new FormData(form);
+
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin'
+            });
+
+            const result = await response.json();
+
+            if (!response.ok || !result.success) {
+                throw new Error(
+                    result.message || 'Submission failed.'
+                );
+            }
+
+            alert(result.message);
+
+            // Refresh to display PENDING status.
+            window.location.reload();
+
+        } catch (error) {
+            alert(error.message || 'Unable to submit clearance.');
+
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalButton;
+        }
+    });
+
 
     ['dragenter', 'dragover'].forEach(function (name) {
         dropzone.addEventListener(name, function (event) {

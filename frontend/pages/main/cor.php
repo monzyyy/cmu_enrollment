@@ -50,40 +50,127 @@ function cor_year_level(int $yearLevel): string
 }
 
 
-/*
- * Get the student's latest COR submission.
- */
-$stmt = $conn->prepare(
-    'SELECT
-        cor_submission_id,
-        file_name,
-        file_path,
-        submitted_at,
-        status,
-        reviewed_at,
-        rejection_reason
-     FROM cor_submissions
-     WHERE student_id = ?
-     ORDER BY cor_submission_id DESC
+// Resolve the active academic period before reading COR submissions.
+$settingsStmt = $conn->prepare(
+    'SELECT enrollment_status, semester, school_year
+     FROM system_settings
+     WHERE setting_id = 1
      LIMIT 1'
 );
+$settingsStmt->execute();
+$settings = $settingsStmt->get_result()->fetch_assoc();
+$settingsStmt->close();
+$academicYear = $settings['school_year'] ?? $academicYear;
 
-$stmt->bind_param('i', $studentId);
-$stmt->execute();
+$currentPeriodId = null;
+if ($settings) {
+    $periodStmt = $conn->prepare(
+        'SELECT period_id FROM enrollment_periods
+         WHERE semester = ? AND school_year = ? LIMIT 1'
+    );
+    $periodStmt->bind_param('ss', $settings['semester'], $settings['school_year']);
+    $periodStmt->execute();
+    $periodRow = $periodStmt->get_result()->fetch_assoc();
+    $periodStmt->close();
+    $currentPeriodId = $periodRow ? (int) $periodRow['period_id'] : null;
+}
 
-$latestCorSubmission = $stmt->get_result()->fetch_assoc();
-
-$stmt->close();
-
-
+// Only the current period's COR may affect this page.
+$latestCorSubmission = null;
+if ($currentPeriodId !== null) {
+    $stmt = $conn->prepare(
+        'SELECT cor_submission_id, file_name, file_path, submitted_at,
+                status, reviewed_at, rejection_reason
+         FROM cor_submissions
+         WHERE student_id = ? AND period_id = ?
+         ORDER BY cor_submission_id DESC LIMIT 1'
+    );
+    $stmt->bind_param('ii', $studentId, $currentPeriodId);
+    $stmt->execute();
+    $latestCorSubmission = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+}
 $corStatus = $latestCorSubmission['status'] ?? 'NOT_SUBMITTED';
 
+// Check whether Clearance has been approved
+// for the current semester and school year.
+$hasApprovedClearance = false;
 
-$canUpload = in_array(
+if ($settings) {
+    $clearanceStmt = $conn->prepare(
+        'SELECT clearance_id
+         FROM clearance_submissions
+         WHERE student_id = ?
+           AND semester = ?
+           AND school_year = ?
+           AND status = "APPROVED"
+         LIMIT 1'
+    );
+
+    $clearanceStmt->bind_param(
+        'iss',
+        $studentId,
+        $settings['semester'],
+        $settings['school_year']
+    );
+
+    $clearanceStmt->execute();
+
+    $hasApprovedClearance = (bool)
+        $clearanceStmt->get_result()->fetch_assoc();
+
+    $clearanceStmt->close();
+}
+
+// COR becomes available only after Clearance approval.
+$corUnlocked =
+    ($student['enrollment_phase'] ?? '') === 'CLEARANCE'
+    && $hasApprovedClearance
+    && $currentPeriodId !== null
+    && ($settings['enrollment_status'] ?? '') === 'OPEN';
+
+// Download remains available after COR submission/approval, but never before clearance approval.
+$canDownloadCor = $currentPeriodId !== null
+    && $hasApprovedClearance
+    && in_array(($student['enrollment_phase'] ?? ''), ['CLEARANCE', 'COR', 'ENROLLED'], true)
+    && (($settings['enrollment_status'] ?? '') === 'OPEN' || $corStatus === 'APPROVED');
+
+// Prevent duplicate pending or approved submissions.
+$canUpload = $corUnlocked && in_array(
     $corStatus,
     ['NOT_SUBMITTED', 'REJECTED'],
     true
 );
+
+
+
+$steps = [
+    ['icon' => 'fa-download', 'title' => 'Download', 'text' => 'Get your COR'],
+    ['icon' => 'fa-print', 'title' => 'Print', 'text' => 'Print the document'],
+    ['icon' => 'fa-file-signature', 'title' => 'Signature', 'text' => 'Sign the COR'],
+    ['icon' => 'fa-camera', 'title' => 'Scan/Photo', 'text' => 'Make a readable copy'],
+    ['icon' => 'fa-upload', 'title' => 'Upload', 'text' => 'Upload the signed COR'],
+    ['icon' => 'fa-paper-plane', 'title' => 'Submit', 'text' => 'Send to Registrar'],
+];
+
+$corChecklist = [
+    'Student information is correct',
+    'Subjects and schedule are complete',
+    'Required signatures are present',
+    'The signed document is clear and readable',
+];
+
+$statusMap = [
+    'NOT_SUBMITTED' => ['icon' => 'fa-file-circle-question', 'class' => '', 'text' => 'Your COR has not been submitted yet'],
+    'PENDING' => ['icon' => 'fa-clock', 'class' => 'is-pending', 'text' => 'Your COR is waiting for Registrar review'],
+    'APPROVED' => ['icon' => 'fa-circle-check', 'class' => 'is-approved', 'text' => 'Your COR has been approved'],
+    'REJECTED' => ['icon' => 'fa-circle-xmark', 'class' => 'is-rejected', 'text' => 'Your COR was rejected. Please upload a corrected copy'],
+];
+$statusView = $statusMap[$corStatus] ?? $statusMap['NOT_SUBMITTED'];
+
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
 
 ?>
 
@@ -91,950 +178,236 @@ $canUpload = in_array(
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>Certificate of Registration</title>
+    <title>CMU | Certificate of Registration</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet"
-          href="<?= BASE_URL ?>frontend/assets/css/main.css">
-
-    <link rel="stylesheet"
-          href="<?= BASE_URL ?>frontend/assets/css/student.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>frontend/assets/css/main.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>frontend/assets/css/student.css">
 
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
 </head>
 
 <body>
 
 <div class="layout">
 
+    <!-- LOGO -->
     <div class="imglogo">
         <span>CMU</span>
     </div>
 
+    <!-- SIDEBAR -->
     <?php require FRONTEND_PATH . 'includes/sidebar.php'; ?>
 
+    <!-- MOBILE OVERLAY -->
+    <div class="overlay" id="overlay"></div>
 
-    <main class="main">
+    <!-- MAIN -->
+    <div class="main">
 
+        <!-- TOPBAR -->
         <?php require FRONTEND_PATH . 'includes/topbar.php'; ?>
 
-
+        <!-- PAGE CONTENT -->
         <div class="content">
 
+            <!-- =========================
+                 PAGE HEADING
+            ========================== -->
+            <section class="page-heading"><h1>Certificate of Registration</h1><p>Student Certificate of Registration (COR)</p></section>
+<section class="cl-card">
+  <div class="cl-card-head"><span class="co-icon"><i class="fa-solid fa-user"></i></span><div><h2>Student Information</h2><p>Your enrollment information</p></div></div>
+  <div class="cl-info">
+    <div class="cl-info-item"><small>Student Number</small><strong><?= e($studentNumber) ?></strong></div>
+    <div class="cl-info-item"><small>Student Name</small><strong><?= e($studentName) ?></strong></div>
+    <div class="cl-info-item"><small>Program</small><strong><?= e($programName) ?></strong></div>
+    <div class="cl-info-item"><small>Year Level</small><strong><?= e(cor_year_level($yearLevel)) ?></strong></div>
+    <div class="cl-info-item"><small>Section</small><strong><?= e($sectionName) ?></strong></div>
+    <div class="cl-info-item"><small>Academic Year</small><strong><?= e($academicYear) ?></strong></div>
+  </div>
+</section>
+<section class="cl-card cl-steps" aria-label="COR submission steps">
+  <?php foreach ($steps as $i => $step): ?>
+    <div class="cl-step"><span class="co-icon"><i class="fa-solid <?= e($step['icon']) ?>"></i></span><h3><?= e($step['title']) ?></h3><p><?= e($step['text']) ?></p></div>
+    <?php if ($i < count($steps) - 1): ?><i class="fa-solid fa-arrow-right cl-step-arrow" aria-hidden="true"></i><?php endif; ?>
+  <?php endforeach; ?>
+</section>
+<section class="cl-grid">
+  <div class="cl-col">
+    <div class="cl-card">
+      <div class="cl-card-head"><span class="co-icon"><i class="fa-solid fa-file-lines"></i></span><div><h2>Certificate of Registration</h2><p>Download your COR, print it, and obtain the required signatures.</p></div></div>
+      <a href="<?= $canDownloadCor ? BASE_URL . 'backend/api/download_cor.php' : '#' ?>" class="cl-action" id="downloadCorButton" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none<?= $canDownloadCor ? '' : ';opacity:.55;cursor:not-allowed' ?>" <?= $canDownloadCor ? '' : 'aria-disabled="true" onclick="return false;" title="Clearance approval is required before downloading COR"' ?>><i class="fa-solid fa-download"></i> Download COR</a>
+    </div>
+    <div class="cl-card">
+      <div class="cl-card-head"><span class="co-icon"><i class="fa-solid fa-upload"></i></span><div><h2>Upload Signed COR</h2><p>Upload a clear scan or photo of your signed COR.</p></div></div>
+      <?php if (!$corUnlocked && $corStatus !== 'APPROVED'): ?>
+        <div class="cl-status is-pending" style="margin-bottom:15px" role="status"><i class="fa-solid fa-lock"></i><strong>COR Upload Locked</strong><span>
+          <?php if (!$currentPeriodId): ?>The active enrollment period has not been configured. Please contact the Registrar.
+          <?php elseif (($settings['enrollment_status'] ?? '') !== 'OPEN'): ?>The enrollment period is currently closed.
+          <?php elseif ($corStatus === 'PENDING'): ?>Your COR is pending Registrar review.
+          <?php else: ?>Complete Professor Evaluation and receive Clearance approval before submitting COR.<?php endif; ?>
+        </span></div>
+      <?php endif; ?>
+      <form action="<?= BASE_URL ?>backend/api/submit_cor.php" method="POST" enctype="multipart/form-data" id="corForm">
+        <input type="hidden" name="csrf_token" value="<?= e($_SESSION['csrf_token']) ?>">
+        <label class="cl-dropzone <?= $canUpload ? '' : 'is-disabled' ?>" id="dropzone" for="corFile">
+          <span class="co-icon"><i class="fa-solid fa-paperclip"></i></span>
+          <span class="cl-drop-title" id="dropTitle">Drag &amp; drop your file here or click to browse</span>
+          <span class="cl-drop-hint" id="dropHint">JPG, PNG, or PDF - Max file size: 10 MB</span>
+          <input type="file" id="corFile" name="cor_file" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" <?= $canUpload ? '' : 'disabled' ?> hidden>
+        </label>
+        <button type="submit" class="cl-action" id="corSubmit" disabled><i class="fa-regular fa-paper-plane"></i> Submit COR</button>
+      </form>
+    </div>
+    <div class="cl-card">
+      <div class="cl-card-head"><span class="co-icon"><i class="fa-solid fa-clock"></i></span><div><h2>Submission Status</h2><p>Current status of your COR submission.</p></div></div>
+      <div class="cl-status <?= e($statusView['class']) ?>" role="status"><i class="fa-solid <?= e($statusView['icon']) ?>"></i><?= e($statusView['text']) ?></div>
+      <?php if ($corStatus === 'REJECTED' && !empty($latestCorSubmission['rejection_reason'])): ?>
+        <p style="color:#dc3545;margin-top:12px;font-size:13px"><strong>Reason for rejection:</strong> <?= e($latestCorSubmission['rejection_reason']) ?></p>
+      <?php endif; ?>
+    </div>
+  </div>
+  <div class="cl-card cl-checklist">
+    <div class="cl-card-head"><span class="co-icon"><i class="fa-solid fa-list-check"></i></span><div><h2>COR Submission Checklist</h2><p>Review these details before submitting your document.</p></div></div>
+    <div class="cl-table-wrap"><table class="cl-table">
+      <thead><tr><th class="col-num">#</th><th>Requirement</th><th class="col-check">Check Box</th></tr></thead>
+      <tbody><?php foreach ($corChecklist as $i => $item): ?>
+        <tr><td class="col-num"><?= $i + 1 ?></td><td><?= e($item) ?></td><td class="col-check"><input type="checkbox" class="cl-checkbox" aria-label="<?= e($item) ?>"></td></tr>
+      <?php endforeach; ?></tbody>
+    </table></div>
+  </div>
+</section>
+</div></div></div>
+<script src="<?= BASE_URL ?>frontend/assets/js/custom.js"></script>
 
-            <!-- PAGE HEADING -->
-
-            <div class="page-heading">
-
-                <div>
-
-                    <h1>Certificate of Registration</h1>
-
-                    <p>
-                        Submit your signed Certificate of Registration
-                        for registrar review.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <!-- STUDENT INFORMATION -->
-
-            <div class="cl-card">
-
-                <div class="cl-card-head">
-
-                    <div class="co-icon">
-                        <i class="fa-solid fa-user"></i>
-                    </div>
-
-                    <div>
-
-                        <h2>Student Information</h2>
-
-                        <p>
-                            Your enrollment information
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="cl-info">
-
-                    <div class="cl-info-item">
-
-                        <small>
-                            Student Number
-                        </small>
-
-                        <strong>
-                            <?= htmlspecialchars($studentNumber) ?>
-                        </strong>
-
-                    </div>
-
-
-                    <div class="cl-info-item">
-
-                        <small>
-                            Student Name
-                        </small>
-
-                        <strong>
-                            <?= htmlspecialchars($studentName) ?>
-                        </strong>
-
-                    </div>
-
-
-                    <div class="cl-info-item">
-
-                        <small>
-                            Program
-                        </small>
-
-                        <strong>
-                            <?= htmlspecialchars($programName) ?>
-                        </strong>
-
-                    </div>
-
-
-                    <div class="cl-info-item">
-
-                        <small>
-                            Year Level
-                        </small>
-
-                        <strong>
-                            <?= htmlspecialchars(cor_year_level($yearLevel)) ?>
-                        </strong>
-
-                    </div>
-
-
-                    <div class="cl-info-item">
-
-                        <small>
-                            Section
-                        </small>
-
-                        <strong>
-                            <?= htmlspecialchars($sectionName) ?>
-                        </strong>
-
-                    </div>
-
-
-                    <div class="cl-info-item">
-
-                        <small>
-                            Academic Year
-                        </small>
-
-                        <strong>
-                            <?= htmlspecialchars($academicYear) ?>
-                        </strong>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- COR SUBMISSION PROCESS -->
-
-            <div class="cl-card">
-
-                <div class="cl-card-head">
-
-                    <div class="co-icon">
-                        <i class="fa-solid fa-list-check"></i>
-                    </div>
-
-                    <div>
-
-                        <h2>COR Submission Process</h2>
-
-                        <p>
-                            Follow these steps before submitting your COR.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="cl-steps">
-
-
-                    <!-- STEP 1 -->
-
-                    <div class="cl-step">
-
-                        <div class="co-icon">
-
-                            <i class="fa-solid fa-download"></i>
-
-                        </div>
-
-                        <h3>
-                            Download
-                        </h3>
-
-                        <p>
-                            Get your COR.
-                        </p>
-
-                    </div>
-
-
-                    <div class="cl-step-arrow">
-                        <i class="fa-solid fa-chevron-right"></i>
-                    </div>
-
-
-                    <!-- STEP 2 -->
-
-                    <div class="cl-step">
-
-                        <div class="co-icon">
-
-                            <i class="fa-solid fa-print"></i>
-
-                        </div>
-
-                        <h3>
-                            Print
-                        </h3>
-
-                        <p>
-                            Print the document.
-                        </p>
-
-                    </div>
-
-
-                    <div class="cl-step-arrow">
-                        <i class="fa-solid fa-chevron-right"></i>
-                    </div>
-
-
-                    <!-- STEP 3 -->
-
-                    <div class="cl-step">
-
-                        <div class="co-icon">
-
-                            <i class="fa-solid fa-pen"></i>
-
-                        </div>
-
-                        <h3>
-                            Sign
-                        </h3>
-
-                        <p>
-                            Sign the COR.
-                        </p>
-
-                    </div>
-
-
-                    <div class="cl-step-arrow">
-                        <i class="fa-solid fa-chevron-right"></i>
-                    </div>
-
-
-                    <!-- STEP 4 -->
-
-                    <div class="cl-step">
-
-                        <div class="co-icon">
-
-                            <i class="fa-solid fa-camera"></i>
-
-                        </div>
-
-                        <h3>
-                            Scan / Photo
-                        </h3>
-
-                        <p>
-                            Create a clear copy.
-                        </p>
-
-                    </div>
-
-
-                    <div class="cl-step-arrow">
-                        <i class="fa-solid fa-chevron-right"></i>
-                    </div>
-
-
-                    <!-- STEP 5 -->
-
-                    <div class="cl-step">
-
-                        <div class="co-icon">
-
-                            <i class="fa-solid fa-upload"></i>
-
-                        </div>
-
-                        <h3>
-                            Upload
-                        </h3>
-
-                        <p>
-                            Upload your COR.
-                        </p>
-
-                    </div>
-
-
-                    <div class="cl-step-arrow">
-                        <i class="fa-solid fa-chevron-right"></i>
-                    </div>
-
-
-                    <!-- STEP 6 -->
-
-                    <div class="cl-step">
-
-                        <div class="co-icon">
-
-                            <i class="fa-solid fa-paper-plane"></i>
-
-                        </div>
-
-                        <h3>
-                            Submit
-                        </h3>
-
-                        <p>
-                            Send to Registrar.
-                        </p>
-
-                    </div>
-
-
-                </div>
-
-            </div>
-
-
-            <!-- MAIN CONTENT GRID -->
-
-            <div class="cl-grid">
-
-
-                <!-- LEFT COLUMN -->
-
-                <div class="cl-col">
-
-
-                    <!-- COR DOCUMENT -->
-
-                    <div class="cl-card">
-
-                        <div class="cl-card-head">
-
-                            <div class="co-icon">
-                                <i class="fa-solid fa-file-lines"></i>
-                            </div>
-
-                            <div>
-
-                                <h2>Certificate of Registration</h2>
-
-                                <p>
-                                    Download your COR before signing.
-                                </p>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="cl-status">
-
-                            <i class="fa-solid fa-file-pdf"></i>
-
-                            <strong>
-                                Certificate of Registration
-                            </strong>
-
-                            <span>
-                                Academic Year <?= htmlspecialchars($academicYear) ?>
-                            </span>
-
-                            <button
-                                type="button"
-                                class="cl-action"
-                            >
-
-                                <i class="fa-solid fa-download"></i>
-
-                                Download COR
-
-                            </button>
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- UPLOAD -->
-
-                    <div class="cl-card">
-
-                        <div class="cl-card-head">
-
-                            <div class="co-icon">
-                                <i class="fa-solid fa-upload"></i>
-                            </div>
-
-                            <div>
-
-                                <h2>Upload Signed COR</h2>
-
-                                <p>
-                                    Upload the completed and signed document.
-                                </p>
-
-                            </div>
-
-                        </div>
-
-
-                        <form
-                            action="<?= BASE_URL ?>backend/api/submit_cor.php"
-                            method="POST"
-                            enctype="multipart/form-data"
-                            id="corForm"
-                        >
-
-                            <div class="cl-dropzone"
-                                 id="corDropzone">
-
-                                <input
-                                    type="file"
-                                    id="corFile"
-                                    name="cor_file"
-                                    accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
-                                    <?= $canUpload ? '' : 'disabled' ?>
-                                    hidden
-                                >
-
-
-                                <label
-                                    for="corFile"
-                                    style="cursor: pointer;"
-                                >
-
-                                    <div class="co-icon"
-                                         style="margin: 0 auto 6px;">
-
-                                        <i class="fa-solid fa-cloud-arrow-up"></i>
-
-                                    </div>
-
-
-                                    <strong
-                                        class="cl-drop-title"
-                                        id="corDropTitle"
-                                    >
-                                        Choose your signed COR
-                                    </strong>
-
-
-                                    <span
-                                        class="cl-drop-hint"
-                                        id="corDropHint"
-                                    >
-                                        JPG, PNG, or PDF • Maximum 10 MB
-                                    </span>
-
-                                </label>
-
-                            </div>
-
-
-                            <button
-                                type="submit"
-                                id="corSubmit"
-                                class="cl-action"
-                                disabled
-                            >
-
-                                <i class="fa-solid fa-paper-plane"></i>
-
-                                Submit COR
-
-                            </button>
-
-                        </form>
-
-                    </div>
-
-
-                    <!-- SUBMISSION STATUS -->
-
-                    <div class="cl-card">
-
-                        <div class="cl-card-head">
-
-                            <div class="co-icon">
-                                <i class="fa-solid fa-clock"></i>
-                            </div>
-
-                            <div>
-
-                                <h2>Submission Status</h2>
-
-                                <p>
-                                    Current status of your COR submission.
-                                </p>
-
-                            </div>
-
-                        </div>
-
-
-                        <?php if ($corStatus === 'NOT_SUBMITTED'): ?>
-
-                            <div class="cl-status">
-
-                                <i class="fa-solid fa-file-circle-exclamation"></i>
-
-                                <strong>
-                                    Not Submitted
-                                </strong>
-
-                                <span>
-                                    You have not submitted your signed COR yet.
-                                </span>
-
-                            </div>
-
-
-                        <?php elseif ($corStatus === 'PENDING'): ?>
-
-                            <div class="cl-status is-pending">
-
-                                <i class="fa-solid fa-clock"></i>
-
-                                <strong>
-                                    Pending Review
-                                </strong>
-
-                                <span>
-                                    Your COR has been submitted and is waiting
-                                    for Registrar review.
-                                </span>
-
-                            </div>
-
-
-                        <?php elseif ($corStatus === 'APPROVED'): ?>
-
-                            <div class="cl-status is-approved">
-
-                                <i class="fa-solid fa-circle-check"></i>
-
-                                <strong>
-                                    Approved
-                                </strong>
-
-                                <span>
-                                    Your COR has been approved.
-                                </span>
-
-                            </div>
-
-
-                        <?php elseif ($corStatus === 'REJECTED'): ?>
-
-                            <div class="cl-status is-rejected">
-
-                                <i class="fa-solid fa-circle-xmark"></i>
-
-                                <strong>
-                                    Rejected
-                                </strong>
-
-                                <span>
-                                    Your COR was rejected.
-                                    Please submit a corrected copy.
-                                </span>
-
-                                <?php if (!empty($latestCorSubmission['rejection_reason'])): ?>
-
-                                    <div class="cl-rejection-reason">
-                                        <strong>Reason:</strong>
-
-                                        <?= e($latestCorSubmission['rejection_reason']) ?>
-                                    </div>
-
-                                <?php endif; ?>
-
-                            </div>
-
-                        <?php endif; ?>
-
-                    </div>
-
-
-                </div>
-
-
-                <!-- RIGHT COLUMN -->
-
-                <div class="cl-col">
-
-
-                    <!-- GUIDELINES -->
-
-                    <div class="cl-card">
-
-                        <div class="cl-card-head">
-
-                            <div class="co-icon">
-                                <i class="fa-solid fa-circle-info"></i>
-                            </div>
-
-                            <div>
-
-                                <h2>COR Submission Guidelines</h2>
-
-                                <p>
-                                    Important reminders before submitting.
-                                </p>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="cl-status">
-
-                            <div style="text-align: left; width: 100%;">
-
-                                <p>
-                                    <i class="fa-solid fa-check"></i>
-                                    Make sure the COR is readable.
-                                </p>
-
-                                <p>
-                                    <i class="fa-solid fa-check"></i>
-                                    Make sure required signatures are present.
-                                </p>
-
-                                <p>
-                                    <i class="fa-solid fa-check"></i>
-                                    Upload the complete signed COR.
-                                </p>
-
-                                <p>
-                                    <i class="fa-solid fa-check"></i>
-                                    Accepted files: JPG, PNG, or PDF.
-                                </p>
-
-                                <p>
-                                    <i class="fa-solid fa-check"></i>
-                                    Maximum file size is 10 MB.
-                                </p>
-
-                                <p>
-                                    <i class="fa-solid fa-check"></i>
-                                    Only one pending submission is allowed.
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- AFTER SUBMISSION -->
-
-                    <div class="cl-card">
-
-                        <div class="cl-card-head">
-
-                            <div class="co-icon">
-                                <i class="fa-solid fa-circle-check"></i>
-                            </div>
-
-                            <div>
-
-                                <h2>After Submission</h2>
-
-                                <p>
-                                    What happens next?
-                                </p>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="cl-status">
-
-                            <i class="fa-solid fa-user-check"></i>
-
-                            <span>
-                                Your signed COR will be reviewed by the
-                                Registrar.
-                            </span>
-
-                            <span>
-                                Once approved, your enrollment status will
-                                be updated to <strong>Enrolled</strong>.
-                            </span>
-
-                        </div>
-
-                    </div>
-
-
-                </div>
-
-
-            </div>
-
-
-        </div>
-
-    </main>
-
-</div>
 
 
 <script>
+(function () {
+    var MAX_SIZE = 10 * 1024 * 1024;
+    var ALLOWED  = ['image/jpeg', 'image/png', 'application/pdf'];
 
-const corForm = document.getElementById('corForm');
-const corFile = document.getElementById('corFile');
-const corSubmit = document.getElementById('corSubmit');
-const corDropzone = document.getElementById('corDropzone');
-const corDropTitle = document.getElementById('corDropTitle');
-const corDropHint = document.getElementById('corDropHint');
+    var input     = document.getElementById('corFile');
+    var dropzone  = document.getElementById('dropzone');
+    var title     = document.getElementById('dropTitle');
+    var hint      = document.getElementById('dropHint');
+    var submitBtn = document.getElementById('corSubmit');
 
+    if (!input || input.disabled) return;
 
-corFile.addEventListener('change', function () {
+    var defaultTitle = title.textContent;
+    var defaultHint  = hint.textContent;
 
-    const file = this.files[0];
-
-    corSubmit.disabled = true;
-
-    corDropzone.classList.remove(
-        'has-file',
-        'has-error'
-    );
-
-
-    if (!file) {
-
-        corDropTitle.textContent =
-            'Choose your signed COR';
-
-        corDropHint.textContent =
-            'JPG, PNG, or PDF • Maximum 10 MB';
-
-        return;
-
+    function reset(message) {
+        input.value = '';
+        submitBtn.disabled = true;
+        dropzone.classList.remove('has-file');
+        title.textContent = defaultTitle;
+        hint.textContent = message || defaultHint;
+        dropzone.classList.toggle('has-error', !!message);
     }
 
+    function check() {
+        var file = input.files[0];
+        if (!file) return reset();
 
-    const allowedTypes = [
-        'image/jpeg',
-        'image/png',
-        'application/pdf'
-    ];
+        if (ALLOWED.indexOf(file.type) === -1) {
+            return reset('That file type is not allowed. Use a JPG, PNG, or PDF.');
+        }
+        if (file.size > MAX_SIZE) {
+            return reset('That file is larger than 10 MB. Choose a smaller one.');
+        }
 
-
-    const maxSize = 10 * 1024 * 1024;
-
-
-    if (!allowedTypes.includes(file.type)) {
-
-        corDropzone.classList.add('has-error');
-
-        corDropTitle.textContent =
-            'Invalid file type';
-
-        corDropHint.textContent =
-            'Please upload a JPG, PNG, or PDF file.';
-
-        this.value = '';
-
-        return;
-
+        dropzone.classList.remove('has-error');
+        dropzone.classList.add('has-file');
+        title.textContent = file.name;
+        hint.textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB - ready to submit';
+        submitBtn.disabled = false;
     }
 
+    input.addEventListener('change', check);
+    
+    const form = document.getElementById('corForm');
 
-    if (file.size > maxSize) {
+    form.addEventListener('submit', async function (event) {
+        event.preventDefault();
 
-        corDropzone.classList.add('has-error');
+        if (!input.files.length || submitBtn.disabled) {
+            return;
+        }
 
-        corDropTitle.textContent =
-            'File is too large';
+        submitBtn.disabled = true;
 
-        corDropHint.textContent =
-            'The maximum file size is 10 MB.';
+        const originalButton = submitBtn.innerHTML;
 
-        this.value = '';
+        submitBtn.innerHTML =
+            '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
 
-        return;
+        try {
+            const formData = new FormData(form);
 
-    }
-
-
-    corDropzone.classList.add('has-file');
-
-    corDropTitle.textContent =
-        file.name;
-
-    corDropHint.textContent =
-        'File selected successfully.';
-
-    corSubmit.disabled = false;
-
-});
-
-
-corDropzone.addEventListener('dragover', function (event) {
-
-    event.preventDefault();
-
-    corDropzone.classList.add('is-dragging');
-
-});
-
-
-corDropzone.addEventListener('dragleave', function () {
-
-    corDropzone.classList.remove('is-dragging');
-
-});
-
-
-corDropzone.addEventListener('drop', function (event) {
-
-    event.preventDefault();
-
-    corDropzone.classList.remove('is-dragging');
-
-    const files = event.dataTransfer.files;
-
-    if (!files.length) {
-        return;
-    }
-
-    corFile.files = files;
-
-    corFile.dispatchEvent(
-        new Event('change')
-    );
-
-});
-
-
-corForm.addEventListener('submit', async function (event) {
-
-    event.preventDefault();
-
-
-    if (!corFile.files.length) {
-
-        alert('Please select a COR file first.');
-
-        return;
-
-    }
-
-
-    corSubmit.disabled = true;
-
-    corSubmit.innerHTML =
-        '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
-
-
-    try {
-
-        const formData = new FormData(corForm);
-
-
-        const response = await fetch(
-            corForm.action,
-            {
+            const response = await fetch(form.action, {
                 method: 'POST',
-                body: formData
+                body: formData,
+                credentials: 'same-origin'
+            });
+
+            const responseText = await response.text();
+            let result;
+            try {
+                result = JSON.parse(responseText);
+            } catch (parseError) {
+                throw new Error('The server could not process the COR submission. Please check the COR status before trying again. If the issue persists, contact the administrator.');
             }
-        );
 
-
-        const result = await response.json();
-
-
-        if (!result.success) {
+            if (!response.ok || !result.success) {
+                throw new Error(
+                    result.message || 'Submission failed.'
+                );
+            }
 
             alert(result.message);
 
-            corSubmit.disabled = false;
+            // Refresh to display PENDING status.
+            window.location.reload();
 
-            corSubmit.innerHTML =
-                '<i class="fa-solid fa-paper-plane"></i> Submit COR';
+        } catch (error) {
+            alert(error.message || 'Unable to submit COR.');
 
-            return;
-
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalButton;
         }
+    });
 
 
-        alert(result.message);
+    ['dragenter', 'dragover'].forEach(function (name) {
+        dropzone.addEventListener(name, function (event) {
+            event.preventDefault();
+            dropzone.classList.add('is-dragging');
+        });
+    });
 
+    ['dragleave', 'drop'].forEach(function (name) {
+        dropzone.addEventListener(name, function (event) {
+            event.preventDefault();
+            dropzone.classList.remove('is-dragging');
+        });
+    });
 
-        /*
-         * Refresh the page so the submission
-         * status can later be loaded from DB.
-         */
-
-        window.location.reload();
-
-
-    } catch (error) {
-
-        alert(
-            'Something went wrong while submitting your COR.'
-        );
-
-
-        corSubmit.disabled = false;
-
-        corSubmit.innerHTML =
-            '<i class="fa-solid fa-paper-plane"></i> Submit COR';
-
-    }
-
-});
-
+    dropzone.addEventListener('drop', function (event) {
+        if (!input.disabled && event.dataTransfer && event.dataTransfer.files.length) {
+            input.files = event.dataTransfer.files;
+            check();
+        }
+    });
+})();
 </script>
+
 </body>
 </html>

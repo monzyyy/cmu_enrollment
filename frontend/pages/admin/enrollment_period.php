@@ -3,6 +3,7 @@
 require_role('ADMIN');
 
 $currentPage = 'enrollment_period';
+if (empty($_SESSION['csrf_token'])) $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 
 
 $stmt = $conn->prepare(
@@ -276,6 +277,12 @@ while ($row = $result->fetch_assoc()) {
 
             </section>
 
+            <section class="admin-period-info-card" style="margin-bottom:24px">
+                <div class="admin-period-info-header"><div><h2>Start New Enrollment Period</h2><p>Create the next semester without deleting previous enrollment records.</p></div></div>
+                <p style="margin:16px 0">The current enrollment must be closed first. Starting a new period resets student enrollment phases, but keeps previous COR and Clearance submissions.</p>
+                <button type="button" class="admin-open-enrollment-button" id="openNewPeriodModal" <?= $isEnrollmentOpen ? 'disabled title="Close enrollment first"' : '' ?>>Start New Enrollment Period</button>
+            </section>
+
             <section class="admin-history-card">
 
                 <div class="admin-history-header">
@@ -466,62 +473,7 @@ while ($row = $result->fetch_assoc()) {
 
         <div class="admin-edit-period-form">
 
-            <div class="admin-form-group">
-
-                <label for="editSemester">
-                    Semester
-                </label>
-
-                <select id="editSemester">
-
-                    <option
-                        value="1st Semester"
-                        <?= ($settings['semester'] ?? '') === '1st Semester'
-                            ? 'selected'
-                            : '' ?>>
-                        1st Semester
-                    </option>
-
-                    <option
-                        value="2nd Semester"
-                        <?= ($settings['semester'] ?? '') === '2nd Semester'
-                            ? 'selected'
-                            : '' ?>>
-                        2nd Semester
-                    </option>
-
-                    <option
-                        value="Summer"
-                        <?= ($settings['semester'] ?? '') === 'Summer'
-                            ? 'selected'
-                            : '' ?>>
-                        Summer
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            <div class="admin-form-group">
-
-                <label for="editSchoolYear">
-                    School Year
-                </label>
-
-                <input
-                    type="text"
-                    id="editSchoolYear"
-                    value="<?= htmlspecialchars(
-                        $settings['school_year'] ?? '',
-                        ENT_QUOTES,
-                        'UTF-8'
-                    ) ?>"
-                    placeholder="e.g. 2026 - 2027">
-
-            </div>
-
-
+            <p style="margin:0 0 16px;color:#64748b;font-size:13px">Semester and school year are fixed for this period. Use <strong>Start New Enrollment Period</strong> to change them.</p>
             <div class="admin-form-row">
 
                 <div class="admin-form-group">
@@ -587,6 +539,19 @@ while ($row = $result->fetch_assoc()) {
 </div>
 
 
+<div class="admin-modal-overlay" id="newPeriodModal">
+  <div class="admin-enrollment-modal admin-edit-period-modal" role="dialog" aria-modal="true" aria-labelledby="newPeriodTitle">
+    <h2 id="newPeriodTitle">Start New Enrollment Period</h2>
+    <p>This action will close the previous period and reset students to NOT_STARTED. Existing submissions will be preserved.</p>
+    <div class="admin-edit-period-form">
+      <div class="admin-form-group"><label for="newSemester">Semester</label><select id="newSemester"><option value="1st Semester">1st Semester</option><option value="2nd Semester">2nd Semester</option><option value="Summer">Summer</option></select></div>
+      <div class="admin-form-group"><label for="newSchoolYear">School Year</label><input id="newSchoolYear" placeholder="2027 - 2028" type="text"></div>
+      <div class="admin-form-row"><div class="admin-form-group"><label for="newStartDate">Start Date</label><input id="newStartDate" type="date"></div><div class="admin-form-group"><label for="newEndDate">End Date</label><input id="newEndDate" type="date"></div></div>
+      <div class="admin-form-group"><label for="newConfirm">Type START NEW PERIOD to confirm</label><input id="newConfirm" autocomplete="off" placeholder="START NEW PERIOD"></div>
+    </div>
+    <div class="admin-modal-actions"><button type="button" class="admin-modal-cancel" id="cancelNewPeriod">Cancel</button><button type="button" class="admin-modal-confirm" id="confirmNewPeriod">Create New Period</button></div>
+  </div>
+</div>
 <script src="<?= BASE_URL ?>frontend/assets/js/custom.js"></script>
 <script>
 
@@ -768,11 +733,9 @@ if (saveEditPeriod) {
 
             saveEditPeriod.disabled = true;
 
-            const semester =
-                document.getElementById('editSemester').value;
+            const semester = <?= json_encode($settings['semester'] ?? '') ?>;
 
-            const schoolYear =
-                document.getElementById('editSchoolYear').value.trim();
+            const schoolYear = <?= json_encode($settings['school_year'] ?? '') ?>;
 
             const startDate =
                 document.getElementById('editStartDate').value;
@@ -832,6 +795,31 @@ if (saveEditPeriod) {
     );
 
 }
+
+const newPeriodModal = document.getElementById('newPeriodModal');
+document.getElementById('openNewPeriodModal')?.addEventListener('click', () => newPeriodModal.classList.add('active'));
+document.getElementById('cancelNewPeriod')?.addEventListener('click', () => newPeriodModal.classList.remove('active'));
+newPeriodModal.addEventListener('click', event => { if (event.target === newPeriodModal) newPeriodModal.classList.remove('active'); });
+document.getElementById('confirmNewPeriod')?.addEventListener('click', async function () {
+    const button = this;
+    const values = {
+      semester: document.getElementById('newSemester').value,
+      school_year: document.getElementById('newSchoolYear').value.trim(),
+      start_date: document.getElementById('newStartDate').value,
+      end_date: document.getElementById('newEndDate').value,
+      confirmation: document.getElementById('newConfirm').value.trim(),
+      csrf_token: <?= json_encode($_SESSION['csrf_token'] ?? '') ?>
+    };
+    if (values.confirmation !== 'START NEW PERIOD') { alert('Please type START NEW PERIOD to confirm.'); return; }
+    if (!confirm('Create the new period and reset ALL student enrollment phases? This cannot be undone automatically.')) return;
+    button.disabled = true;
+    try {
+      const response = await fetch('<?= BASE_URL ?>backend/api/start_enrollment_period.php', {method:'POST', body: new URLSearchParams(values), credentials:'same-origin'});
+      const data = await response.json();
+      if (!response.ok || !data.success) throw new Error(data.message || 'Unable to start period.');
+      alert(data.message); window.location.reload();
+    } catch(error) { alert(error.message); button.disabled = false; }
+});
 
 document.addEventListener(
     'keydown',

@@ -50,81 +50,34 @@ function pf_field($label, $value)
 }
 
 /* ---------------------------------------------------------
-   PROFILE DATA
-   TODO: replace the right-hand keys with your real column
-   names. Missing keys fall back to an empty value (shown as –).
+   REGISTRAR-MANAGED STUDENT PROFILE
 --------------------------------------------------------- */
-
-$birthDate = $student['birth_date'] ?? '';
-$age       = '';
-$birthText = '';
-
-if ($birthDate) {
-    try {
-        $dob       = new DateTime($birthDate);
-        $age       = $dob->diff(new DateTime('today'))->y;
-        $birthText = $dob->format('M j, Y');
-    } catch (Exception $ex) {
-        $birthText = $birthDate;
-    }
-}
-
 $photoUrl = !empty($student['photo'])
     ? BASE_URL . 'uploads/students/' . rawurlencode($student['photo'])
     : '';
 
 $personalLeft = [
-    'Student No.'   => $student['student_number'] ?? '',
-    'Lastname'      => $student['last_name']      ?? '',
-    'First Name'    => $student['first_name']     ?? '',
-    'Middle Name'   => $student['middle_name']    ?? '',
-    'Age'           => $age,
-    'Date of Birth' => $birthText,
-    'Sex'           => $student['sex']            ?? '',
+    'First Name'   => $student['first_name'] ?? '',
+    'Middle Name'  => $student['middle_name'] ?? '',
+    'Last Name'    => $student['last_name'] ?? '',
 ];
 
 $personalRight = [
-    'Civil Status'   => $student['civil_status']   ?? '',
-    'Citizenship'    => $student['citizenship']    ?? '',
-    'Religion'       => $student['religion']       ?? '',
-    'Place of Birth' => $student['place_of_birth'] ?? '',
-    'Residence No.'  => $student['residence_no']   ?? '',
-    'Cellphone No.'  => $student['cellphone_no']   ?? '',
-    'Email Address'  => $student['email']          ?? '',
+    'Email Address'  => $student['email'] ?? '',
+    'Contact Number' => $student['phone'] ?? ($student['cellphone_no'] ?? ''),
 ];
 
-$address = [
-    'House No. / Street'  => $student['house_street'] ?? '',
-    'Barangay'            => $student['barangay']     ?? '',
-    'District'            => $student['district']     ?? '',
-    'Zip Code'            => $student['zip_code']     ?? '',
-    'City / Municipality' => $student['city']         ?? '',
-    'Province'            => $student['province']     ?? '',
+$academicLeft = [
+    'Student Number' => $student['student_number'] ?? '',
+    'Program'        => $student['program_name'] ?? ($student['program'] ?? ''),
 ];
 
-$family = [
-    "Mother's Name" => $student['mother_name']     ?? '',
-    'Contact No.'   => $student['mother_contact']  ?? '',
-    "Father's Name" => $student['father_name']     ?? '',
-    ' Contact No.'  => $student['father_contact']  ?? '',
-    'Guardian'      => $student['guardian_name']   ?? '',
-    '  Contact No.' => $student['guardian_contact'] ?? '',
+$academicRight = [
+    'Year Level' => $student['year_level'] ?? '',
+    'Section'    => $student['section_name'] ?? ($student['section'] ?? ''),
 ];
 
-$education = [
-    'Primary Education' => [
-        'School Name'     => $student['primary_school']       ?? '',
-        'Year Graduated'  => $student['primary_year']         ?? '',
-    ],
-    'Lower Secondary Education' => [
-        'School Name'     => $student['lower_secondary_school'] ?? '',
-        'Year Graduated'  => $student['lower_secondary_year']   ?? '',
-    ],
-    'Upper Secondary Education' => [
-        'School Name'     => $student['upper_secondary_school'] ?? '',
-        'Year Graduated'  => $student['upper_secondary_year']   ?? '',
-    ],
-];
+$accountStatus = $student['account_status'] ?? ($student['status'] ?? '');
 
 ?>
 
@@ -145,6 +98,12 @@ $education = [
 
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+/* Profile-specific two-column academic information layout. */
+.pf-profile-academic { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 12px 14px 16px; }
+.pf-profile-academic .pf-fields { min-width: 0; }
+@media (max-width: 760px) { .pf-profile-academic { grid-template-columns: 1fr; } }
+</style>
 </head>
 
 <body>
@@ -171,46 +130,29 @@ $education = [
         <!-- PAGE CONTENT -->
         <div class="content">
 
-            <!-- =========================
-                 PAGE HEADING
-            ========================== -->
             <section class="pf-top">
-
                 <div class="page-heading">
-                    <h1>Personal Information</h1>
-                    <p>View your personal and academic information registered with the University.</p>
+                    <h1>My Profile</h1>
+                    <p>View your registered personal and academic information.</p>
                 </div>
-
                 <div class="pf-notice">
                     <span class="co-icon"><i class="fa-solid fa-circle-info"></i></span>
-                    <p>
-                        This information is based on your application record.
-                        To request changes, contact the registrar's office.
-                    </p>
+                    <p>Your personal and academic information is maintained by the Registrar's Office. To request corrections, please contact the Registrar.</p>
                 </div>
-
             </section>
 
-
-            <!-- =========================
-                 PERSONAL BACKGROUND
-            ========================== -->
             <section class="pf-card">
-
                 <div class="pf-card-head">
                     <span class="co-icon"><i class="fa-regular fa-user"></i></span>
-                    <h2>Personal Background</h2>
+                    <h2>Personal Information</h2>
                 </div>
-
                 <div class="pf-personal">
-
-                    <!-- PHOTO -->
+                    <!-- Keep the existing photo upload feature. -->
                     <form class="pf-photo"
                           action="<?= BASE_URL ?>backend/api/update_photo.php"
                           method="POST"
                           enctype="multipart/form-data"
                           id="photoForm">
-
                         <?php if ($photoUrl): ?>
                             <img src="<?= e($photoUrl) ?>" alt="Photo of <?= e($userName) ?>">
                         <?php else: ?>
@@ -218,97 +160,36 @@ $education = [
                                 <i class="fa-regular fa-user"></i>
                             </div>
                         <?php endif; ?>
-
                         <label class="pf-photo-button" for="photoInput" title="Change photo">
                             <i class="fa-solid fa-camera"></i>
                             <span class="sr-only">Change photo</span>
                         </label>
-
-                        <input type="file"
-                               id="photoInput"
-                               name="photo"
-                               accept=".jpg,.jpeg,.png,image/jpeg,image/png"
-                               hidden>
-
+                        <input type="file" id="photoInput" name="photo"
+                               accept=".jpg,.jpeg,.png,image/jpeg,image/png" hidden>
                     </form>
-
-                    <!-- FIELDS -->
                     <div class="pf-fields">
                         <?php foreach ($personalLeft as $label => $value): pf_field($label, $value); endforeach; ?>
                     </div>
-
                     <div class="pf-fields">
                         <?php foreach ($personalRight as $label => $value): pf_field($label, $value); endforeach; ?>
+                        <?php if ($accountStatus !== ''): pf_field('Account Status', $accountStatus); endif; ?>
                     </div>
-
                 </div>
-
             </section>
 
-
-            <!-- =========================
-                 ADDRESS + FAMILY
-            ========================== -->
-            <section class="pf-pair">
-
-                <div class="pf-card">
-
-                    <div class="pf-card-head">
-                        <span class="co-icon"><i class="fa-regular fa-user"></i></span>
-                        <h2>Address Information</h2>
-                    </div>
-
-                    <div class="pf-fields is-wide">
-                        <?php foreach ($address as $label => $value): pf_field($label, $value); endforeach; ?>
-                    </div>
-
-                </div>
-
-
-                <div class="pf-card">
-
-                    <div class="pf-card-head">
-                        <span class="co-icon"><i class="fa-regular fa-user"></i></span>
-                        <h2>Family Background</h2>
-                    </div>
-
-                    <div class="pf-fields is-wide">
-                        <?php foreach ($family as $label => $value): pf_field(trim($label), $value); endforeach; ?>
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <!-- =========================
-                 EDUCATIONAL BACKGROUND
-            ========================== -->
-            <section class="pf-card">
-
+            <section class="pf-card" style="margin-top: 14px;">
                 <div class="pf-card-head">
-                    <span class="co-icon"><i class="fa-regular fa-user"></i></span>
-                    <h2>Educational Background</h2>
+                    <span class="co-icon"><i class="fa-solid fa-graduation-cap"></i></span>
+                    <h2>Academic Information</h2>
                 </div>
-
-                <div class="pf-education">
-
-                    <?php foreach ($education as $level => $fields): ?>
-
-                        <div class="pf-edu-block">
-
-                            <h3><?= e($level) ?></h3>
-
-                            <div class="pf-fields">
-                                <?php foreach ($fields as $label => $value): pf_field($label, $value); endforeach; ?>
-                            </div>
-
-                        </div>
-
-                    <?php endforeach; ?>
-
+                <div class="pf-profile-academic">
+                    <div class="pf-fields">
+                        <?php foreach ($academicLeft as $label => $value): pf_field($label, $value); endforeach; ?>
+                    </div>
+                    <div class="pf-fields">
+                        <?php foreach ($academicRight as $label => $value): pf_field($label, $value); endforeach; ?>
+                    </div>
                 </div>
-
             </section>
 
         </div>

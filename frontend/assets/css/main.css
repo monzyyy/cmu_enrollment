@@ -541,3 +541,35 @@ select {
     }
 
 }
+
+/* =========================================================
+   SHARED DESKTOP SIDEBAR — STUDENT AND ADMIN
+   Keep navigation visible while long page content scrolls.
+   Mobile drawer rules remain unchanged.
+========================================================= */
+@media (min-width: 769px) {
+  .layout > .sidebar {
+    position: fixed;
+    top: 90px; /* 16px layout padding + 58px header + 16px gap */
+    left: 16px;
+    width: var(--sidebar-w, 240px);
+    height: calc(100dvh - 106px);
+    max-height: calc(100dvh - 106px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 30;
+  }
+}
+
+/* Keep the logo anchored above the fixed sidebar on desktop.
+   The top navigation remains in its normal scrolling layout. */
+@media (min-width: 769px) {
+  .layout > .imglogo {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    width: var(--sidebar-w, 240px);
+    height: 58px;
+    z-index: 31;
+  }
+}

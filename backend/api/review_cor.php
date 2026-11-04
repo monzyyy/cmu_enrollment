@@ -10,11 +10,6 @@ $submissionId = (int) ($_POST['submission_id'] ?? 0);
 $action = $_POST['action'] ?? '';
 $rejectionReason = trim($_POST['rejection_reason'] ?? '');
 
-file_put_contents(
-    __DIR__ . '/reject_debug.txt',
-    print_r($_POST, true)
-);
-
 if ($submissionId <= 0) {
     echo json_encode([
         'success' => false,
@@ -52,6 +47,7 @@ try {
         'SELECT
             cor_submission_id,
             student_id,
+            period_id,
             status
          FROM cor_submissions
          WHERE cor_submission_id = ?
@@ -81,6 +77,22 @@ try {
     }
 
 
+    // Review only submissions explicitly linked to the active period.
+    // Older NULL-period submissions must be verified and assigned manually.
+    $stmt = $conn->prepare(
+        'SELECT ep.period_id
+         FROM system_settings ss
+         JOIN enrollment_periods ep
+           ON ep.semester = ss.semester AND ep.school_year = ss.school_year
+         WHERE ss.setting_id = 1 LIMIT 1'
+    );
+    $stmt->execute();
+    $activePeriod = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    if (!$activePeriod || (int) ($submission['period_id'] ?? 0) !== (int) $activePeriod['period_id']) {
+        throw new Exception('This COR is not linked to the current enrollment period. Verify its academic period before reviewing.');
+    }
+
     $studentId =
         (int) $submission['student_id'];
 
@@ -107,23 +119,28 @@ try {
 
         $stmt->close();
 
-
         $stmt = $conn->prepare(
             'UPDATE students
-             SET enrollment_phase = "ENROLLED"
-             WHERE student_id = ?
-               AND enrollment_phase = "COR"'
+            SET
+                enrollment_phase = "ENROLLED",
+                enrollment_status = "Enrolled"
+            WHERE student_id = ?
+            AND enrollment_phase = "CLEARANCE"'
         );
 
-        $stmt->bind_param(
-            'i',
-            $studentId
-        );
+        $stmt->bind_param('i', $studentId);
 
         $stmt->execute();
 
-        $stmt->close();
+        if ($stmt->affected_rows !== 1) {
+            $stmt->close();
 
+            throw new Exception(
+                'Unable to update enrollment status. Please verify the student enrollment phase.'
+            );
+        }
+
+        $stmt->close();
 
         $message =
             'COR approved successfully.';

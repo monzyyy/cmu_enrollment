@@ -342,7 +342,6 @@ function cor_status_class(string $status): string
                     <p>
                         Review and manage submitted Certificates of Registration.
                     </p>
-
                 </div>
 
             </section>
@@ -405,6 +404,9 @@ function cor_status_class(string $status): string
                     </div>
 
 
+                    <form method="GET" action="<?= e(BASE_URL) ?>">
+                        <input type="hidden" name="page" value="cor_submissions">
+                        <input type="hidden" name="status" value="<?= e($statusFilter) ?>">
                         <div class="admin-cor-search-box">
 
                             <i class="fa-solid fa-magnifying-glass"></i>
@@ -1009,8 +1011,7 @@ const corModalOverlay =
 const corViewModal =
     document.getElementById('corViewModal');
 
-const viewButtons =
-    document.querySelectorAll('.admin-cor-view-button');
+
 
 const modalFileName =
     document.getElementById('modalFileName');
@@ -1102,7 +1103,9 @@ corRejectButton.addEventListener(
 
 
 
-viewButtons.forEach(function (button) {
+function bindCorViewButtons() {
+ document.querySelectorAll('.admin-cor-view-button:not([data-live-bound])').forEach(function (button) {
+    button.dataset.liveBound = '1';
 
     button.addEventListener('click', function () {
 
@@ -1115,61 +1118,46 @@ viewButtons.forEach(function (button) {
         const fileName =
             this.dataset.fileName;
 
-        const fileExtension =
-            fileName
-                .split('.')
-                .pop()
-                .toLowerCase();
+        const corFilePreview = document.getElementById('corFilePreview');
+        corFilePreview.replaceChildren();
+        const url = '<?= BASE_URL ?>backend/api/view_cor.php?id=' + encodeURIComponent(submissionId);
+        const fileExtension = (fileName || '').split('.').pop().toLowerCase();
+        const fileHeader = document.querySelector('#corViewModal .admin-cor-modal-file-header');
+        fileHeader.querySelector('.document-open-link')?.remove();
+        const openLink = document.createElement('a');
+        openLink.className = 'document-open-link';
+        openLink.href = url;
+        openLink.target = '_blank';
+        openLink.rel = 'noopener noreferrer';
+        openLink.textContent = 'Open document in new tab';
+        openLink.style.cssText = 'font-size:12px;color:#2563eb;text-decoration:underline;margin-left:auto';
+        fileHeader.appendChild(openLink);
 
-
-        const corFilePreview =
-            document.getElementById('corFilePreview');
-
-        corFilePreview.innerHTML = '';
-
-
-        if (
-            fileExtension === 'png' ||
-            fileExtension === 'jpg' ||
-            fileExtension === 'jpeg'
-        ) {
-
-            const image =
-                document.createElement('img');
-
-            image.src =
-                '<?= BASE_URL ?>backend/api/view_cor.php?id=' +
-                submissionId;
-
-            image.alt =
-                'Submitted COR';
-
-            image.className =
-                'admin-cor-preview-image';
-
+        if (['png', 'jpg', 'jpeg'].includes(fileExtension)) {
+            const image = document.createElement('img');
+            image.src = url;
+            image.alt = 'Submitted COR';
+            image.className = 'admin-cor-preview-image';
             image.style.cursor = 'zoom-in';
-
+            image.onerror = () => {
+                corFilePreview.textContent = 'Preview could not be loaded. Try opening the document in a new tab.';
+            };
             image.addEventListener('click', function () {
-
-                const corImageModal =
-                    document.getElementById('corImageModal');
-
-                const corMaximizedImage =
-                    document.getElementById('corMaximizedImage');
-
+                const corImageModal = document.getElementById('corImageModal');
+                const corMaximizedImage = document.getElementById('corMaximizedImage');
                 corMaximizedImage.src = this.src;
-
                 corImageModal.classList.add('show');
-
-                corImageModal.setAttribute(
-                    'aria-hidden',
-                    'false'
-                );
-
+                corImageModal.setAttribute('aria-hidden', 'false');
             });
-
             corFilePreview.appendChild(image);
-
+        } else if (fileExtension === 'pdf') {
+            const frame = document.createElement('iframe');
+            frame.src = url;
+            frame.title = 'Submitted COR PDF';
+            frame.style.cssText = 'display:block;width:100%;height:420px;border:0';
+            corFilePreview.appendChild(frame);
+        } else {
+            corFilePreview.textContent = 'Preview is not available for this file type.';
         }
 
         const studentNumber =
@@ -1277,9 +1265,13 @@ viewButtons.forEach(function (button) {
     });
 
 });
+}
+window.bindCorViewButtons = bindCorViewButtons;
+bindCorViewButtons();
 
 function closeCorModal() {
 
+    document.getElementById('corFilePreview').replaceChildren();
     corViewModal.classList.remove('show');
 
     corViewModal.setAttribute(
@@ -1388,6 +1380,102 @@ corApproveButton.addEventListener(
 
 </script>
 
+
+<script>
+(() => {
+    const pageName = 'cor_submissions';
+    const pageParam = 'cor_page';
+    const searchForm = document.querySelector('.admin-cor-card-header form');
+    const searchInput = searchForm?.querySelector('[name="search"]');
+    const statusForm = document.querySelector('.admin-cor-filter');
+    const statusSelect = statusForm?.querySelector('[name="status"]');
+    const card = document.querySelector('.admin-cor-card');
+    if (!searchForm || !searchInput || !statusSelect || !card) return;
+
+    let debounceTimer;
+    let requestController;
+    let requestNumber = 0;
+
+    async function updateResults(targetPage = 1) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('page', pageName);
+        url.searchParams.set('search', searchInput.value);
+        url.searchParams.set('status', statusSelect.value);
+        url.searchParams.set(pageParam, String(targetPage));
+
+        if (requestController) requestController.abort();
+        requestController = new AbortController();
+        const thisRequest = ++requestNumber;
+        try {
+            const response = await fetch(url.toString(), {
+                signal: requestController.signal,
+                credentials: 'same-origin',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            if (!response.ok) throw new Error('Unable to load submissions.');
+            const html = await response.text();
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            if (thisRequest !== requestNumber) return;
+
+            for (const selector of [
+                '.admin-cor-table-info',
+                '.admin-cor-table-wrapper',
+                '.admin-cor-pagination'
+            ]) {
+                const current = card.querySelector(selector);
+                const updated = doc.querySelector('.admin-cor-card ' + selector);
+                if (current && updated) {
+                    current.replaceWith(document.importNode(updated, true));
+                } else if (current && !updated) {
+                    current.remove();
+                } else if (!current && updated) {
+                    card.appendChild(document.importNode(updated, true));
+                }
+            }
+            window.bindCorViewButtons?.();
+            // Keep the browser URL and status form synchronized without navigating.
+            statusForm.querySelector('[name="search"]').value = searchInput.value;
+            searchForm.querySelector('[name="status"]').value = statusSelect.value;
+            window.history.replaceState(null, '', url.toString());
+        } catch (error) {
+            if (error.name !== 'AbortError') {
+                console.error('Live submission search:', error);
+                // Existing table remains available; full GET navigation still works.
+            }
+        }
+    }
+
+    searchForm.addEventListener('submit', event => {
+        event.preventDefault();
+        clearTimeout(debounceTimer);
+        updateResults(1);
+    });
+    searchInput.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => updateResults(1), 300);
+    });
+    statusForm.addEventListener('submit', event => {
+        event.preventDefault();
+        clearTimeout(debounceTimer);
+        updateResults(1);
+    });
+    statusSelect.removeAttribute('onchange');
+    statusSelect.addEventListener('change', () => {
+        clearTimeout(debounceTimer);
+        updateResults(1);
+    });
+    card.addEventListener('click', event => {
+        const link = event.target.closest('.admin-cor-pagination a');
+        if (!link || !card.contains(link)) return;
+        event.preventDefault();
+        if (link.classList.contains('disabled')) return;
+        const url = new URL(link.href, window.location.href);
+        const page = parseInt(url.searchParams.get(pageParam) || '1', 10);
+        clearTimeout(debounceTimer);
+        updateResults(Number.isFinite(page) && page > 0 ? page : 1);
+    });
+})();
+</script>
 </body>
 
 </html>

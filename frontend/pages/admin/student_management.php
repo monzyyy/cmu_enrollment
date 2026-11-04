@@ -228,6 +228,41 @@ $stmt->close();
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
     >
 
+    <!-- Page-specific alignment: match the other admin page headings without changing shared CSS. -->
+    <style>
+        .student-management-page-heading {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+        .student-management-page-heading > div:first-child { min-width: 0; }
+        .student-management-page-heading h1 {
+            font-family: 'Manrope', sans-serif;
+            font-size: 22px;
+            font-weight: 800;
+            line-height: 1.3;
+            margin: 0 0 5px;
+            letter-spacing: -0.025em;
+        }
+        .student-management-page-heading p {
+            font-family: 'Manrope', sans-serif;
+            font-size: 12px;
+            font-weight: 400;
+            line-height: 1.5;
+            margin: 0;
+        }
+        .student-management-page-heading .admin-primary-button {
+            flex-shrink: 0;
+            margin: 0;
+        }
+        @media (max-width: 600px) {
+            .student-management-page-heading { flex-wrap: wrap; }
+        }
+    </style>
+
 </head>
 
 <body>
@@ -248,7 +283,7 @@ $stmt->close();
 
             <!-- PAGE HEADING -->
 
-            <div class="page-heading">
+            <div class="page-heading student-management-page-heading">
 
                 <div>
 
@@ -299,24 +334,28 @@ $stmt->close();
 
             <!-- SEARCH -->
 
-            <div class="admin-cor-search-box">
+            <form id="studentManagementSearchForm" method="GET" action="<?= e(BASE_URL) ?>">
+                <input type="hidden" name="page" value="student_management">
+                <div class="admin-cor-search-box">
 
                             <i class="fa-solid fa-magnifying-glass"></i>
 
                             <input
                                 type="text"
+                                id="studentManagementSearch"
                                 name="search"
                                 value="<?= e($search) ?>"
                                 placeholder="Search student..."
                                 autocomplete="off"
                             >
 
-                        </div>
+                </div>
+            </form>
 
 
             <!-- STUDENT TABLE -->
 
-            <div class="admin-table-card">
+            <div class="admin-table-card" id="studentManagementResults" aria-live="polite">
 
                 <div class="admin-student-enrollment-table-info">
 
@@ -1143,6 +1182,73 @@ $stmt->close();
 
 
 <script>
+(() => {
+    const form = document.getElementById('studentManagementSearchForm');
+    const input = document.getElementById('studentManagementSearch');
+    const results = document.getElementById('studentManagementResults');
+    if (!form || !input || !results) return;
+
+    let debounceTimer;
+    let controller;
+    let requestNumber = 0;
+
+    async function updateResults(page = 1) {
+        if (controller) controller.abort();
+        controller = new AbortController();
+        const thisRequest = ++requestNumber;
+        const url = new URL(form.action, window.location.href);
+        url.searchParams.set('page', 'student_management');
+        url.searchParams.set('search', input.value);
+        url.searchParams.set('student_page', String(page));
+        results.setAttribute('aria-busy', 'true');
+
+        try {
+            const response = await fetch(url.toString(), {
+                signal: controller.signal,
+                credentials: 'same-origin',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            if (!response.ok) throw new Error('Search request failed');
+            const html = await response.text();
+            if (thisRequest !== requestNumber) return;
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            const nextResults = doc.getElementById('studentManagementResults');
+            if (!nextResults) throw new Error('Search results were not found');
+            results.innerHTML = nextResults.innerHTML;
+            window.history.replaceState(null, '', url.toString());
+        } catch (error) {
+            if (error.name !== 'AbortError') {
+                console.error('Student Management live search:', error);
+                // The standard GET form remains usable if AJAX fails.
+            }
+        } finally {
+            if (thisRequest === requestNumber) results.removeAttribute('aria-busy');
+        }
+    }
+
+    input.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => updateResults(1), 300);
+    });
+
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        clearTimeout(debounceTimer);
+        updateResults(1);
+    });
+
+    results.addEventListener('click', (event) => {
+        const link = event.target.closest('.admin-student-enrollment-pagination a');
+        if (!link || link.classList.contains('disabled')) return;
+        event.preventDefault();
+        const url = new URL(link.href, window.location.href);
+        updateResults(Number(url.searchParams.get('student_page')) || 1);
+    });
+})();
+</script>
+
+
+<script>
 
 
 const addStudentButton =
@@ -1336,16 +1442,10 @@ function closeEditStudentModalWindow() {
 }
 
 
-document
-    .querySelectorAll('.student-management-edit-button')
-    .forEach(function (button) {
-
-        button.addEventListener(
-            'click',
-            async function () {
-
-                const studentId =
-                    this.dataset.studentId;
+document.addEventListener('click', async function (event) {
+    const editButton = event.target.closest('.student-management-edit-button');
+    if (!editButton) return;
+    const studentId = editButton.dataset.studentId;
 
                 editStudentMessage.className =
                     'student-form-message';
@@ -1428,10 +1528,7 @@ document
 
                 }
 
-            }
-        );
-
-    });
+});
 
 
 closeEditStudentModal.addEventListener(

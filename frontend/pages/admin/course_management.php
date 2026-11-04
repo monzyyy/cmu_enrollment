@@ -277,6 +277,7 @@ $stmt->close();
                         method="GET"
                         action="<?= e(BASE_URL) ?>"
                         class="course-management-search"
+                         id="courseSearchForm"
                     >
 
                         <input
@@ -289,6 +290,7 @@ $stmt->close();
 
                         <input
                             type="text"
+                            id="courseSearch"
                             name="search"
                             value="<?= e($search) ?>"
                             placeholder="Search course..."
@@ -302,7 +304,7 @@ $stmt->close();
 
                 <!-- TABLE -->
 
-                <div class="course-management-table-wrap">
+                <div class="course-management-table-wrap" id="courseResults">
 
                     <?php if ($totalFilteredCourses > 0): ?>
 
@@ -467,6 +469,7 @@ $stmt->close();
 
                 </div>
 
+                <div id="coursePagination">
                 <?php if ($totalCoursePages > 1): ?>
 
                 <div class="admin-student-enrollment-pagination">
@@ -533,6 +536,7 @@ $stmt->close();
                 </div>
 
             <?php endif; ?>
+                </div>
 
             </section>
 
@@ -777,32 +781,79 @@ $stmt->close();
 
 <script>
 
+// Fetch the server-filtered course catalog without navigating away.
 const courseSearch = document.getElementById('courseSearch');
+const courseSearchForm = document.getElementById('courseSearchForm');
+const courseResults = document.getElementById('courseResults');
+const coursePagination = document.getElementById('coursePagination');
+let courseSearchTimer;
+let courseRequestController;
+let courseRequestNumber = 0;
 
-if (courseSearch) {
+async function updateCourseCatalog(url) {
+    if (courseRequestController) courseRequestController.abort();
+    courseRequestController = new AbortController();
+    const requestNumber = ++courseRequestNumber;
+    courseResults.setAttribute('aria-busy', 'true');
 
-    courseSearch.addEventListener('input', function () {
-
-        const searchValue = this.value.toLowerCase().trim();
-
-        const rows = document.querySelectorAll(
-            '#courseTableBody tr'
-        );
-
-        rows.forEach(function (row) {
-
-            const text = row.textContent.toLowerCase();
-
-            row.style.display =
-                text.includes(searchValue)
-                    ? ''
-                    : 'none';
-
+    try {
+        const response = await fetch(url, {
+            credentials: 'same-origin',
+            signal: courseRequestController.signal,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
         });
+        if (!response.ok) throw new Error('Unable to load courses.');
+        const html = await response.text();
+        if (requestNumber !== courseRequestNumber) return;
+        const page = new DOMParser().parseFromString(html, 'text/html');
+        const newResults = page.getElementById('courseResults');
+        const newPagination = page.getElementById('coursePagination');
+        if (!newResults || !newPagination) throw new Error('Invalid course response.');
 
-    });
-
+        courseResults.innerHTML = newResults.innerHTML;
+        coursePagination.innerHTML = newPagination.innerHTML;
+        window.history.replaceState(null, '', url);
+    } catch (error) {
+        if (error.name !== 'AbortError') {
+            console.error('Course search failed:', error);
+            // Preserve the existing table if the request fails.
+        }
+    } finally {
+        if (requestNumber === courseRequestNumber) {
+            courseResults.removeAttribute('aria-busy');
+        }
+    }
 }
+
+courseSearchForm.addEventListener('submit', function (event) {
+    event.preventDefault();
+    clearTimeout(courseSearchTimer);
+    const url = new URL(courseSearchForm.action, window.location.href);
+    url.searchParams.set('page', 'course_management');
+    url.searchParams.set('search', courseSearch.value);
+    updateCourseCatalog(url.toString());
+});
+
+courseSearch.addEventListener('input', function () {
+    clearTimeout(courseSearchTimer);
+    // Cancel any older response as soon as the search text changes.
+    if (courseRequestController) courseRequestController.abort();
+    ++courseRequestNumber;
+    courseResults.removeAttribute('aria-busy');
+    courseSearchTimer = setTimeout(function () {
+        courseSearchForm.requestSubmit();
+    }, 300);
+});
+
+coursePagination.addEventListener('click', function (event) {
+    const link = event.target.closest('a[href]');
+    if (!link || link.classList.contains('disabled')) {
+        if (link) event.preventDefault();
+        return;
+    }
+    event.preventDefault();
+    updateCourseCatalog(link.href);
+});
 
 const addCourseButton = document.getElementById('addCourseButton');
 const addCourseModal = document.getElementById('addCourseModal');
@@ -979,33 +1030,19 @@ function closeEditCourseModalFunction() {
 
 /* Edit buttons */
 
-document
-    .querySelectorAll('.course-management-edit-button')
-    .forEach(function (button) {
-
-        button.addEventListener('click', function () {
-
-            const row = this.closest('tr');
-
-            const courseId = this.dataset.courseId;
-
-            const cells = row.querySelectorAll('td');
-
-            const courseCode = cells[0].textContent.trim();
-            const courseName = cells[1].textContent.trim();
-            const units = cells[2].textContent.trim();
-
-            openEditCourseModal(
-                courseId,
-                courseCode,
-                courseName,
-                units
-            );
-
-        });
-
-    });
-
+// Delegate clicks so Edit works on rows loaded by AJAX too.
+courseResults.addEventListener('click', function (event) {
+    const button = event.target.closest('.course-management-edit-button');
+    if (!button) return;
+    const row = button.closest('tr');
+    const cells = row.querySelectorAll('td');
+    openEditCourseModal(
+        button.dataset.courseId,
+        cells[0].textContent.trim(),
+        cells[1].textContent.trim(),
+        cells[2].textContent.trim()
+    );
+});
 
 closeEditCourseModal.addEventListener(
     'click',
@@ -1141,18 +1178,16 @@ editCourseForm.addEventListener(
     }
 );
 
-document
-    .querySelectorAll('.course-management-status-button')
-    .forEach(function (button) {
-
-        button.addEventListener('click', async function () {
+courseResults.addEventListener('click', async function (event) {
+        const button = event.target.closest('.course-management-status-button');
+        if (!button) return;
 
             const courseId = parseInt(
-                this.dataset.courseId,
+                button.dataset.courseId,
                 10
             );
 
-            const action = this.dataset.action;
+            const action = button.dataset.action;
 
             const actionText =
                 action === 'deactivate'
@@ -1217,8 +1252,6 @@ document
             }
 
         });
-
-    });
 
 </script>
 

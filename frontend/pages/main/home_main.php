@@ -4,6 +4,7 @@ require_role('STUDENT');
 
 require_once dirname(__DIR__, 3) . '/backend/bootstrap.php';
 require_once dirname(__DIR__, 3) . '/backend/models/student.php';
+require_once dirname(__DIR__, 3) . '/backend/helpers/evaluation_completion.php';
 
 $studentId = $_SESSION['student_id'] ?? null;
 
@@ -12,6 +13,8 @@ if (!$studentId) {
     exit;
 }
 
+// Recover completed evaluations from before the phase update was fixed.
+syncCompletedEvaluationPhase($conn, (int) $studentId);
 $student = student_find_by_id($conn, (int) $studentId);
 
 if (!$student) {
@@ -230,7 +233,7 @@ if ($startDate && $endDate) {
                             Your professor evaluation is complete. Continue by completing your clearance.
                         </p>
 
-                        <a href="<?= BASE_URL ?>?page=clearance" class="hero-button">
+                        <a href="<?= BASE_URL ?>?page=clearance_main" class="hero-button">
                             Start Clearance
                             <i class="fa-solid fa-arrow-right"></i>
                         </a>

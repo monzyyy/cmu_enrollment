@@ -1948,3 +1948,49 @@
     color: #8a99aa;
     font-size: 11px;
 }
+
+/* MY ENROLLMENT — append to the end of student.css */
+.myen-page{display:flex;flex-direction:column;gap:14px}
+.myen-overview,.myen-card{border:1px solid var(--border);border-radius:var(--radius-md);background:var(--white);padding:18px}
+.myen-overview{background:linear-gradient(110deg,#eaf4ff 0%,#f6faff 100%)}
+.myen-overview-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.myen-eyebrow{font-size:10px;font-weight:800;letter-spacing:.08em;color:#567391}
+.myen-overview h2{margin:6px 0;font-size:24px;color:#183b68}
+.myen-overview p,.myen-section-head p,.myen-stage p,.myen-next p{margin:0;font-size:12px;line-height:1.6;color:#53647b}
+.myen-pill,.myen-counter,.myen-stage-status{display:inline-flex;align-items:center;gap:6px;border-radius:20px;padding:6px 10px;font-size:11px;font-weight:700;white-space:nowrap}
+.myen-pill.is-complete,.myen-stage.is-done .myen-stage-status{background:#dff5e8;color:#28794d}
+.myen-pill.is-active,.myen-stage.is-current .myen-stage-status{background:#e1edff;color:#245caa}
+.myen-progress-heading,.myen-progress-foot{display:flex;justify-content:space-between;gap:12px;font-size:11px;color:#52677f}
+.myen-progress-heading{margin:22px 0 8px;font-weight:700}
+.myen-progress-heading strong{color:#183b68}
+.myen-progress-track{height:10px;border-radius:20px;background:#dce7f4;overflow:hidden}
+.myen-progress-fill{height:100%;background:#2f9b61;border-radius:20px;transition:width .25s}
+.myen-progress-foot{margin-top:9px}
+.myen-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.myen-card h2{display:flex;align-items:center;gap:9px;margin:0;font-size:15px;color:#12284a}
+.myen-card h2 i{color:#5276a8}
+.myen-details{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:16px}
+.myen-details small{display:block;font-size:10px;color:#7b8da4;margin-bottom:4px}
+.myen-details strong{font-size:12px;color:#243952;overflow-wrap:anywhere}
+.myen-section-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.myen-section-head p{margin-top:5px}
+.myen-counter{background:#edf3fb;color:#365b89}
+.myen-timeline{padding:18px 0 0 8px}
+.myen-stage{display:grid;grid-template-columns:34px minmax(0,1fr);gap:14px;position:relative;padding-bottom:25px}
+.myen-stage:not(:last-child):before{content:"";position:absolute;left:16px;top:35px;bottom:0;width:2px;background:#dce5f0}
+.myen-stage.is-done:not(:last-child):before{background:#bde7ce}
+.myen-stage-marker{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:#edf2f7;color:#8491a3;z-index:1}
+.myen-stage.is-done .myen-stage-marker{background:#dff5e8;color:#28794d}
+.myen-stage.is-current .myen-stage-marker{background:#e1edff;color:#245caa}
+.myen-stage.is-rejected .myen-stage-marker{background:#fff0f0;color:#b45353}
+.myen-stage-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:3px 0 6px}
+.myen-stage h3{margin:0;font-size:14px;color:#12284a}
+.myen-stage-status{background:#f1f5f9;color:#64748b}
+.myen-stage.is-rejected .myen-stage-status{background:#fff0f0;color:#b45353}
+.myen-reason{margin-top:10px;padding:10px;border-radius:8px;background:#fff0f0;color:#a94444;font-size:11px;overflow-wrap:anywhere}
+.myen-stage-link{display:inline-flex;align-items:center;gap:7px;margin-top:9px;font-size:11px;font-weight:700;color:var(--primary)}
+.myen-next{display:flex;align-items:center;justify-content:space-between;gap:14px;border:1px solid #d5e4f5;border-radius:var(--radius-md);padding:15px 18px;background:#f1f7ff}
+.myen-next strong{font-size:13px;color:#12284a}
+.myen-next a{display:inline-flex;align-items:center;gap:8px;padding:9px 12px;border-radius:8px;background:var(--primary);color:#fff;font-size:11px;font-weight:700;white-space:nowrap}
+@media(max-width:760px){.myen-info-grid{grid-template-columns:1fr}.myen-overview-top,.myen-section-head,.myen-next{flex-direction:column;align-items:flex-start}.myen-progress-foot{flex-wrap:wrap}.myen-stage-top{align-items:flex-start;flex-direction:column}.myen-overview h2{font-size:21px}}
+@media(max-width:420px){.myen-details{grid-template-columns:1fr}.myen-overview,.myen-card{padding:13px}}
