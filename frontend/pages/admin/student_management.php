@@ -5,6 +5,7 @@ require_once dirname(__DIR__, 3) . '/backend/bootstrap.php';
 require_role('ADMIN');
 
 $currentPage = 'student_management';
+if (empty($_SESSION['masterlist_import_csrf'])) { $_SESSION['masterlist_import_csrf'] = bin2hex(random_bytes(32)); }
 
 $studentsPerPage = 5;
 
@@ -297,6 +298,9 @@ $stmt->close();
 
                 <div>
 
+                    <button type="button" class="admin-primary-button" id="importMasterlistButton" style="margin-right:10px">
+                        <i class="fa-solid fa-file-import"></i> Import Masterlist
+                    </button>
                     <button
                         type="button"
                         class="admin-primary-button"
@@ -607,6 +611,47 @@ $stmt->close();
 
 </div>
 
+<!-- IMPORT MASTERLIST MODAL -->
+<div class="student-modal-overlay" id="importMasterlistModal">
+  <div class="student-modal" style="max-width:560px">
+    <div class="student-modal-header"><div><h2>Import Student Masterlist</h2><p>Upload verified registrar records, not student accounts.</p></div>
+      <button type="button" class="student-modal-close" id="closeImportMasterlist" aria-label="Close"><i class="fa-solid fa-xmark"></i></button></div>
+    <form id="importMasterlistForm" enctype="multipart/form-data">
+      <input type="hidden" name="csrf_token" value="<?= e($_SESSION['masterlist_import_csrf']) ?>">
+      <div class="student-modal-body">
+        <p style="font-size:13px;line-height:1.6;margin-bottom:14px">Open the Excel template and use <strong>Save As → CSV UTF-8 (Comma delimited)</strong>. Keep the original column headers. Existing masterlist records are skipped, not overwritten.</p>
+        <div class="student-form-group"><label for="masterlistCsv">Masterlist CSV file</label><input type="file" name="masterlist_csv" id="masterlistCsv" accept=".csv,text/csv" required></div>
+        <div class="student-form-message" id="importMasterlistMessage" role="status" aria-live="polite" style="white-space:pre-line"></div>
+      </div>
+      <div class="student-modal-footer"><button type="button" class="student-modal-cancel" id="cancelImportMasterlist">Cancel</button><button type="submit" class="admin-primary-button" id="submitImportMasterlist"><i class="fa-solid fa-upload"></i> Import Records</button></div>
+    </form>
+  </div>
+</div>
+<script>
+(() => {
+ const modal=document.getElementById('importMasterlistModal');
+ const form=document.getElementById('importMasterlistForm');
+ const message=document.getElementById('importMasterlistMessage');
+ const button=document.getElementById('submitImportMasterlist');
+ function close(){modal.classList.remove('is-open');}
+ document.getElementById('importMasterlistButton').addEventListener('click',()=>{message.textContent='';message.className='student-form-message';form.reset();modal.classList.add('is-open');});
+ document.getElementById('closeImportMasterlist').addEventListener('click',close);
+ document.getElementById('cancelImportMasterlist').addEventListener('click',close);
+ modal.addEventListener('click',e=>{if(e.target===modal)close();});
+ form.addEventListener('submit',async e=>{
+  e.preventDefault();button.disabled=true;message.textContent='Importing...';message.className='student-form-message';
+  try {
+   const response=await fetch('backend/api/import_student_masterlist.php',{method:'POST',body:new FormData(form),credentials:'same-origin'});
+   const result=await response.json();
+   message.className='student-form-message '+(result.success?'is-success':'is-error');
+   message.textContent=result.message||'Import failed.';
+   if(result.errors?.length)message.textContent+='\n'+result.errors.join('\n');
+  } catch(err){message.className='student-form-message is-error';message.textContent='Could not complete import. Check the server and try again.';}
+  finally{button.disabled=false;}
+ });
+})();
+</script>
+
 <!-- ADD STUDENT MODAL -->
 
 <div class="student-modal-overlay" id="addStudentModal">
@@ -753,13 +798,26 @@ $stmt->close();
                                 Program
                             </label>
 
-                            <input
-                                type="text"
-                                id="studentProgram"
-                                name="program"
-                                placeholder="e.g. BS Information Technology"
-                                required
-                            >
+                            <select id="studentProgram" name="program" required>
+                                <option value="">Select program</option>
+                                <option value="Bachelor of Arts in Journalism">Bachelor of Arts in Journalism</option>
+                                <option value="Bachelor of Arts in Political Science">Bachelor of Arts in Political Science</option>
+                                <option value="Bachelor of Public Administration">Bachelor of Public Administration</option>
+                                <option value="Bachelor of Science in Social Work">Bachelor of Science in Social Work</option>
+                                <option value="Bachelor of Science in Criminology">Bachelor of Science in Criminology</option>
+                                <option value="BSBA Major in Financial Management">BSBA Major in Financial Management</option>
+                                <option value="BSBA Major in Human Resource Management">BSBA Major in Human Resource Management</option>
+                                <option value="BSBA Major in Marketing Management">BSBA Major in Marketing Management</option>
+                                <option value="Bachelor of Science in Accountancy">Bachelor of Science in Accountancy</option>
+                                <option value="Bachelor of Science in Management Accounting">Bachelor of Science in Management Accounting</option>
+                                <option value="Bachelor of Science in Information Technology">Bachelor of Science in Information Technology</option>
+                                <option value="Bachelor in Elementary Education">Bachelor in Elementary Education</option>
+                                <option value="Bachelor in Secondary Education : English">Bachelor in Secondary Education : English</option>
+                                <option value="Bachelor in Secondary Education : Mathematics">Bachelor in Secondary Education : Mathematics</option>
+                                <option value="Bachelor in Secondary Education : Social Studies">Bachelor in Secondary Education : Social Studies</option>
+                                <option value="Bachelor of Early Childhood Education">Bachelor of Early Childhood Education</option>
+                                
+                            </select>
 
                         </div>
 
@@ -1053,13 +1111,25 @@ $stmt->close();
                                 Program
                             </label>
 
-                            <input
-                                type="text"
-                                id="editStudentProgram"
-                                name="program"
-                                required
-                            >
-
+                            <select id="editStudentProgram" name="program" required>
+                                <option value="">Select program</option>
+                                <option value="Bachelor of Arts in Journalism">Bachelor of Arts in Journalism</option>
+                                <option value="Bachelor of Arts in Political Science">Bachelor of Arts in Political Science</option>
+                                <option value="Bachelor of Public Administration">Bachelor of Public Administration</option>
+                                <option value="Bachelor of Science in Social Work">Bachelor of Science in Social Work</option>
+                                <option value="Bachelor of Science in Criminology">Bachelor of Science in Criminology</option>
+                                <option value="BSBA Major in Financial Management">BSBA Major in Financial Management</option>
+                                <option value="BSBA Major in Human Resource Management">BSBA Major in Human Resource Management</option>
+                                <option value="BSBA Major in Marketing Management">BSBA Major in Marketing Management</option>
+                                <option value="Bachelor of Science in Accountancy">Bachelor of Science in Accountancy</option>
+                                <option value="Bachelor of Science in Management Accounting">Bachelor of Science in Management Accounting</option>
+                                <option value="Bachelor of Science in Information Technology">Bachelor of Science in Information Technology</option>
+                                <option value="Bachelor in Elementary Education">Bachelor in Elementary Education</option>
+                                <option value="Bachelor in Secondary Education : English">Bachelor in Secondary Education : English</option>
+                                <option value="Bachelor in Secondary Education : Mathematics">Bachelor in Secondary Education : Mathematics</option>
+                                <option value="Bachelor in Secondary Education : Social Studies">Bachelor in Secondary Education : Social Studies</option>
+                                <option value="Bachelor of Early Childhood Education">Bachelor of Early Childhood Education</option>
+                            </select>
                         </div>
 
                         <div class="student-form-group">

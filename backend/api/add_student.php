@@ -24,7 +24,7 @@ $lastName      = trim($data['last_name'] ?? '');
 $program       = trim($data['program'] ?? '');
 $yearLevel     = (int) ($data['year_level'] ?? 0);
 $section       = trim($data['section'] ?? '');
-$email         = trim($data['email'] ?? '');
+$email         = strtolower(trim($data['email'] ?? ''));
 $phone         = trim($data['phone'] ?? '');
 
 if (
@@ -49,6 +49,16 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     echo json_encode([
         'success' => false,
         'message' => 'Please enter a valid email address.'
+    ]);
+    exit;
+}
+
+// Phone is optional, but supplied Philippine mobile numbers must use
+// 09XXXXXXXXX (11 digits) or +639XXXXXXXXX (13 characters).
+if ($phone !== '' && !preg_match('/^(?:09[0-9]{9}|\+639[0-9]{9})$/D', $phone)) {
+    echo json_encode([
+        'success' => false,
+        'message' => 'Please enter a valid Philippine mobile number (09XXXXXXXXX or +639XXXXXXXXX).'
     ]);
     exit;
 }
@@ -100,7 +110,7 @@ try {
     $stmt = $conn->prepare(
         'SELECT student_id
          FROM students
-         WHERE email = ?
+         WHERE LOWER(TRIM(email)) = ?
          LIMIT 1'
     );
 
@@ -113,7 +123,7 @@ try {
 
     if ($existingEmail) {
         throw new Exception(
-            'A student with this email already exists.'
+            'This email address is already registered. Please use a different email.'
         );
     }
 

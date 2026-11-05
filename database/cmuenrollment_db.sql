@@ -755,3 +755,30 @@ SELECT cor_submission_id, student_id, file_name, submitted_at, status, period_id
 FROM cor_submissions ORDER BY submitted_at DESC;
 
 SELECT period_id, semester, school_year, status FROM enrollment_periods;
+
+CREATE TABLE IF NOT EXISTS student_masterlist (
+    masterlist_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    student_number VARCHAR(50) NOT NULL,
+    first_name VARCHAR(100) NOT NULL,
+    middle_name VARCHAR(100) DEFAULT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    date_of_birth DATE DEFAULT NULL,
+    email VARCHAR(100) NOT NULL,
+    program VARCHAR(100) NOT NULL,
+    year_level INT NOT NULL,
+    section VARCHAR(50) NOT NULL,
+    previous_program VARCHAR(100) DEFAULT NULL,
+    previous_year_level INT DEFAULT NULL,
+    previous_section VARCHAR(50) DEFAULT NULL,
+    previous_semester VARCHAR(50) DEFAULT NULL,
+    previous_school_year VARCHAR(20) DEFAULT NULL,
+    registration_status ENUM('UNREGISTERED','REGISTERED','REVIEW_REQUIRED') NOT NULL DEFAULT 'UNREGISTERED',
+    user_id INT UNSIGNED DEFAULT NULL,
+    imported_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (masterlist_id),
+    UNIQUE KEY uq_masterlist_student_number (student_number),
+    UNIQUE KEY uq_masterlist_email (email),
+    KEY idx_masterlist_status (registration_status),
+    CONSTRAINT fk_masterlist_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
