@@ -1,24 +1,15 @@
-
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-START TRANSACTION;
-SET time_zone = "+00:00";
-
--- cmuenrollment_db.sql
-CREATE DATABASE IF NOT EXISTS cmuenrollment_db
-    CHARACTER SET utf8mb4
-    COLLATE utf8mb4_unicode_ci;
-
-USE cmuenrollment_db;
-
 -- phpMyAdmin SQL Dump
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 02, 2026 at 06:57 PM
+-- Generation Time: Nov 05, 2026 at 08:15 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
 
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -33,12 +24,33 @@ USE cmuenrollment_db;
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `clearance_submissions`
+--
+
+CREATE TABLE `clearance_submissions` (
+  `clearance_id` int(10) UNSIGNED NOT NULL,
+  `student_id` int(10) UNSIGNED NOT NULL,
+  `semester` varchar(50) NOT NULL,
+  `school_year` varchar(20) NOT NULL,
+  `file_path` varchar(255) NOT NULL,
+  `original_filename` varchar(255) NOT NULL,
+  `status` enum('PENDING','APPROVED','REJECTED') NOT NULL DEFAULT 'PENDING',
+  `rejection_reason` text DEFAULT NULL,
+  `reviewed_by` int(10) UNSIGNED DEFAULT NULL,
+  `reviewed_at` datetime DEFAULT NULL,
+  `submitted_at` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `cor_submissions`
 --
 
 CREATE TABLE `cor_submissions` (
   `cor_submission_id` int(10) UNSIGNED NOT NULL,
   `student_id` int(10) UNSIGNED NOT NULL,
+  `period_id` int(10) UNSIGNED DEFAULT NULL,
   `file_name` varchar(255) NOT NULL,
   `file_path` varchar(500) NOT NULL,
   `submitted_at` datetime NOT NULL DEFAULT current_timestamp(),
@@ -48,13 +60,6 @@ CREATE TABLE `cor_submissions` (
   `rejection_reason` text DEFAULT NULL,
   `created_at` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `cor_submissions`
---
-
-INSERT INTO `cor_submissions` (`cor_submission_id`, `student_id`, `file_name`, `file_path`, `submitted_at`, `status`, `reviewed_at`, `reviewed_by`, `rejection_reason`, `created_at`) VALUES
-(2, 3, 'jpeg (1).jpg', 'uploads/cor/COR_3_1791785959_3a0a038344.jpg', '2026-10-12 14:19:19', 'APPROVED', '2026-10-12 14:20:19', 8, NULL, '2026-10-12 14:19:19');
 
 -- --------------------------------------------------------
 
@@ -85,7 +90,15 @@ INSERT INTO `courses` (`course_id`, `course_code`, `course_name`, `units`, `is_a
 (6, 'IT 306', 'Integrative Programming', 3, 1, '2026-10-08 20:36:10', '2026-10-08 20:36:10'),
 (7, 'GE 101', 'Purposive Communication', 3, 1, '2026-10-08 20:36:10', '2026-10-08 20:36:10'),
 (8, 'PE 102', 'Physical Fitness 1', 3, 1, '2026-10-08 20:36:10', '2026-10-08 20:36:10'),
-(9, 'IT 308', 'GRAPHICS DESIGN', 5, 1, '2026-10-08 20:39:30', '2026-10-08 20:40:19');
+(9, 'IT 308', 'Graphics Design', 5, 1, '2026-10-08 20:39:30', '2026-11-05 11:40:25'),
+(10, 'GE6', 'ART APPRECIATION', 3, 1, '2026-11-05 12:35:34', '2026-11-05 12:35:34'),
+(11, 'GE7', 'SCIENCE, TECHNOLOGY & SOCIETY', 3, 1, '2026-11-05 12:35:34', '2026-11-05 12:35:34'),
+(12, 'GE8', 'ETHICS', 3, 1, '2026-11-05 12:35:34', '2026-11-05 12:35:34'),
+(13, 'IM101', 'ADVANCED DATABASE SYSTEM', 3, 1, '2026-11-05 12:35:34', '2026-11-05 12:35:34'),
+(14, 'IPT101', 'INTEGRATIVE PROGRAMMING AND TECHNOLOGIES 1', 3, 1, '2026-11-05 12:35:34', '2026-11-05 12:35:34'),
+(15, 'MS102', 'QUANTITATIVE METHODS', 3, 1, '2026-11-05 12:35:34', '2026-11-05 12:35:34'),
+(16, 'NET102', 'NETWORKING 2', 3, 1, '2026-11-05 12:35:34', '2026-11-05 12:35:34'),
+(17, 'SIA101', 'SYSTEM INTEGRATION AND ARCHITECTURE 1', 3, 1, '2026-11-05 12:35:34', '2026-11-05 12:35:34');
 
 -- --------------------------------------------------------
 
@@ -111,13 +124,14 @@ CREATE TABLE `course_offerings` (
 --
 
 INSERT INTO `course_offerings` (`offering_id`, `course_id`, `program`, `year_level`, `section`, `semester`, `school_year`, `instructor_name`, `created_at`, `updated_at`) VALUES
-(1, 7, 'BS Information Technology', 3, 'BSIT 3D', '1st Semester', '2026 - 2027', 'Prof. JIAR LASINGERO', '2026-10-08 20:41:27', '2026-10-08 20:43:23'),
-(2, 7, 'BS Information Technology', 2, 'BSIT 2D', '1st Semester', '2026 - 2027', NULL, '2026-10-08 20:56:25', '2026-10-08 20:56:25'),
-(3, 1, 'BS Information Technology', 2, 'BSIT 2D', '1st Semester', '2026 - 2027', NULL, '2026-10-08 20:58:51', '2026-10-08 20:58:51'),
-(4, 2, 'BS Information Technology', 3, 'BSIT 3D', '1st Semester', '2026 - 2027', 'Doc. Sam', '2026-10-08 21:14:38', '2026-10-26 22:29:40'),
-(5, 8, 'BS Information Technology', 3, 'BSIT 3D', '1st Semester', '2026 - 2027', NULL, '2026-10-08 21:15:24', '2026-10-08 21:15:24'),
-(6, 9, 'BS Information Technology', 2, 'BSIT 2D', '1st Semester', '2026 - 2027', NULL, '2026-10-12 14:17:59', '2026-10-12 14:17:59'),
-(7, 6, 'BS Information Technology', 3, 'BSIT 3D', '1st Semester', '2026 - 2027', NULL, '2026-10-20 19:16:06', '2026-10-20 19:16:06');
+(12, 10, 'Bachelor of Science in Information Technology', 3, 'D', '1st Semester', '2026 - 2027', NULL, '2026-11-05 12:35:34', '2026-11-05 12:35:34'),
+(13, 11, 'Bachelor of Science in Information Technology', 3, 'D', '1st Semester', '2026 - 2027', NULL, '2026-11-05 12:35:34', '2026-11-05 12:35:34'),
+(14, 12, 'Bachelor of Science in Information Technology', 3, 'D', '1st Semester', '2026 - 2027', NULL, '2026-11-05 12:35:34', '2026-11-05 12:35:34'),
+(15, 13, 'Bachelor of Science in Information Technology', 3, 'D', '1st Semester', '2026 - 2027', 'CERWIN JOHN ZAULDA', '2026-11-05 12:35:34', '2026-11-05 12:35:34'),
+(16, 14, 'Bachelor of Science in Information Technology', 3, 'D', '1st Semester', '2026 - 2027', 'Gian Carlo Cruz', '2026-11-05 12:35:34', '2026-11-05 12:35:34'),
+(17, 15, 'Bachelor of Science in Information Technology', 3, 'D', '1st Semester', '2026 - 2027', 'Ronaldo Jaime', '2026-11-05 12:35:34', '2026-11-05 12:35:34'),
+(18, 16, 'Bachelor of Science in Information Technology', 3, 'D', '1st Semester', '2026 - 2027', 'JED CONCEPCION', '2026-11-05 12:35:34', '2026-11-05 12:35:34'),
+(19, 17, 'Bachelor of Science in Information Technology', 3, 'D', '1st Semester', '2026 - 2027', 'CERWIN JOHN ZAULDA', '2026-11-05 12:35:34', '2026-11-05 12:35:34');
 
 -- --------------------------------------------------------
 
@@ -135,12 +149,30 @@ CREATE TABLE `course_offering_schedules` (
   `created_at` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- --------------------------------------------------------
+
 --
--- Dumping data for table `course_offering_schedules`
+-- Table structure for table `enrollment_periods`
 --
 
-INSERT INTO `course_offering_schedules` (`schedule_id`, `offering_id`, `day_of_week`, `start_time`, `end_time`, `room`, `created_at`) VALUES
-(1, 1, 'Thursday', '20:45:00', '20:49:00', '202', '2026-10-08 20:44:13');
+CREATE TABLE `enrollment_periods` (
+  `period_id` int(10) UNSIGNED NOT NULL,
+  `semester` varchar(50) NOT NULL,
+  `school_year` varchar(20) NOT NULL,
+  `start_date` date DEFAULT NULL,
+  `end_date` date DEFAULT NULL,
+  `status` enum('OPEN','CLOSED') NOT NULL DEFAULT 'CLOSED',
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `closed_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `enrollment_periods`
+--
+
+INSERT INTO `enrollment_periods` (`period_id`, `semester`, `school_year`, `start_date`, `end_date`, `status`, `created_at`, `closed_at`) VALUES
+(1, '1st Semester', '2026 - 2027', '2026-09-01', '2026-10-05', 'CLOSED', '2026-11-05 00:13:28', '2026-11-05 01:02:21'),
+(2, '2nd Semester', '2026 - 2027', '2026-11-05', '2026-11-15', 'CLOSED', '2026-11-05 01:16:45', '2026-11-05 12:34:48');
 
 -- --------------------------------------------------------
 
@@ -160,24 +192,9 @@ CREATE TABLE `enrollment_status_history` (
 --
 
 INSERT INTO `enrollment_status_history` (`history_id`, `status`, `changed_at`, `changed_by`) VALUES
-(1, 'CLOSED', '2026-10-05 14:43:05', 8),
-(2, 'OPENED', '2026-10-05 14:43:12', 8),
-(3, 'CLOSED', '2026-10-05 14:43:15', 8),
-(4, 'OPENED', '2026-10-05 14:43:18', 8),
-(5, 'CLOSED', '2026-10-05 14:43:21', 8),
-(6, 'OPENED', '2026-10-05 14:43:26', 8),
-(7, 'CLOSED', '2026-10-05 14:43:30', 8),
-(8, 'OPENED', '2026-10-05 14:43:46', 8),
-(9, 'CLOSED', '2026-10-05 14:45:31', 8),
-(10, 'OPENED', '2026-10-08 20:37:54', 8),
-(11, 'CLOSED', '2026-10-12 14:14:12', 8),
-(12, 'OPENED', '2026-10-12 14:14:19', 8),
-(13, 'CLOSED', '2026-10-12 14:14:25', 8),
-(14, 'OPENED', '2026-10-12 14:24:01', 8),
-(15, 'CLOSED', '2026-10-12 14:24:06', 8),
-(16, 'OPENED', '2026-10-26 15:10:54', 8),
-(17, 'CLOSED', '2026-10-26 15:11:09', 8),
-(18, 'OPENED', '2026-10-26 15:11:14', 8);
+(23, 'CLOSED', '2026-11-05 11:54:36', 8),
+(24, 'OPENED', '2026-11-05 12:34:32', 8),
+(25, 'CLOSED', '2026-11-05 12:34:48', 8);
 
 -- --------------------------------------------------------
 
@@ -263,7 +280,7 @@ CREATE TABLE `professor_evaluation_answers` (
   `evaluation_id` int(10) UNSIGNED NOT NULL,
   `question_id` int(10) UNSIGNED NOT NULL,
   `rating` tinyint(3) UNSIGNED NOT NULL
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -294,13 +311,115 @@ CREATE TABLE `students` (
 --
 
 INSERT INTO `students` (`student_id`, `user_id`, `student_number`, `first_name`, `middle_name`, `last_name`, `program`, `year_level`, `section`, `email`, `phone`, `password_hash`, `enrollment_phase`, `enrollment_status`, `created_at`) VALUES
-(1, 1, '202400745', 'Jonathan', NULL, 'Pasa', 'BS Information Technology', 3, 'BSIT 3D', 'pasajonathan4@gmail.com', '09216992548', '$2y$12$lm2MxPm56vuPy2K34LTXFul8TkQ.EXKuB0nOYYk2DE3WevD6lmiqq', 'NOT_STARTED', 'Closed', '2026-10-02 09:57:26'),
-(2, 2, '202401207', 'Jhosua', '', 'Alfaro', 'BS Information Technology', 3, 'BSIT 3D', 'jhosuaalfaro28@gmail.com', '09753876340', '$2y$12$a4xpiRKGvEuoUO0AKeqg6O.7XeFf1IV3noypuTm6bXDnolobmNM4q', 'EVALUATION', 'Evaluation', '2026-10-02 09:57:26'),
-(3, 3, '202400847', 'John Romar', NULL, 'Saptang', 'BS Information Technology', 3, 'BSIT 3D', 'Johnromarsaptang02@gmail.com', '09515295684', '$2y$12$BssqryuGxbzUZ90yyFpgZeXQ3eVR1S4auspwrB.o6r0kLWrU0X6Ci', 'CLEARANCE', 'Clearance', '2026-10-02 09:57:26'),
-(4, 4, '202400764', 'Dennis', NULL, 'Jorta', 'BS Information Technology', 3, 'BSIT 3D', 'dennissantiagojorta@gmail.com', '09318866752', '$2y$12$SwbK3T2kVm4snbYB2owD6euLERtNAOItGOtRkq260COlhFNGRNkoO', 'COR', 'COR', '2026-10-02 09:57:26'),
-(5, 5, '202400924', 'Ronald', '', 'Pineda', 'BS Information Technology', 3, 'BSIT 3D', 'ronaldpineda642@gmail.com', '09122241752', '$2y$10$dfZdEBlIA3pDL3tK8B6fieDSamg6xD5jE5z6VFJ.mKRa6dLiJbOTy', 'ENROLLED', 'Enrolled', '2026-10-02 09:57:26'),
-(10, 15, '202401117', 'gabriel', NULL, 'milagro', 'BS Information Technology', 3, 'BSIT 3D', 'gabriel.milagro@gmail.com', '09123456789', '$2y$10$Q9mR/o2Lc7PJ8UEG.23Pw.DUMbNb/iPVQgc6c0C712nHwqC2/JEAu', 'NOT_STARTED', 'Closed', '2026-10-05 18:02:39'),
-(12, 18, '20240529', 'Richmond', 'Aquino', 'Quizon', 'BS Information Technology', 3, 'BSIT 3D', 'richmondquizon0948@gmail.com', '09683365853', '$2y$10$QwPXttyiGvwLe0J6jkzhzOQjdTTHyBxlWy9zNs5PAv/69zStXc1ES', 'NOT_STARTED', 'Closed', '2026-10-20 20:26:42');
+(14, 20, '20240529', 'Richmond', 'Aquino', 'Quizon', 'Bachelor of Science in Information Technology', 3, 'D', 'richmondquizon0948@gmail.com', '09683365853', '$2y$10$3O8ZxThF/cq1kA.hBgqh/.fDuQ2NnY5EwRIO295x/kqK8Z0BcrQXa', 'NOT_STARTED', 'Closed', '2026-11-05 11:51:38'),
+(15, 21, '202400764', 'Dennis', '', 'Jorta', 'Bachelor of Science in Information Technology', 3, 'D', 'dennissantiagojorta@gmail.com', '09318866752', '$2y$10$8x2VLMRovE1nPr9ofcXT4ubxW0xxxC38QPLWp4dZimGiD/2wiGkAS', 'NOT_STARTED', 'Closed', '2026-11-05 12:38:02'),
+(16, 22, '202400847', 'John Romar', '', 'Saptang', 'Bachelor of Science in Information Technology', 3, 'D', 'johnromarsaptang02@gmail.com', '09515295684', '$2y$10$Ru5HH.euldk2ddYuE0buK./dELSwrsewaaLRQoBAVkuld3KvapjB2', 'NOT_STARTED', 'Closed', '2026-11-05 12:38:47'),
+(17, 23, '202401207', 'Jhosua', '', 'Alfaro', 'Bachelor of Science in Information Technology', 3, 'D', 'jhosuaalfaro28@gmail.com', '09753876340', '$2y$10$oOfIFHlickuf0M2.22VX1eHq4x0Sd//CzdrBmCgOIkbLddhrYNENS', 'NOT_STARTED', 'Closed', '2026-11-05 12:39:20'),
+(18, 24, '202400745', 'Jonathan', '', 'Pasa', 'Bachelor of Science in Information Technology', 3, 'D', 'pasajonathan4@gmail.com', '09216992548', '$2y$10$EWnxlM.lQwKxAisabM/8dOOTr.AEByxRaFlxug2a5P0GSb.myLKJm', 'NOT_STARTED', 'Closed', '2026-11-05 12:40:09'),
+(19, 25, '202400924', 'Ronald', '', 'Pineda', 'Bachelor of Science in Information Technology', 3, 'D', 'ronaldpineda642@gmail.com', '09122241752', '$2y$10$DT1P4apIl0lnzILeSDLyuenTuGXngWES.efyAC5PqZyhl5wgdpJoy', 'NOT_STARTED', 'Closed', '2026-11-05 12:50:17');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `student_course_enrollments`
+--
+
+CREATE TABLE `student_course_enrollments` (
+  `enrollment_id` int(10) UNSIGNED NOT NULL,
+  `student_id` int(10) UNSIGNED NOT NULL,
+  `offering_id` int(10) UNSIGNED NOT NULL,
+  `enrollment_type` enum('REGULAR','IRREGULAR') NOT NULL DEFAULT 'REGULAR',
+  `created_at` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `student_course_enrollments`
+--
+
+INSERT INTO `student_course_enrollments` (`enrollment_id`, `student_id`, `offering_id`, `enrollment_type`, `created_at`) VALUES
+(59, 14, 12, 'REGULAR', '2026-11-05 12:35:34'),
+(60, 14, 13, 'REGULAR', '2026-11-05 12:35:34'),
+(61, 14, 14, 'REGULAR', '2026-11-05 12:35:34'),
+(62, 14, 15, 'REGULAR', '2026-11-05 12:35:34'),
+(63, 14, 16, 'REGULAR', '2026-11-05 12:35:34'),
+(64, 14, 17, 'REGULAR', '2026-11-05 12:35:34'),
+(65, 14, 18, 'REGULAR', '2026-11-05 12:35:34'),
+(66, 14, 19, 'REGULAR', '2026-11-05 12:35:34'),
+(67, 15, 12, 'REGULAR', '2026-11-05 12:59:07'),
+(68, 16, 12, 'REGULAR', '2026-11-05 12:59:07'),
+(69, 17, 12, 'REGULAR', '2026-11-05 12:59:07'),
+(70, 18, 12, 'REGULAR', '2026-11-05 12:59:07'),
+(71, 19, 12, 'REGULAR', '2026-11-05 12:59:07'),
+(72, 15, 13, 'REGULAR', '2026-11-05 12:59:07'),
+(73, 16, 13, 'REGULAR', '2026-11-05 12:59:07'),
+(74, 17, 13, 'REGULAR', '2026-11-05 12:59:07'),
+(75, 18, 13, 'REGULAR', '2026-11-05 12:59:07'),
+(76, 19, 13, 'REGULAR', '2026-11-05 12:59:07'),
+(77, 15, 14, 'REGULAR', '2026-11-05 12:59:07'),
+(78, 16, 14, 'REGULAR', '2026-11-05 12:59:07'),
+(79, 17, 14, 'REGULAR', '2026-11-05 12:59:07'),
+(80, 18, 14, 'REGULAR', '2026-11-05 12:59:07'),
+(81, 19, 14, 'REGULAR', '2026-11-05 12:59:07'),
+(82, 15, 15, 'REGULAR', '2026-11-05 12:59:07'),
+(83, 16, 15, 'REGULAR', '2026-11-05 12:59:07'),
+(84, 17, 15, 'REGULAR', '2026-11-05 12:59:07'),
+(85, 18, 15, 'REGULAR', '2026-11-05 12:59:07'),
+(86, 19, 15, 'REGULAR', '2026-11-05 12:59:07'),
+(87, 15, 16, 'REGULAR', '2026-11-05 12:59:07'),
+(88, 16, 16, 'REGULAR', '2026-11-05 12:59:07'),
+(89, 17, 16, 'REGULAR', '2026-11-05 12:59:07'),
+(90, 18, 16, 'REGULAR', '2026-11-05 12:59:07'),
+(91, 19, 16, 'REGULAR', '2026-11-05 12:59:07'),
+(92, 15, 17, 'REGULAR', '2026-11-05 12:59:07'),
+(93, 16, 17, 'REGULAR', '2026-11-05 12:59:07'),
+(94, 17, 17, 'REGULAR', '2026-11-05 12:59:07'),
+(95, 18, 17, 'REGULAR', '2026-11-05 12:59:07'),
+(96, 19, 17, 'REGULAR', '2026-11-05 12:59:07'),
+(97, 15, 18, 'REGULAR', '2026-11-05 12:59:07'),
+(98, 16, 18, 'REGULAR', '2026-11-05 12:59:07'),
+(99, 17, 18, 'REGULAR', '2026-11-05 12:59:07'),
+(100, 18, 18, 'REGULAR', '2026-11-05 12:59:07'),
+(101, 19, 18, 'REGULAR', '2026-11-05 12:59:07'),
+(102, 15, 19, 'REGULAR', '2026-11-05 12:59:07'),
+(103, 16, 19, 'REGULAR', '2026-11-05 12:59:07'),
+(104, 17, 19, 'REGULAR', '2026-11-05 12:59:07'),
+(105, 18, 19, 'REGULAR', '2026-11-05 12:59:07'),
+(106, 19, 19, 'REGULAR', '2026-11-05 12:59:07');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `student_masterlist`
+--
+
+CREATE TABLE `student_masterlist` (
+  `masterlist_id` int(10) UNSIGNED NOT NULL,
+  `student_number` varchar(50) NOT NULL,
+  `first_name` varchar(100) NOT NULL,
+  `middle_name` varchar(100) DEFAULT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `date_of_birth` date DEFAULT NULL,
+  `email` varchar(100) NOT NULL,
+  `program` varchar(100) NOT NULL,
+  `year_level` int(11) NOT NULL,
+  `section` varchar(50) NOT NULL,
+  `previous_program` varchar(100) DEFAULT NULL,
+  `previous_year_level` int(11) DEFAULT NULL,
+  `previous_section` varchar(50) DEFAULT NULL,
+  `previous_semester` varchar(50) DEFAULT NULL,
+  `previous_school_year` varchar(20) DEFAULT NULL,
+  `registration_status` enum('UNREGISTERED','REGISTERED','REVIEW_REQUIRED') NOT NULL DEFAULT 'UNREGISTERED',
+  `user_id` int(10) UNSIGNED DEFAULT NULL,
+  `imported_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `student_masterlist`
+--
+
+INSERT INTO `student_masterlist` (`masterlist_id`, `student_number`, `first_name`, `middle_name`, `last_name`, `date_of_birth`, `email`, `program`, `year_level`, `section`, `previous_program`, `previous_year_level`, `previous_section`, `previous_semester`, `previous_school_year`, `registration_status`, `user_id`, `imported_at`, `updated_at`) VALUES
+(1, '2024001111', 'Juan', 'Dela', 'Cruz', '2006-04-02', 'monzylog@gmail.com', 'Bachelor of Science in Information Technology', 3, 'D', 'Bachelor of Science in Information Technology', 3, 'D', '1st Semester', '2026-2027', 'UNREGISTERED', NULL, '2026-11-05 06:51:03', '2026-11-05 06:51:03');
 
 -- --------------------------------------------------------
 
@@ -323,7 +442,7 @@ CREATE TABLE `system_settings` (
 --
 
 INSERT INTO `system_settings` (`setting_id`, `enrollment_status`, `semester`, `school_year`, `start_date`, `end_date`, `updated_at`) VALUES
-(1, 'OPEN', '1st Semester', '2026 - 2027', '2026-09-01', '2026-10-05', '2026-10-26 15:11:14');
+(1, 'CLOSED', '2nd Semester', '2026 - 2027', '2026-11-05', '2026-11-15', '2026-11-05 12:34:48');
 
 -- --------------------------------------------------------
 
@@ -345,23 +464,25 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `account_number`, `password_hash`, `role`, `is_active`, `created_at`) VALUES
-(1, '202400745', '$2y$12$lm2MxPm56vuPy2K34LTXFul8TkQ.EXKuB0nOYYk2DE3WevD6lmiqq', 'STUDENT', 1, '2026-10-05 14:37:29'),
-(2, '202401207', '$2y$12$a4xpiRKGvEuoUO0AKeqg6O.7XeFf1IV3noypuTm6bXDnolobmNM4q', 'STUDENT', 1, '2026-10-05 14:37:29'),
-(3, '202400847', '$2y$12$BssqryuGxbzUZ90yyFpgZeXQ3eVR1S4auspwrB.o6r0kLWrU0X6Ci', 'STUDENT', 1, '2026-10-05 14:37:29'),
-(4, '202400764', '$2y$12$SwbK3T2kVm4snbYB2owD6euLERtNAOItGOtRkq260COlhFNGRNkoO', 'STUDENT', 1, '2026-10-05 14:37:29'),
-(5, '202400924', '$2y$10$dfZdEBlIA3pDL3tK8B6fieDSamg6xD5jE5z6VFJ.mKRa6dLiJbOTy', 'STUDENT', 1, '2026-10-05 14:37:29'),
 (8, 'ADMIN001', '$2y$12$lW4XC5INw7dcSYGuI0r4XOBuCxFFgB2inPzAocdUD9dUNhmXtSCRa', 'ADMIN', 1, '2026-10-05 14:41:27'),
-(9, '202401112', '$2y$10$sQJBR/O/85EZbGPnKFQMq.fKza.Wkrb74PlKCUlDLBA9n3hiTYzPO', 'STUDENT', 1, '2026-10-05 17:46:22'),
-(11, '202401113', '$2y$10$7VXusXb3bIs.Cl2DiUKKhOtpFgeLa3t96SLoiFp4nQwSCg1jAhATS', 'STUDENT', 1, '2026-10-05 17:50:03'),
-(13, '202401115', '$2y$10$7VXusXb3bIs.Cl2DiUKKhOtpFgeLa3t96SLoiFp4nQwSCg1jAhATS', 'STUDENT', 1, '2026-10-05 17:50:49'),
-(14, '202401116', '$2y$10$9WQcmunil/owg90wWY.EKuY6z83zRCS3pVzdOugc7QBYD0Uw.z/B6', 'STUDENT', 1, '2026-10-05 17:55:47'),
-(17, '20242025', '$2y$10$FUWCvLCwnqbsliSbSEfyouSwTdfZkxLsx4TJKY81t9FUCoazjRzhS', 'STUDENT', 1, '2026-10-08 20:46:38'),
-(18, '20240529', '$2y$10$QwPXttyiGvwLe0J6jkzhzOQjdTTHyBxlWy9zNs5PAv/69zStXc1ES', 'STUDENT', 1, '2026-10-20 20:26:42'),
-(19, '202400907', '$2y$10$OvbXpaP/QJlQEVEI4l0Ws.cZyOm5FUyr7fz5mUsDNIvftLsJJjcSm', 'STUDENT', 1, '2026-10-20 21:42:15');
+(20, '20240529', '$2y$10$3O8ZxThF/cq1kA.hBgqh/.fDuQ2NnY5EwRIO295x/kqK8Z0BcrQXa', 'STUDENT', 1, '2026-11-05 11:51:38'),
+(21, '202400764', '$2y$10$8x2VLMRovE1nPr9ofcXT4ubxW0xxxC38QPLWp4dZimGiD/2wiGkAS', 'STUDENT', 1, '2026-11-05 12:38:02'),
+(22, '202400847', '$2y$10$Ru5HH.euldk2ddYuE0buK./dELSwrsewaaLRQoBAVkuld3KvapjB2', 'STUDENT', 1, '2026-11-05 12:38:47'),
+(23, '202401207', '$2y$10$oOfIFHlickuf0M2.22VX1eHq4x0Sd//CzdrBmCgOIkbLddhrYNENS', 'STUDENT', 1, '2026-11-05 12:39:20'),
+(24, '202400745', '$2y$10$EWnxlM.lQwKxAisabM/8dOOTr.AEByxRaFlxug2a5P0GSb.myLKJm', 'STUDENT', 1, '2026-11-05 12:40:09'),
+(25, '202400924', '$2y$10$DT1P4apIl0lnzILeSDLyuenTuGXngWES.efyAC5PqZyhl5wgdpJoy', 'STUDENT', 1, '2026-11-05 12:50:17');
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `clearance_submissions`
+--
+ALTER TABLE `clearance_submissions`
+  ADD PRIMARY KEY (`clearance_id`),
+  ADD KEY `idx_clearance_student_period` (`student_id`,`semester`,`school_year`),
+  ADD KEY `idx_clearance_status` (`status`);
 
 --
 -- Indexes for table `cor_submissions`
@@ -369,7 +490,9 @@ INSERT INTO `users` (`user_id`, `account_number`, `password_hash`, `role`, `is_a
 ALTER TABLE `cor_submissions`
   ADD PRIMARY KEY (`cor_submission_id`),
   ADD KEY `student_id` (`student_id`),
-  ADD KEY `reviewed_by` (`reviewed_by`);
+  ADD KEY `reviewed_by` (`reviewed_by`),
+  ADD KEY `idx_cor_student_period_status` (`student_id`,`period_id`,`status`),
+  ADD KEY `fk_cor_submission_period` (`period_id`);
 
 --
 -- Indexes for table `courses`
@@ -391,6 +514,13 @@ ALTER TABLE `course_offerings`
 ALTER TABLE `course_offering_schedules`
   ADD PRIMARY KEY (`schedule_id`),
   ADD KEY `fk_schedule_offering` (`offering_id`);
+
+--
+-- Indexes for table `enrollment_periods`
+--
+ALTER TABLE `enrollment_periods`
+  ADD PRIMARY KEY (`period_id`),
+  ADD UNIQUE KEY `uq_enrollment_period` (`semester`,`school_year`);
 
 --
 -- Indexes for table `enrollment_status_history`
@@ -439,6 +569,24 @@ ALTER TABLE `students`
   ADD UNIQUE KEY `uq_students_email` (`email`);
 
 --
+-- Indexes for table `student_course_enrollments`
+--
+ALTER TABLE `student_course_enrollments`
+  ADD PRIMARY KEY (`enrollment_id`),
+  ADD UNIQUE KEY `uq_student_offering` (`student_id`,`offering_id`),
+  ADD KEY `fk_sce_offering` (`offering_id`);
+
+--
+-- Indexes for table `student_masterlist`
+--
+ALTER TABLE `student_masterlist`
+  ADD PRIMARY KEY (`masterlist_id`),
+  ADD UNIQUE KEY `uq_masterlist_student_number` (`student_number`),
+  ADD UNIQUE KEY `uq_masterlist_email` (`email`),
+  ADD KEY `idx_masterlist_status` (`registration_status`),
+  ADD KEY `fk_masterlist_user` (`user_id`);
+
+--
 -- Indexes for table `system_settings`
 --
 ALTER TABLE `system_settings`
@@ -456,34 +604,46 @@ ALTER TABLE `users`
 --
 
 --
+-- AUTO_INCREMENT for table `clearance_submissions`
+--
+ALTER TABLE `clearance_submissions`
+  MODIFY `clearance_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
 -- AUTO_INCREMENT for table `cor_submissions`
 --
 ALTER TABLE `cor_submissions`
-  MODIFY `cor_submission_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `cor_submission_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `courses`
 --
 ALTER TABLE `courses`
-  MODIFY `course_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `course_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `course_offerings`
 --
 ALTER TABLE `course_offerings`
-  MODIFY `offering_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `offering_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `course_offering_schedules`
 --
 ALTER TABLE `course_offering_schedules`
-  MODIFY `schedule_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `schedule_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `enrollment_periods`
+--
+ALTER TABLE `enrollment_periods`
+  MODIFY `period_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `enrollment_status_history`
 --
 ALTER TABLE `enrollment_status_history`
-  MODIFY `history_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `history_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT for table `evaluation_questions`
@@ -495,25 +655,37 @@ ALTER TABLE `evaluation_questions`
 -- AUTO_INCREMENT for table `faculty_assignment_finalizations`
 --
 ALTER TABLE `faculty_assignment_finalizations`
-  MODIFY `finalization_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `finalization_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `professor_evaluations`
 --
 ALTER TABLE `professor_evaluations`
-  MODIFY `evaluation_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `evaluation_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `professor_evaluation_answers`
 --
 ALTER TABLE `professor_evaluation_answers`
-  MODIFY `answer_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `answer_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=241;
 
 --
 -- AUTO_INCREMENT for table `students`
 --
 ALTER TABLE `students`
-  MODIFY `student_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `student_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+
+--
+-- AUTO_INCREMENT for table `student_course_enrollments`
+--
+ALTER TABLE `student_course_enrollments`
+  MODIFY `enrollment_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=107;
+
+--
+-- AUTO_INCREMENT for table `student_masterlist`
+--
+ALTER TABLE `student_masterlist`
+  MODIFY `masterlist_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `system_settings`
@@ -525,18 +697,25 @@ ALTER TABLE `system_settings`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `user_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- Constraints for dumped tables
 --
 
 --
+-- Constraints for table `clearance_submissions`
+--
+ALTER TABLE `clearance_submissions`
+  ADD CONSTRAINT `fk_clearance_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `cor_submissions`
 --
 ALTER TABLE `cor_submissions`
   ADD CONSTRAINT `cor_submissions_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `cor_submissions_ibfk_2` FOREIGN KEY (`reviewed_by`) REFERENCES `users` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE;
+  ADD CONSTRAINT `cor_submissions_ibfk_2` FOREIGN KEY (`reviewed_by`) REFERENCES `users` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_cor_submission_period` FOREIGN KEY (`period_id`) REFERENCES `enrollment_periods` (`period_id`);
 
 --
 -- Constraints for table `course_offerings`
@@ -575,210 +754,21 @@ ALTER TABLE `professor_evaluations`
 ALTER TABLE `professor_evaluation_answers`
   ADD CONSTRAINT `fk_answer_evaluation` FOREIGN KEY (`evaluation_id`) REFERENCES `professor_evaluations` (`evaluation_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_answer_question` FOREIGN KEY (`question_id`) REFERENCES `evaluation_questions` (`question_id`);
+
+--
+-- Constraints for table `student_course_enrollments`
+--
+ALTER TABLE `student_course_enrollments`
+  ADD CONSTRAINT `fk_sce_offering` FOREIGN KEY (`offering_id`) REFERENCES `course_offerings` (`offering_id`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_sce_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `student_masterlist`
+--
+ALTER TABLE `student_masterlist`
+  ADD CONSTRAINT `fk_masterlist_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-
-
-CREATE TABLE IF NOT EXISTS student_course_enrollments (
-    enrollment_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-
-    student_id INT UNSIGNED NOT NULL,
-    offering_id INT UNSIGNED NOT NULL,
-
-    enrollment_type ENUM('REGULAR', 'IRREGULAR')
-        NOT NULL DEFAULT 'REGULAR',
-
-    created_at DATETIME NOT NULL
-        DEFAULT CURRENT_TIMESTAMP,
-
-    UNIQUE KEY uq_student_offering (
-        student_id,
-        offering_id
-    ),
-
-    CONSTRAINT fk_sce_student
-        FOREIGN KEY (student_id)
-        REFERENCES students(student_id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-
-    CONSTRAINT fk_sce_offering
-        FOREIGN KEY (offering_id)
-        REFERENCES course_offerings(offering_id)
-        ON DELETE RESTRICT
-        ON UPDATE CASCADE
-);
-
-
-
--- eto ung sample professor for previous semesters
-
-
-INSERT INTO course_offerings
-(
-    course_id,
-    program,
-    year_level,
-    section,
-    semester,
-    school_year,
-    instructor_name
-)
-SELECT
-    c.course_id,
-    'BS Information Technology',
-    3,
-    'BSIT 3D',
-    '2nd Semester',
-    '2025 - 2026',
-    sample.instructor_name
-FROM (
-    SELECT 'IT 301' AS course_code,
-           'Sample Professor A' AS instructor_name
-    UNION ALL
-    SELECT 'IT 302', 'Sample Professor B'
-    UNION ALL
-    SELECT 'IT 303', 'Sample Professor C'
-) AS sample
-INNER JOIN courses c
-    ON c.course_code = sample.course_code
-WHERE NOT EXISTS (
-    SELECT 1
-    FROM course_offerings co
-    WHERE co.course_id = c.course_id
-      AND co.program = 'BS Information Technology'
-      AND co.year_level = 3
-      AND co.section = 'BSIT 3D'
-      AND co.semester = '2nd Semester'
-      AND co.school_year = '2025 - 2026'
-);
-
-INSERT INTO student_course_enrollments
-    (student_id, offering_id, enrollment_type)
-SELECT
-    s.student_id,
-    co.offering_id,
-    'REGULAR'
-FROM students s
-INNER JOIN course_offerings co
-    ON co.program = 'BS Information Technology'
-    AND co.year_level = 3
-    AND co.section = 'BSIT 3D'
-    AND co.semester = '2nd Semester'
-    AND co.school_year = '2025 - 2026'
-WHERE s.student_number = '202400745'
-  AND NOT EXISTS (
-      SELECT 1
-      FROM student_course_enrollments sce
-      WHERE sce.student_id = s.student_id
-        AND sce.offering_id = co.offering_id
-  );
-
-
-CREATE TABLE clearance_submissions (
-    clearance_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-
-    student_id INT UNSIGNED NOT NULL,
-
-    semester VARCHAR(50) NOT NULL,
-    school_year VARCHAR(20) NOT NULL,
-
-    file_path VARCHAR(255) NOT NULL,
-    original_filename VARCHAR(255) NOT NULL,
-
-    status ENUM(
-        'PENDING',
-        'APPROVED',
-        'REJECTED'
-    ) NOT NULL DEFAULT 'PENDING',
-
-    rejection_reason TEXT NULL,
-
-    reviewed_by INT UNSIGNED NULL,
-    reviewed_at DATETIME NULL,
-
-    submitted_at DATETIME NOT NULL
-        DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_clearance_student
-        FOREIGN KEY (student_id)
-        REFERENCES students(student_id)
-        ON DELETE CASCADE,
-
-    INDEX idx_clearance_student_period (
-        student_id,
-        semester,
-        school_year
-    ),
-
-    INDEX idx_clearance_status (status)
-);
-
--- CMU Enrollment System: Step 1 - non-destructive enrollment-period schema
--- BACK UP YOUR DATABASE before running this script.
--- Run ONCE in phpMyAdmin, against your cmuenrollment database.
--- This migration does NOT reset students or change the current enrollment period.
-
-CREATE TABLE IF NOT EXISTS enrollment_periods (
-  period_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  semester VARCHAR(50) NOT NULL,
-  school_year VARCHAR(20) NOT NULL,
-  start_date DATE DEFAULT NULL,
-  end_date DATE DEFAULT NULL,
-  status ENUM('OPEN','CLOSED') NOT NULL DEFAULT 'CLOSED',
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  closed_at DATETIME DEFAULT NULL,
-  PRIMARY KEY (period_id),
-  UNIQUE KEY uq_enrollment_period (semester, school_year)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Register the current period without changing system_settings.
-INSERT INTO enrollment_periods (semester, school_year, start_date, end_date, status)
-SELECT semester, school_year, start_date, end_date, enrollment_status
-FROM system_settings
-WHERE setting_id = 1 AND semester IS NOT NULL AND school_year IS NOT NULL
-ON DUPLICATE KEY UPDATE period_id = period_id;
-
--- Each COR submission must belong to a specific period going forward.
--- Nullable at first: existing COR records have no reliable period metadata.
-ALTER TABLE cor_submissions
-  ADD COLUMN period_id INT UNSIGNED NULL AFTER student_id,
-  ADD INDEX idx_cor_student_period_status (student_id, period_id, status),
-  ADD CONSTRAINT fk_cor_submission_period
-    FOREIGN KEY (period_id) REFERENCES enrollment_periods(period_id);
-
--- Check existing COR records. Assign period_id only after verifying their true period.
-SELECT cor_submission_id, student_id, file_name, submitted_at, status, period_id
-FROM cor_submissions ORDER BY submitted_at DESC;
-
-SELECT period_id, semester, school_year, status FROM enrollment_periods;
-
-CREATE TABLE IF NOT EXISTS student_masterlist (
-    masterlist_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    student_number VARCHAR(50) NOT NULL,
-    first_name VARCHAR(100) NOT NULL,
-    middle_name VARCHAR(100) DEFAULT NULL,
-    last_name VARCHAR(100) NOT NULL,
-    date_of_birth DATE DEFAULT NULL,
-    email VARCHAR(100) NOT NULL,
-    program VARCHAR(100) NOT NULL,
-    year_level INT NOT NULL,
-    section VARCHAR(50) NOT NULL,
-    previous_program VARCHAR(100) DEFAULT NULL,
-    previous_year_level INT DEFAULT NULL,
-    previous_section VARCHAR(50) DEFAULT NULL,
-    previous_semester VARCHAR(50) DEFAULT NULL,
-    previous_school_year VARCHAR(20) DEFAULT NULL,
-    registration_status ENUM('UNREGISTERED','REGISTERED','REVIEW_REQUIRED') NOT NULL DEFAULT 'UNREGISTERED',
-    user_id INT UNSIGNED DEFAULT NULL,
-    imported_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (masterlist_id),
-    UNIQUE KEY uq_masterlist_student_number (student_number),
-    UNIQUE KEY uq_masterlist_email (email),
-    KEY idx_masterlist_status (registration_status),
-    CONSTRAINT fk_masterlist_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
