@@ -115,7 +115,7 @@ $stages = [
         'reason' => '',
     ],
 ];
-
+$currentPage = 'myenrollment';
 $nextUrl = $stepsDone === 0 ? 'faculty_evaluation' : ($stepsDone === 1 ? 'clearance' : ($stepsDone < 4 ? 'cor' : ''));
 $nextText = $stepsDone === 0 ? 'Go to Evaluation' : ($stepsDone === 1 ? 'View Clearance' : ($stepsDone < 4 ? 'View COR' : ''));
 ?>

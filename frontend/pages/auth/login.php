@@ -26,14 +26,6 @@ if (!empty($_SESSION['student_id'])) {
     <!-- Glass card -->
     <section class="w-full max-w-sm rounded-2xl border border-white/40 bg-white/30 p-6 shadow-xl backdrop-blur-md">
 
-      <!-- Top row: back + register -->
-      <div class="flex items-center justify-between text-xs">
-        <a href="<?= BASE_URL ?>" aria-label="Go back"
-           class="rounded p-1 text-base hover:bg-white/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600">
-          <i class="bi bi-arrow-left"></i>
-        </a>
-      </div>
-
       <!-- Heading -->
       <h1 class="mt-6 text-3xl font-bold">Welcome Back!</h1>
       <p class="mt-1 text-xs">Log in to your account to continue to the CMU Enrollment System</p>
@@ -78,6 +70,7 @@ if (!empty($_SESSION['student_id'])) {
           Log in
         </button>
       </form>
+      <p class="mt-5 text-center text-xs">Don't have an account? <a class="font-bold text-blue-700 hover:underline" href="<?= BASE_URL . '?page=register' ?>">Create Account</a></p>
 
     </section>
   </main>

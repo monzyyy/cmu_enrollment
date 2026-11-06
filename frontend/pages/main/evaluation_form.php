@@ -54,6 +54,12 @@ if (!$settings) {
     exit('Enrollment settings are unavailable.');
 }
 
+// Do not allow students to open an evaluation form outside the open period.
+// POST requests are still checked below, so direct submissions remain blocked.
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' && $settings['enrollment_status'] !== 'OPEN') {
+    evalRedirect();
+}
+
 try {
     [$previousSemester, $previousSchoolYear] = evaluationPreviousTerm(
         $settings['semester'], $settings['school_year']
@@ -127,6 +133,11 @@ $checkStmt->bind_param("ii", $studentId, $offeringId);
 $checkStmt->execute();
 $alreadyEvaluated = $checkStmt->get_result()->num_rows > 0;
 $checkStmt->close();
+
+// Prevent opening a new form after progressing beyond evaluation.
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' && !$alreadyEvaluated && $student['enrollment_phase'] !== 'NOT_STARTED') {
+    evalRedirect();
+}
 
 // Load questionnaire.
 $questionResult = $conn->query(
@@ -368,7 +379,7 @@ $currentPage = 'faculty_evaluation';
     <style>
         /* Scoped to this page: shared main.css and other screens are unchanged. */
         /* Keep desktop navigation available while the long form scrolls. */
-        @media (min-width: 769px) {
+        @media (min-width: 901px) {
             .layout > .sidebar {
                 position: fixed;
                 top: 90px;
@@ -604,5 +615,6 @@ $currentPage = 'faculty_evaluation';
     updateProgress();
 })();
 </script>
+<script src="<?= BASE_URL ?>frontend/assets/js/custom.js"></script>
 </body>
 </html>

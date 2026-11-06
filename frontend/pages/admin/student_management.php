@@ -6,6 +6,7 @@ require_role('ADMIN');
 
 $currentPage = 'student_management';
 if (empty($_SESSION['masterlist_import_csrf'])) { $_SESSION['masterlist_import_csrf'] = bin2hex(random_bytes(32)); }
+if (empty($_SESSION['registration_review_csrf'])) { $_SESSION['registration_review_csrf'] = bin2hex(random_bytes(32)); }
 
 $studentsPerPage = 5;
 
@@ -188,6 +189,27 @@ $students =
 
 $stmt->close();
 
+
+/* Registration requests are reviewed separately from active student accounts. */
+$registrationRequests = [];
+$registrationRequestError = false;
+$registrationSql = "SELECT r.request_id, r.status, r.requested_at, r.reviewed_at,
+                           m.student_number, m.first_name, m.middle_name, m.last_name,
+                           m.program, m.year_level, m.section, m.date_of_birth
+                    FROM student_registration_requests r
+                    INNER JOIN student_masterlist m ON m.masterlist_id = r.masterlist_id
+                    ORDER BY CASE r.status WHEN 'PENDING' THEN 0 WHEN 'REJECTED' THEN 1 ELSE 2 END,
+                             r.requested_at DESC";
+$registrationResult = $conn->query($registrationSql);
+if ($registrationResult) {
+    $registrationRequests = $registrationResult->fetch_all(MYSQLI_ASSOC);
+    $registrationResult->free();
+} else {
+    $registrationRequestError = true;
+    error_log('Student Management registration requests query failed: ' . $conn->error);
+}
+$pendingRegistrationCount = count(array_filter($registrationRequests, static fn($r) => $r['status'] === 'PENDING'));
+
 ?>
 
 <!DOCTYPE html>
@@ -262,6 +284,23 @@ $stmt->close();
         @media (max-width: 600px) {
             .student-management-page-heading { flex-wrap: wrap; }
         }
+
+        .student-management-tabs { display:flex; gap:8px; margin:22px 0 18px; flex-wrap:wrap; border-bottom:1px solid #dce4ef; }
+        .student-management-tab { border:0; background:transparent; padding:12px 15px; font:700 13px Manrope,sans-serif; color:#53657d; cursor:pointer; border-bottom:3px solid transparent; }
+        .student-management-tab.is-active { color:#1454a2; border-bottom-color:#1454a2; }
+        .student-management-tab .request-count { display:inline-block; margin-left:5px; padding:2px 7px; border-radius:20px; background:#fff0d6; color:#915c0b; font-size:11px; }
+        .registration-toolbar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
+        .registration-toolbar select { padding:9px 12px; border:1px solid #d4deeb; border-radius:8px; background:white; color:#173153; }
+        .registration-status { font-weight:700; font-size:12px; }
+        .registration-status.pending { color:#976000; } .registration-status.approved { color:#147c45; } .registration-status.rejected { color:#ae3030; }
+        .registration-review-button { border:1px solid #c6d8ed; border-radius:7px; background:#eef5ff; color:#174c88; font-weight:700; padding:8px 13px; cursor:pointer; }
+        .registration-review-button:hover { background:#dcecff; }
+        .registration-detail-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+        .registration-detail { min-width:0; }
+        .registration-detail span { display:block; color:#68788c; font-size:12px; margin-bottom:4px; }
+        .registration-detail strong { display:block; overflow-wrap:anywhere; font-size:14px; }
+        @media(max-width:500px) { .registration-detail-grid { grid-template-columns:1fr; } }
+        [hidden] { display:none !important; }
     </style>
 
 </head>
@@ -315,6 +354,12 @@ $stmt->close();
             </div>
 
 
+            <div class="student-management-tabs" role="tablist" aria-label="Student management sections">
+                <button type="button" class="student-management-tab is-active" id="studentsTab" role="tab" aria-selected="true" aria-controls="studentsPanel">Students</button>
+                <button type="button" class="student-management-tab" id="registrationTab" role="tab" aria-selected="false" aria-controls="registrationPanel">Registration Requests<?php if ($pendingRegistrationCount > 0): ?><span class="request-count"><?= (int) $pendingRegistrationCount ?></span><?php endif; ?></button>
+            </div>
+
+            <section id="studentsPanel" role="tabpanel" aria-labelledby="studentsTab">
             <!-- STUDENT SUMMARY -->
 
             <div class="admin-summary-card">
@@ -604,12 +649,182 @@ $stmt->close();
                 <?php endif; ?>
 
             </div>
+            </section>
+
+            <section id="registrationPanel" role="tabpanel" aria-labelledby="registrationTab" hidden>
+                <div class="registration-toolbar">
+                    <div>
+                        <h2 style="font-size:18px;font-weight:800;margin:0 0 5px">Registration Requests</h2>
+                        <p style="font-size:12px;margin:0">Review student registration requests before activating accounts.</p>
+                    </div>
+                    <label for="registrationStatusFilter" style="font-size:13px;font-weight:600">Status
+                        <select id="registrationStatusFilter">
+                            <option value="ALL">All Requests</option>
+                            <option value="PENDING" selected>Pending</option>
+                            <option value="APPROVED">Approved</option>
+                            <option value="REJECTED">Rejected</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="admin-table-card">
+                    <div class="admin-table-wrapper">
+                        <table class="admin-table">
+                            <thead><tr><th>Student Number</th><th>Student Name</th><th>Program</th><th>Year</th><th>Requested At</th><th>Status</th><th>Action</th></tr></thead>
+                            <tbody id="registrationRequestsBody">
+                                <?php if ($registrationRequestError): ?>
+                                    <tr><td colspan="7" class="admin-empty-state">Unable to load registration requests. Check the server logs.</td></tr>
+                                <?php elseif (!$registrationRequests): ?>
+                                    <tr><td colspan="7" class="admin-empty-state">No registration requests found.</td></tr>
+                                <?php else: ?>
+                                    <?php foreach ($registrationRequests as $request): ?>
+                                        <?php $requestName = trim(($request['first_name'] ?? '') . ' ' . ($request['middle_name'] ?? '') . ' ' . ($request['last_name'] ?? '')); ?>
+                                        <tr data-registration-status="<?= e($request['status']) ?>">
+                                            <td><?= e($request['student_number']) ?></td>
+                                            <td><strong><?= e($requestName) ?></strong></td>
+                                            <td><?= e($request['program'] ?: '-') ?></td>
+                                            <td><?= e($request['year_level'] ?: '-') ?></td>
+                                            <td><?= e($request['requested_at']) ?></td>
+                                            <td><span class="registration-status <?= e(strtolower($request['status'])) ?>"><?= e(ucfirst(strtolower($request['status']))) ?></span></td>
+                                            <td><button type="button" class="registration-review-button"
+                                                data-request-id="<?= e($request['request_id']) ?>"
+                                                data-student-number="<?= e($request['student_number']) ?>"
+                                                data-student-name="<?= e($requestName) ?>"
+                                                data-program="<?= e($request['program'] ?? '') ?>"
+                                                data-year="<?= e($request['year_level'] ?? '') ?>"
+                                                data-section="<?= e($request['section'] ?? '') ?>"
+                                                data-dob="<?= e($request['date_of_birth'] ?? '') ?>"
+                                                data-requested="<?= e($request['requested_at']) ?>"
+                                                data-status="<?= e($request['status']) ?>">Review</button></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                                <tr id="registrationFilteredEmpty" hidden><td colspan="7" class="admin-empty-state">No requests match this status.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
 
         </div>
 
     </main>
 
 </div>
+
+<script>
+(() => {
+    const studentsTab = document.getElementById('studentsTab');
+    const registrationTab = document.getElementById('registrationTab');
+    const studentsPanel = document.getElementById('studentsPanel');
+    const registrationPanel = document.getElementById('registrationPanel');
+    const filter = document.getElementById('registrationStatusFilter');
+    const rows = Array.from(document.querySelectorAll('#registrationRequestsBody tr[data-registration-status]'));
+    const empty = document.getElementById('registrationFilteredEmpty');
+    function switchTab(name) {
+        const isStudents = name === 'students';
+        studentsPanel.hidden = !isStudents;
+        registrationPanel.hidden = isStudents;
+        studentsTab.classList.toggle('is-active', isStudents);
+        registrationTab.classList.toggle('is-active', !isStudents);
+        studentsTab.setAttribute('aria-selected', String(isStudents));
+        registrationTab.setAttribute('aria-selected', String(!isStudents));
+    }
+    function filterRequests() {
+        let shown = 0;
+        rows.forEach(row => {
+            const visible = filter.value === 'ALL' || row.dataset.registrationStatus === filter.value;
+            row.hidden = !visible;
+            if (visible) shown++;
+        });
+        empty.hidden = rows.length === 0 || shown > 0;
+    }
+    studentsTab.addEventListener('click', () => switchTab('students'));
+    registrationTab.addEventListener('click', () => switchTab('registration'));
+    filter.addEventListener('change', filterRequests);
+    filterRequests();
+})();
+</script>
+
+<!-- REGISTRATION REVIEW MODAL -->
+<div class="student-modal-overlay" id="registrationReviewModal" role="dialog" aria-modal="true" aria-labelledby="registrationReviewTitle">
+ <div class="student-modal" style="max-width:580px">
+  <div class="student-modal-header"><div><h2 id="registrationReviewTitle">Review Registration Request</h2><p>Verify identity using official Registrar records before approval.</p></div><button type="button" class="student-modal-close" id="closeRegistrationReview" aria-label="Close"><i class="fa-solid fa-xmark"></i></button></div>
+  <div class="student-modal-body">
+   <div class="registration-detail-grid">
+    <div class="registration-detail"><span>Student Number</span><strong id="reviewStudentNumber"></strong></div>
+    <div class="registration-detail"><span>Student Name</span><strong id="reviewStudentName"></strong></div>
+    <div class="registration-detail"><span>Date of Birth</span><strong id="reviewDob"></strong></div>
+    <div class="registration-detail"><span>Program</span><strong id="reviewProgram"></strong></div>
+    <div class="registration-detail"><span>Year Level</span><strong id="reviewYear"></strong></div>
+    <div class="registration-detail"><span>Section</span><strong id="reviewSection"></strong></div>
+    <div class="registration-detail"><span>Requested At</span><strong id="reviewRequested"></strong></div>
+    <div class="registration-detail"><span>Status</span><strong id="reviewStatus"></strong></div>
+   </div>
+   <div id="registrationDecisionFields" style="margin-top:18px">
+    <label style="display:flex;gap:8px;align-items:flex-start;font-size:13px"><input id="registrationIdentityVerified" type="checkbox" style="margin-top:3px"> I have independently verified this student's identity against official Registrar records.</label>
+    <label for="registrationRejectionReason" style="display:block;margin-top:14px;font-size:13px">Rejection reason (optional)</label>
+    <textarea id="registrationRejectionReason" maxlength="2000" rows="2" style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px" placeholder="Reason for rejecting this request"></textarea>
+   </div>
+   <p id="registrationReviewMessage" role="status" aria-live="polite" style="font-size:13px;margin-top:12px;white-space:pre-wrap"></p>
+  </div>
+  <div class="student-modal-footer">
+   <button type="button" class="student-modal-cancel" id="cancelRegistrationReview">Close</button>
+   <button type="button" class="admin-primary-button" id="rejectRegistrationRequest">Reject</button>
+   <button type="button" class="admin-primary-button" id="approveRegistrationRequest">Approve</button>
+  </div>
+ </div>
+</div>
+<script>
+(() => {
+ const modal=document.getElementById('registrationReviewModal');
+ const closeButton=document.getElementById('closeRegistrationReview');
+ const cancelButton=document.getElementById('cancelRegistrationReview');
+ const approve=document.getElementById('approveRegistrationRequest');
+ const reject=document.getElementById('rejectRegistrationRequest');
+ const identity=document.getElementById('registrationIdentityVerified');
+ const reason=document.getElementById('registrationRejectionReason');
+ const message=document.getElementById('registrationReviewMessage');
+ let requestId=null, previousFocus=null, saved=false, busy=false;
+ const csrf=<?= json_encode($_SESSION['registration_review_csrf']) ?>;
+ function close() {
+  if(busy)return;
+  modal.classList.remove('is-open');
+  if(saved) { window.location.href=window.location.pathname+'?page=student_management'; return; }
+  if(previousFocus) previousFocus.focus();
+ }
+ document.getElementById('registrationRequestsBody').addEventListener('click',event=>{
+  const button=event.target.closest('.registration-review-button');
+  if(!button)return;
+  previousFocus=button;requestId=Number(button.dataset.requestId);saved=false;
+  const fields={reviewStudentNumber:button.dataset.studentNumber,reviewStudentName:button.dataset.studentName,reviewDob:button.dataset.dob,reviewProgram:button.dataset.program,reviewYear:button.dataset.year,reviewSection:button.dataset.section,reviewRequested:button.dataset.requested,reviewStatus:button.dataset.status};
+  Object.entries(fields).forEach(([id,value])=>document.getElementById(id).textContent=value||'—');
+  const pending=button.dataset.status==='PENDING';
+  document.getElementById('registrationDecisionFields').hidden=!pending;
+  approve.hidden=!pending;reject.hidden=!pending;
+  identity.checked=false;reason.value='';message.textContent='';
+  modal.classList.add('is-open');closeButton.focus();
+ });
+ async function submit(action){
+  if(busy || !requestId)return;
+  if(action==='approve' && !identity.checked){message.textContent='Verify identity before approving.';return;}
+  if(!window.confirm(action==='approve'?'Approve this student and create an account?':'Reject this registration request?'))return;
+  busy=true;approve.disabled=true;reject.disabled=true;message.textContent='Processing...';
+  try {
+   const response=await fetch(<?= json_encode(BASE_URL . 'backend/api/review_registration_request.php') ?>,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({csrf_token:csrf,request_id:requestId,action,identity_verified:identity.checked,rejection_reason:reason.value})});
+   const result=await response.json();
+   if(!response.ok || !result.success)throw new Error(result.message||'Unable to process request.');
+   saved=true;message.textContent=result.message||'Request updated.';
+   approve.hidden=true;reject.hidden=true;document.getElementById('registrationDecisionFields').hidden=true;
+  }catch(error){message.textContent=error.message||'Unable to process request.';}
+  finally{busy=false;approve.disabled=false;reject.disabled=false;}
+ }
+ approve.addEventListener('click',()=>submit('approve'));
+ reject.addEventListener('click',()=>submit('reject'));
+ closeButton.addEventListener('click',close);cancelButton.addEventListener('click',close);
+ modal.addEventListener('click',event=>{if(event.target===modal)close();});
+ document.addEventListener('keydown',event=>{if(event.key==='Escape'&&modal.classList.contains('is-open'))close();});
+})();
+</script>
 
 <!-- IMPORT MASTERLIST MODAL -->
 <div class="student-modal-overlay" id="importMasterlistModal">
@@ -619,8 +834,8 @@ $stmt->close();
     <form id="importMasterlistForm" enctype="multipart/form-data">
       <input type="hidden" name="csrf_token" value="<?= e($_SESSION['masterlist_import_csrf']) ?>">
       <div class="student-modal-body">
-        <p style="font-size:13px;line-height:1.6;margin-bottom:14px">Open the Excel template and use <strong>Save As → CSV UTF-8 (Comma delimited)</strong>. Keep the original column headers. Existing masterlist records are skipped, not overwritten.</p>
-        <div class="student-form-group"><label for="masterlistCsv">Masterlist CSV file</label><input type="file" name="masterlist_csv" id="masterlistCsv" accept=".csv,text/csv" required></div>
+        <p style="font-size:13px;line-height:1.6;margin-bottom:14px">Upload the original Excel workbook (.xlsx) or a CSV UTF-8 file (.csv). Use the first worksheet and keep all 14 template headers in their original order. Existing masterlist records are skipped, not overwritten.</p>
+        <div class="student-form-group"><label for="masterlistFile">Masterlist file (.csv or .xlsx)</label><input type="file" name="masterlist_file" id="masterlistFile" accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required></div>
         <div class="student-form-message" id="importMasterlistMessage" role="status" aria-live="polite" style="white-space:pre-line"></div>
       </div>
       <div class="student-modal-footer"><button type="button" class="student-modal-cancel" id="cancelImportMasterlist">Cancel</button><button type="submit" class="admin-primary-button" id="submitImportMasterlist"><i class="fa-solid fa-upload"></i> Import Records</button></div>

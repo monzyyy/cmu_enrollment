@@ -168,21 +168,21 @@ if (empty($_SESSION['csrf_token'])) {
 
 
 /* ---------------------------------------------------------
-   SIGNATURE CHECKLIST
-   'signed' is read-only here: offices tick it on their side.
-   TODO: replace with a query on the student's clearance records.
+   REQUIRED SIGNATURES
+   Names follow the official project-generated clearance PDF.
+   Signatures are collected manually and verified on submission.
 --------------------------------------------------------- */
 $signatures = [
-    ['office' => 'Computer Laboratory',  'signed' => false],
-    ['office' => 'Health Services Office', 'signed' => false],
-    ['office' => 'Computer Laboratory',  'signed' => false],
-    ['office' => 'Program Chair',        'signed' => false],
-    ['office' => 'College Dean',         'signed' => false],
-    ['office' => 'Computer Laboratory',  'signed' => false],
-    ['office' => 'Computer Laboratory',  'signed' => false],
-    ['office' => 'Computer Laboratory',  'signed' => false],
-    ['office' => 'Computer Laboratory',  'signed' => false],
-    ['office' => 'Computer Laboratory',  'signed' => false],
+    ['office' => 'Computer Laboratory / MIS'],
+    ['office' => 'Health Services Office'],
+    ['office' => 'University Library'],
+    ['office' => 'Program Chair'],
+    ['office' => 'College Dean'],
+    ['office' => 'National Service Training Program Office'],
+    ['office' => 'Registrar’s Office'],
+    ['office' => 'Student Values Formation Unit'],
+    ['office' => 'Student Organization and Activity Unit'],
+    ['office' => 'Student Affairs and Services Office'],
 ];
 
 $steps = [
@@ -213,6 +213,37 @@ $steps = [
 
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <style>
+    /* Keep the existing desktop steps layout; stack and center on tablets and phones. */
+    @media (max-width: 900px) {
+        .cl-steps {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 0 !important;
+            grid-template-columns: minmax(0, 1fr) !important;
+        }
+        .cl-steps .cl-step {
+            width: 100% !important;
+            min-width: 0 !important;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        .cl-steps .cl-step-arrow {
+            display: block !important;
+            width: 100% !important;
+            margin: 8px 0 !important;
+            text-align: center !important;
+            align-self: center !important;
+            transform: none !important;
+            position: static !important;
+            font-size: 15px;
+        }
+        .cl-steps .cl-step-arrow::before { content: "\f063"; }
+        .cl-grid, .cl-col, .cl-card { min-width: 0; }
+    }
+    </style>
 </head>
 
 <body>
@@ -461,6 +492,10 @@ $steps = [
                         <h2>Required Signatures Check List</h2>
                     </div>
 
+                    <p style="font-size: 12px; color: #64748b; margin: 0 0 12px;">
+                        Use this list to check which offices you still need to visit. Signatures must be obtained on the printed clearance form.
+                    </p>
+
                     <div class="cl-table-wrap">
 
                         <table class="cl-table">
@@ -483,7 +518,7 @@ $steps = [
                                         <td class="col-check">
                                             <input type="checkbox"
                                             class="cl-checkbox"
-                                            aria-label="<?= e($row['office']) ?>">
+                                            aria-label="Visited <?= e($row['office']) ?> (personal checklist only)">
                                         </td>
                                     </tr>
 

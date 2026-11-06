@@ -35,7 +35,7 @@ $currentPage = 'faculty_evaluation';
 
 // Get current semester and school year
 $settingsQuery = $conn->query("
-    SELECT semester, school_year
+    SELECT semester, school_year, enrollment_status
     FROM system_settings
     WHERE setting_id = 1
     LIMIT 1
@@ -45,6 +45,7 @@ $settings = $settingsQuery->fetch_assoc();
 
 $semester = $settings['semester'] ?? '';
 $schoolYear = $settings['school_year'] ?? '';
+$evaluationOpen = (($settings['enrollment_status'] ?? '') === 'OPEN');
 try {
     [$previousSemester, $previousSchoolYear] = evaluationPreviousTerm($semester, $schoolYear);
 } catch (RuntimeException $e) {
@@ -187,6 +188,14 @@ $progressPercent = $totalSubjects > 0
             </section>
 
 
+            <?php if (!$evaluationOpen): ?>
+                <div role="status" style="padding: 14px 18px; margin-bottom: 18px; background: #fff4e5; border: 1px solid #f1d5a7; border-radius: 10px; color: #754c14;">
+                    <i class="fa-solid fa-lock" aria-hidden="true"></i>
+                    <strong>Faculty Evaluation Unavailable.</strong>
+                    The enrollment period is currently closed. You can review your subjects and evaluation progress, but new evaluations are unavailable until the Registrar opens enrollment.
+                </div>
+            <?php endif; ?>
+
             <!-- =========================
                  EVALUATION CARD
             ========================== -->
@@ -283,11 +292,11 @@ $progressPercent = $totalSubjects > 0
                                     <?php foreach ($subjects as $i => $subject): ?>
 
                                         <tr>
-                                            <td class="col-num"><?= $i + 1 ?></td>
-                                            <td><?= e($subject['code']) ?></td>
-                                            <td><?= e($subject['name']) ?></td>
-                                            <td><?= e($subject['instructor']) ?></td>
-                                            <td class="col-status">
+                                            <td class="col-num" data-label="No."><?= $i + 1 ?></td>
+                                            <td data-label="Course ID"><?= e($subject['code']) ?></td>
+                                            <td data-label="Course Name"><?= e($subject['name']) ?></td>
+                                            <td data-label="Instructor"><?= e($subject['instructor']) ?></td>
+                                            <td class="col-status" data-label="Status">
                                                 <?php if (!$subject['has_instructor']): ?>
                                                     <span class="eval-badge eval-pending">
                                                         <i class="fa-solid fa-clock"></i>
@@ -306,7 +315,7 @@ $progressPercent = $totalSubjects > 0
                                                 <?php endif; ?>
                                             </td>
                                             
-                                        <td class="col-action">
+                                        <td class="col-action" data-label="Action">
 
                                             <?php if (!$subject['has_instructor']): ?>
 
@@ -321,6 +330,15 @@ $progressPercent = $totalSubjects > 0
                                                     style="opacity: 0.5; cursor: not-allowed;">
                                                     <i class="fa-solid fa-check"></i>
                                                     Completed
+                                                </span>
+
+                                            <?php elseif (!$evaluationOpen): ?>
+
+                                                <span class="eval-button" aria-disabled="true"
+                                                      title="Enrollment is currently closed"
+                                                      style="opacity: 0.5; cursor: not-allowed;">
+                                                    <i class="fa-solid fa-lock" aria-hidden="true"></i>
+                                                    Enrollment Closed
                                                 </span>
 
                                             <?php else: ?>

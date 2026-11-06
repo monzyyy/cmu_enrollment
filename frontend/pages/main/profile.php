@@ -26,6 +26,10 @@ $userName = trim(
 );
 
 $currentPage = 'profile';
+if (empty($_SESSION['profile_password_csrf'])) {
+    $_SESSION['profile_password_csrf'] = bin2hex(random_bytes(32));
+}
+
 
 /* ---------------------------------------------------------
    HELPERS
@@ -103,6 +107,18 @@ $accountStatus = $student['account_status'] ?? ($student['status'] ?? '');
 .pf-profile-academic { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 12px 14px 16px; }
 .pf-profile-academic .pf-fields { min-width: 0; }
 @media (max-width: 760px) { .pf-profile-academic { grid-template-columns: 1fr; } }
+
+.pf-security { padding: 18px; }
+.pf-security-form { max-width: 520px; display: grid; gap: 14px; }
+.pf-security-form label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+.pf-security-form input { width: 100%; box-sizing: border-box; border: 1px solid #d1d5db; border-radius: 8px; padding: 11px 12px; font: inherit; background: #fff; color: #111827; }
+.pf-security-form input:focus { outline: 2px solid #2563eb; outline-offset: 1px; }
+.pf-security-form button { justify-self: start; border: 0; border-radius: 8px; background: #1d4ed8; color: #fff; padding: 11px 18px; font: inherit; font-weight: 700; cursor: pointer; }
+.pf-security-form button:disabled { opacity: .6; cursor: wait; }
+.pf-security-help { font-size: 12px; color: #64748b; margin: 0; }
+.pf-security-message { font-size: 13px; margin: 0; }
+.pf-security-message.success { color: #166534; }
+.pf-security-message.error { color: #b91c1c; }
 </style>
 </head>
 
@@ -192,6 +208,33 @@ $accountStatus = $student['account_status'] ?? ($student['status'] ?? '');
                 </div>
             </section>
 
+            <section class="pf-card" style="margin-top: 14px;">
+                <div class="pf-card-head">
+                    <span class="co-icon"><i class="fa-solid fa-shield-halved"></i></span>
+                    <h2>Account Security</h2>
+                </div>
+                <div class="pf-security">
+                    <form id="changePasswordForm" class="pf-security-form" autocomplete="off">
+                        <input type="hidden" name="csrf_token" value="<?= e($_SESSION['profile_password_csrf']) ?>">
+                        <div>
+                            <label for="currentPassword">Current Password</label>
+                            <input id="currentPassword" type="password" name="current_password" autocomplete="current-password" required>
+                        </div>
+                        <div>
+                            <label for="newPassword">New Password</label>
+                            <input id="newPassword" type="password" name="new_password" autocomplete="new-password" minlength="8" maxlength="72" required>
+                            <p class="pf-security-help">Use 8–72 characters, including at least one letter and one number.</p>
+                        </div>
+                        <div>
+                            <label for="confirmPassword">Confirm New Password</label>
+                            <input id="confirmPassword" type="password" name="confirm_password" autocomplete="new-password" required>
+                        </div>
+                        <p id="changePasswordMessage" class="pf-security-message" role="status" aria-live="polite"></p>
+                        <button type="submit" id="changePasswordButton">Update Password</button>
+                    </form>
+                </div>
+            </section>
+
         </div>
 
     </div>
@@ -221,6 +264,49 @@ $accountStatus = $student['account_status'] ?? ($student['status'] ?? '');
         }
 
         form.submit();
+    });
+})();
+</script>
+<script>
+(function () {
+    const form = document.getElementById('changePasswordForm');
+    const message = document.getElementById('changePasswordMessage');
+    const button = document.getElementById('changePasswordButton');
+    if (!form) return;
+    form.addEventListener('submit', async function (event) {
+        event.preventDefault();
+        message.textContent = '';
+        message.className = 'pf-security-message';
+        const data = new FormData(form);
+        const current = String(data.get('current_password') || '');
+        const next = String(data.get('new_password') || '');
+        const confirm = String(data.get('confirm_password') || '');
+        if (next.length < 8 || next.length > 72 || !/[A-Za-z]/.test(next) || !/[0-9]/.test(next)) {
+            message.textContent = 'Use 8–72 characters with at least one letter and one number.';
+            message.classList.add('error'); return;
+        }
+        if (next !== confirm) {
+            message.textContent = 'New passwords do not match.';
+            message.classList.add('error'); return;
+        }
+        if (next === current) {
+            message.textContent = 'Choose a different password.';
+            message.classList.add('error'); return;
+        }
+        button.disabled = true;
+        try {
+            const response = await fetch(<?= json_encode(BASE_URL . 'backend/api/change_student_password.php') ?>, {
+                method: 'POST', body: data, credentials: 'same-origin',
+                headers: {'Accept': 'application/json'}
+            });
+            const result = await response.json();
+            message.textContent = result.message || 'Unable to update password.';
+            message.classList.add(response.ok && result.success ? 'success' : 'error');
+            if (response.ok && result.success) form.reset();
+        } catch (_) {
+            message.textContent = 'Connection error. Please try again.';
+            message.classList.add('error');
+        } finally { button.disabled = false; }
     });
 })();
 </script>

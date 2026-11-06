@@ -31,6 +31,7 @@ $pages = [
     'student_management' => 'admin/student_management.php',
 
     'login' => 'auth/login.php',
+    'register' => 'auth/register.php',
     'forget' => 'auth/forget.php',
     'verification' => 'auth/verification.php',
     'reset' => 'auth/reset.php',

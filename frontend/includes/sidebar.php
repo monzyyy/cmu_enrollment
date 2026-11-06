@@ -43,6 +43,11 @@ $sidebarMenu = [
 <!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
 
+    <!-- Logo inside the slide-out menu on tablet and mobile. -->
+    <div class="sidebar-mobile-logo" aria-label="City of Malabon University">
+        <span>CMU</span>
+    </div>
+
     <nav class="menu">
 
         <p class="menu-title">Dashboard</p>

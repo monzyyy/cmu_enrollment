@@ -1994,3 +1994,68 @@
 .myen-next a{display:inline-flex;align-items:center;gap:8px;padding:9px 12px;border-radius:8px;background:var(--primary);color:#fff;font-size:11px;font-weight:700;white-space:nowrap}
 @media(max-width:760px){.myen-info-grid{grid-template-columns:1fr}.myen-overview-top,.myen-section-head,.myen-next{flex-direction:column;align-items:flex-start}.myen-progress-foot{flex-wrap:wrap}.myen-stage-top{align-items:flex-start;flex-direction:column}.myen-overview h2{font-size:21px}}
 @media(max-width:420px){.myen-details{grid-template-columns:1fr}.myen-overview,.myen-card{padding:13px}}
+
+
+/* Home dashboard responsive layout — scoped to Home components */
+.home-hero-layout, .home-stats, .home-lower,
+.home-hero-layout > *, .home-stats > *, .home-lower > * {
+    min-width: 0;
+}
+.home-hero-layout .home-hero-content,
+.home-panel .panel-header, .home-panel .announcement-item,
+.home-panel .schedule-item { min-width: 0; }
+.home-panel p, .home-panel span, .home-stat-card h2,
+.enrollment-info-item strong { overflow-wrap: anywhere; }
+.enrollment-progress { box-sizing: border-box; min-width: 0; }
+.progress-item { min-width: 0; flex: 0 1 100px; text-align: center; }
+.progress-line { min-width: 4px; margin: 0 6px; }
+@media (max-width: 1250px) {
+    .home-hero-layout { grid-template-columns: minmax(0, 1fr); }
+    .home-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .home-lower { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 600px) {
+    .home-hero-layout { gap: 10px; }
+    .home-hero { padding: 16px 14px; }
+    .home-hero h1 { font-size: 21px; }
+    .enrollment-info-card { padding: 15px; }
+    .enrollment-info-details { margin: 14px 0; gap: 10px; }
+    .enrollment-progress {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px 8px;
+        padding: 14px 10px;
+    }
+    .enrollment-progress .progress-line { display: none; }
+    .enrollment-progress .progress-item { width: 100%; }
+    .home-stats { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+    .home-stat-card { min-height: 0; }
+    .home-lower { gap: 10px; }
+    .panel-header { gap: 8px; }
+    .panel-header h2 { min-width: 0; }
+    .panel-header a { flex-shrink: 0; }
+}
+
+/* Today's Schedule panel */
+.today-day-label { font-size: 10px; font-weight: 500; color: #64748b; white-space: nowrap; }
+.schedule-empty { padding: 22px 14px; text-align: center; color: #64748b; }
+.schedule-empty i { font-size: 20px; margin-bottom: 8px; }
+.schedule-empty p { margin: 0; font-size: 12px; }
+@media (max-width: 400px) { .today-day-label { display: block; margin-top: 3px; } }
+
+
+/* Faculty Evaluation: card-style subjects on narrow screens. */
+@media (max-width: 768px) {
+  .ev-subjects .co-table-wrap { overflow: visible; border: 0; border-radius: 0; }
+  .ev-subjects .ev-table { display: block; min-width: 0; width: 100%; }
+  .ev-subjects .ev-table thead { display: none; }
+  .ev-subjects .ev-table tbody { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .ev-subjects .ev-table tr { display: block; min-width: 0; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--white); }
+  .ev-subjects .ev-table td { display: grid; grid-template-columns: 86px minmax(0, 1fr); gap: 10px; align-items: start; width: 100%; padding: 7px 0; border: 0; background: transparent; text-align: left; overflow-wrap: anywhere; }
+  .ev-subjects .ev-table td::before { content: attr(data-label); font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; padding-top: 3px; }
+  .ev-subjects .ev-table .col-status, .ev-subjects .ev-table .col-action { width: 100%; text-align: left; }
+  .ev-subjects .ev-table .eval-badge, .ev-subjects .ev-table .eval-button { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
+  .ev-subjects .ev-table .col-action .eval-button { width: 100%; min-height: 38px; }
+  .ev-subjects .ev-table td.co-empty { display: block; padding: 18px 8px !important; text-align: center; }
+  .ev-subjects .ev-table td.co-empty::before { content: none; }
+}

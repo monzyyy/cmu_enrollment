@@ -552,7 +552,7 @@ while ($row = $result->fetch_assoc()) {
     <div class="admin-modal-actions"><button type="button" class="admin-modal-cancel" id="cancelNewPeriod">Cancel</button><button type="button" class="admin-modal-confirm" id="confirmNewPeriod">Create New Period</button></div>
   </div>
 </div>
-<script src="<?= BASE_URL ?>frontend/assets/js/custom.js"></script>
+
 <script>
 
 const enrollmentModal =

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 05, 2026 at 08:15 AM
+-- Generation Time: Nov 05, 2026 at 06:41 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -11,6 +11,11 @@ SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
 
+CREATE DATABASE IF NOT EXISTS cmuenrollment_db
+    CHARACTER SET utf8mb4
+    COLLATE utf8mb4_unicode_ci;
+
+USE cmuenrollment_db;
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -124,14 +129,16 @@ CREATE TABLE `course_offerings` (
 --
 
 INSERT INTO `course_offerings` (`offering_id`, `course_id`, `program`, `year_level`, `section`, `semester`, `school_year`, `instructor_name`, `created_at`, `updated_at`) VALUES
-(12, 10, 'Bachelor of Science in Information Technology', 3, 'D', '1st Semester', '2026 - 2027', NULL, '2026-11-05 12:35:34', '2026-11-05 12:35:34'),
-(13, 11, 'Bachelor of Science in Information Technology', 3, 'D', '1st Semester', '2026 - 2027', NULL, '2026-11-05 12:35:34', '2026-11-05 12:35:34'),
-(14, 12, 'Bachelor of Science in Information Technology', 3, 'D', '1st Semester', '2026 - 2027', NULL, '2026-11-05 12:35:34', '2026-11-05 12:35:34'),
-(15, 13, 'Bachelor of Science in Information Technology', 3, 'D', '1st Semester', '2026 - 2027', 'CERWIN JOHN ZAULDA', '2026-11-05 12:35:34', '2026-11-05 12:35:34'),
-(16, 14, 'Bachelor of Science in Information Technology', 3, 'D', '1st Semester', '2026 - 2027', 'Gian Carlo Cruz', '2026-11-05 12:35:34', '2026-11-05 12:35:34'),
-(17, 15, 'Bachelor of Science in Information Technology', 3, 'D', '1st Semester', '2026 - 2027', 'Ronaldo Jaime', '2026-11-05 12:35:34', '2026-11-05 12:35:34'),
-(18, 16, 'Bachelor of Science in Information Technology', 3, 'D', '1st Semester', '2026 - 2027', 'JED CONCEPCION', '2026-11-05 12:35:34', '2026-11-05 12:35:34'),
-(19, 17, 'Bachelor of Science in Information Technology', 3, 'D', '1st Semester', '2026 - 2027', 'CERWIN JOHN ZAULDA', '2026-11-05 12:35:34', '2026-11-05 12:35:34');
+(12, 10, 'Bachelor of Science in Information Technology', 3, 'D', '1st Semester', '2026 - 2027', 'Prof. Arsenio Ranay', '2026-11-05 12:35:34', '2026-11-05 23:26:19'),
+(13, 11, 'Bachelor of Science in Information Technology', 3, 'D', '1st Semester', '2026 - 2027', 'Prof.  Rich Caranguian', '2026-11-05 12:35:34', '2026-11-05 23:26:28'),
+(14, 12, 'Bachelor of Science in Information Technology', 3, 'D', '1st Semester', '2026 - 2027', 'Prof. Greg Roslin', '2026-11-05 12:35:34', '2026-11-05 23:24:52'),
+(15, 13, 'Bachelor of Science in Information Technology', 3, 'D', '1st Semester', '2026 - 2027', 'CERWIN JOHN ZAULDA', '2026-11-05 12:35:34', '2026-11-05 20:48:36'),
+(16, 14, 'Bachelor of Science in Information Technology', 3, 'D', '1st Semester', '2026 - 2027', 'Gian Carlo Cruz', '2026-11-05 12:35:34', '2026-11-05 20:48:36'),
+(17, 15, 'Bachelor of Science in Information Technology', 3, 'D', '1st Semester', '2026 - 2027', 'Ronaldo Jaime', '2026-11-05 12:35:34', '2026-11-05 20:48:36'),
+(18, 16, 'Bachelor of Science in Information Technology', 3, 'D', '1st Semester', '2026 - 2027', 'JED CONCEPCION', '2026-11-05 12:35:34', '2026-11-05 20:48:36'),
+(19, 17, 'Bachelor of Science in Information Technology', 3, 'D', '1st Semester', '2026 - 2027', 'CERWIN JOHN ZAULDA', '2026-11-05 12:35:34', '2026-11-05 20:48:36'),
+(20, 1, 'Bachelor of Science in Information Technology', 3, 'D', '2nd Semester', '2026 - 2027', 'Prof. Ronald Pinedaks', '2026-11-06 00:01:27', '2026-11-06 00:01:27'),
+(21, 2, 'Bachelor of Science in Information Technology', 3, 'D', '2nd Semester', '2026 - 2027', 'Prof. Jhosua Pasa', '2026-11-06 00:06:02', '2026-11-06 00:06:02');
 
 -- --------------------------------------------------------
 
@@ -148,6 +155,14 @@ CREATE TABLE `course_offering_schedules` (
   `room` varchar(100) DEFAULT NULL,
   `created_at` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `course_offering_schedules`
+--
+
+INSERT INTO `course_offering_schedules` (`schedule_id`, `offering_id`, `day_of_week`, `start_time`, `end_time`, `room`, `created_at`) VALUES
+(3, 20, 'Monday', '10:00:00', '13:00:00', 'Room 400', '2026-11-06 00:01:27'),
+(4, 21, 'Friday', '07:00:00', '10:00:00', 'Room 300', '2026-11-06 00:06:02');
 
 -- --------------------------------------------------------
 
@@ -172,7 +187,7 @@ CREATE TABLE `enrollment_periods` (
 
 INSERT INTO `enrollment_periods` (`period_id`, `semester`, `school_year`, `start_date`, `end_date`, `status`, `created_at`, `closed_at`) VALUES
 (1, '1st Semester', '2026 - 2027', '2026-09-01', '2026-10-05', 'CLOSED', '2026-11-05 00:13:28', '2026-11-05 01:02:21'),
-(2, '2nd Semester', '2026 - 2027', '2026-11-05', '2026-11-15', 'CLOSED', '2026-11-05 01:16:45', '2026-11-05 12:34:48');
+(2, '2nd Semester', '2026 - 2027', '2026-11-05', '2026-11-15', 'OPEN', '2026-11-05 01:16:45', NULL);
 
 -- --------------------------------------------------------
 
@@ -194,7 +209,12 @@ CREATE TABLE `enrollment_status_history` (
 INSERT INTO `enrollment_status_history` (`history_id`, `status`, `changed_at`, `changed_by`) VALUES
 (23, 'CLOSED', '2026-11-05 11:54:36', 8),
 (24, 'OPENED', '2026-11-05 12:34:32', 8),
-(25, 'CLOSED', '2026-11-05 12:34:48', 8);
+(25, 'CLOSED', '2026-11-05 12:34:48', 8),
+(26, 'OPENED', '2026-11-05 23:30:36', 8),
+(27, 'CLOSED', '2026-11-05 23:31:11', 8),
+(28, 'OPENED', '2026-11-06 00:07:47', 8),
+(29, 'CLOSED', '2026-11-06 01:02:29', 8),
+(30, 'OPENED', '2026-11-06 01:07:43', 8);
 
 -- --------------------------------------------------------
 
@@ -280,6 +300,25 @@ CREATE TABLE `professor_evaluation_answers` (
   `evaluation_id` int(10) UNSIGNED NOT NULL,
   `question_id` int(10) UNSIGNED NOT NULL,
   `rating` tinyint(3) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `registration_verifications`
+--
+
+CREATE TABLE `registration_verifications` (
+  `verification_id` bigint(20) UNSIGNED NOT NULL,
+  `masterlist_id` int(10) UNSIGNED NOT NULL,
+  `code_hash` varchar(255) NOT NULL,
+  `expires_at` datetime NOT NULL,
+  `attempts` tinyint(3) UNSIGNED NOT NULL DEFAULT 0,
+  `send_count` tinyint(3) UNSIGNED NOT NULL DEFAULT 1,
+  `last_sent_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `verified_at` datetime DEFAULT NULL,
+  `consumed_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -419,7 +458,33 @@ CREATE TABLE `student_masterlist` (
 --
 
 INSERT INTO `student_masterlist` (`masterlist_id`, `student_number`, `first_name`, `middle_name`, `last_name`, `date_of_birth`, `email`, `program`, `year_level`, `section`, `previous_program`, `previous_year_level`, `previous_section`, `previous_semester`, `previous_school_year`, `registration_status`, `user_id`, `imported_at`, `updated_at`) VALUES
-(1, '2024001111', 'Juan', 'Dela', 'Cruz', '2006-04-02', 'monzylog@gmail.com', 'Bachelor of Science in Information Technology', 3, 'D', 'Bachelor of Science in Information Technology', 3, 'D', '1st Semester', '2026-2027', 'UNREGISTERED', NULL, '2026-11-05 06:51:03', '2026-11-05 06:51:03');
+(1, '2024001111', 'Juan', 'Dela', 'Cruz', '2006-04-02', 'monzylog@gmail.com', 'Bachelor of Science in Information Technology', 3, 'D', 'Bachelor of Science in Information Technology', 3, 'D', '1st Semester', '2026-2027', 'UNREGISTERED', NULL, '2026-11-05 06:51:03', '2026-11-05 17:27:12'),
+(2, '2024001112', 'Mark', 'V.', 'Vigo', '2006-02-27', 'quizonrichmond0@gmail.com', 'Bachelor of Science in Information Technology', 3, 'D', 'Bachelor of Science in Information Technology', 3, 'D', '1st Semester', '2026-2027', 'UNREGISTERED', NULL, '2026-11-05 11:51:02', '2026-11-05 17:27:12'),
+(3, '2024999001', 'Daniel', NULL, 'Reyes', '2006-04-02', 'ra.quizon.bsit2024@gmail.com', 'Bachelor of Science in Information Technology', 3, 'D', 'Bachelor of Science in Information Technology', 3, 'A', '1st Semester', '2026-2027', 'UNREGISTERED', NULL, '2026-11-05 15:18:59', '2026-11-05 15:18:59');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `student_registration_requests`
+--
+
+CREATE TABLE `student_registration_requests` (
+  `request_id` int(10) UNSIGNED NOT NULL,
+  `masterlist_id` int(10) UNSIGNED NOT NULL,
+  `password_hash` varchar(255) DEFAULT NULL,
+  `status` enum('PENDING','APPROVED','REJECTED') NOT NULL DEFAULT 'PENDING',
+  `requested_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `reviewed_by` int(10) UNSIGNED DEFAULT NULL,
+  `reviewed_at` datetime DEFAULT NULL,
+  `rejection_reason` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `student_registration_requests`
+--
+
+INSERT INTO `student_registration_requests` (`request_id`, `masterlist_id`, `password_hash`, `status`, `requested_at`, `reviewed_by`, `reviewed_at`, `rejection_reason`) VALUES
+(5, 3, '$2y$10$FgZOvDN3nIvQ8k9xREtSmOpxKJRlVz79dODooaGLCg6h7QKkve6c6', 'PENDING', '2026-11-06 01:34:58', NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -442,7 +507,7 @@ CREATE TABLE `system_settings` (
 --
 
 INSERT INTO `system_settings` (`setting_id`, `enrollment_status`, `semester`, `school_year`, `start_date`, `end_date`, `updated_at`) VALUES
-(1, 'CLOSED', '2nd Semester', '2026 - 2027', '2026-11-05', '2026-11-15', '2026-11-05 12:34:48');
+(1, 'OPEN', '2nd Semester', '2026 - 2027', '2026-11-05', '2026-11-15', '2026-11-06 01:07:43');
 
 -- --------------------------------------------------------
 
@@ -456,21 +521,22 @@ CREATE TABLE `users` (
   `password_hash` varchar(255) NOT NULL,
   `role` enum('STUDENT','ADMIN','INSTRUCTOR') NOT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT 1,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp()
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `must_change_password` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`user_id`, `account_number`, `password_hash`, `role`, `is_active`, `created_at`) VALUES
-(8, 'ADMIN001', '$2y$12$lW4XC5INw7dcSYGuI0r4XOBuCxFFgB2inPzAocdUD9dUNhmXtSCRa', 'ADMIN', 1, '2026-10-05 14:41:27'),
-(20, '20240529', '$2y$10$3O8ZxThF/cq1kA.hBgqh/.fDuQ2NnY5EwRIO295x/kqK8Z0BcrQXa', 'STUDENT', 1, '2026-11-05 11:51:38'),
-(21, '202400764', '$2y$10$8x2VLMRovE1nPr9ofcXT4ubxW0xxxC38QPLWp4dZimGiD/2wiGkAS', 'STUDENT', 1, '2026-11-05 12:38:02'),
-(22, '202400847', '$2y$10$Ru5HH.euldk2ddYuE0buK./dELSwrsewaaLRQoBAVkuld3KvapjB2', 'STUDENT', 1, '2026-11-05 12:38:47'),
-(23, '202401207', '$2y$10$oOfIFHlickuf0M2.22VX1eHq4x0Sd//CzdrBmCgOIkbLddhrYNENS', 'STUDENT', 1, '2026-11-05 12:39:20'),
-(24, '202400745', '$2y$10$EWnxlM.lQwKxAisabM/8dOOTr.AEByxRaFlxug2a5P0GSb.myLKJm', 'STUDENT', 1, '2026-11-05 12:40:09'),
-(25, '202400924', '$2y$10$DT1P4apIl0lnzILeSDLyuenTuGXngWES.efyAC5PqZyhl5wgdpJoy', 'STUDENT', 1, '2026-11-05 12:50:17');
+INSERT INTO `users` (`user_id`, `account_number`, `password_hash`, `role`, `is_active`, `created_at`, `must_change_password`) VALUES
+(8, 'ADMIN001', '$2y$12$lW4XC5INw7dcSYGuI0r4XOBuCxFFgB2inPzAocdUD9dUNhmXtSCRa', 'ADMIN', 1, '2026-10-05 14:41:27', 0),
+(20, '20240529', '$2y$10$3O8ZxThF/cq1kA.hBgqh/.fDuQ2NnY5EwRIO295x/kqK8Z0BcrQXa', 'STUDENT', 1, '2026-11-05 11:51:38', 0),
+(21, '202400764', '$2y$10$8x2VLMRovE1nPr9ofcXT4ubxW0xxxC38QPLWp4dZimGiD/2wiGkAS', 'STUDENT', 1, '2026-11-05 12:38:02', 0),
+(22, '202400847', '$2y$10$Ru5HH.euldk2ddYuE0buK./dELSwrsewaaLRQoBAVkuld3KvapjB2', 'STUDENT', 1, '2026-11-05 12:38:47', 0),
+(23, '202401207', '$2y$10$oOfIFHlickuf0M2.22VX1eHq4x0Sd//CzdrBmCgOIkbLddhrYNENS', 'STUDENT', 1, '2026-11-05 12:39:20', 0),
+(24, '202400745', '$2y$10$EWnxlM.lQwKxAisabM/8dOOTr.AEByxRaFlxug2a5P0GSb.myLKJm', 'STUDENT', 1, '2026-11-05 12:40:09', 0),
+(25, '202400924', '$2y$10$DT1P4apIl0lnzILeSDLyuenTuGXngWES.efyAC5PqZyhl5wgdpJoy', 'STUDENT', 1, '2026-11-05 12:50:17', 0);
 
 --
 -- Indexes for dumped tables
@@ -561,6 +627,14 @@ ALTER TABLE `professor_evaluation_answers`
   ADD KEY `fk_answer_question` (`question_id`);
 
 --
+-- Indexes for table `registration_verifications`
+--
+ALTER TABLE `registration_verifications`
+  ADD PRIMARY KEY (`verification_id`),
+  ADD UNIQUE KEY `uq_registration_masterlist` (`masterlist_id`),
+  ADD KEY `idx_registration_expires` (`expires_at`);
+
+--
 -- Indexes for table `students`
 --
 ALTER TABLE `students`
@@ -587,6 +661,15 @@ ALTER TABLE `student_masterlist`
   ADD KEY `fk_masterlist_user` (`user_id`);
 
 --
+-- Indexes for table `student_registration_requests`
+--
+ALTER TABLE `student_registration_requests`
+  ADD PRIMARY KEY (`request_id`),
+  ADD UNIQUE KEY `uq_registration_masterlist` (`masterlist_id`),
+  ADD KEY `idx_registration_status` (`status`),
+  ADD KEY `idx_registration_reviewer` (`reviewed_by`);
+
+--
 -- Indexes for table `system_settings`
 --
 ALTER TABLE `system_settings`
@@ -607,13 +690,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `clearance_submissions`
 --
 ALTER TABLE `clearance_submissions`
-  MODIFY `clearance_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `clearance_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `cor_submissions`
 --
 ALTER TABLE `cor_submissions`
-  MODIFY `cor_submission_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `cor_submission_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `courses`
@@ -625,13 +708,13 @@ ALTER TABLE `courses`
 -- AUTO_INCREMENT for table `course_offerings`
 --
 ALTER TABLE `course_offerings`
-  MODIFY `offering_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `offering_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `course_offering_schedules`
 --
 ALTER TABLE `course_offering_schedules`
-  MODIFY `schedule_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `schedule_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `enrollment_periods`
@@ -643,7 +726,7 @@ ALTER TABLE `enrollment_periods`
 -- AUTO_INCREMENT for table `enrollment_status_history`
 --
 ALTER TABLE `enrollment_status_history`
-  MODIFY `history_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `history_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- AUTO_INCREMENT for table `evaluation_questions`
@@ -661,31 +744,43 @@ ALTER TABLE `faculty_assignment_finalizations`
 -- AUTO_INCREMENT for table `professor_evaluations`
 --
 ALTER TABLE `professor_evaluations`
-  MODIFY `evaluation_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `evaluation_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `professor_evaluation_answers`
 --
 ALTER TABLE `professor_evaluation_answers`
-  MODIFY `answer_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=241;
+  MODIFY `answer_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=401;
+
+--
+-- AUTO_INCREMENT for table `registration_verifications`
+--
+ALTER TABLE `registration_verifications`
+  MODIFY `verification_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `students`
 --
 ALTER TABLE `students`
-  MODIFY `student_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `student_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `student_course_enrollments`
 --
 ALTER TABLE `student_course_enrollments`
-  MODIFY `enrollment_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=107;
+  MODIFY `enrollment_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=130;
 
 --
 -- AUTO_INCREMENT for table `student_masterlist`
 --
 ALTER TABLE `student_masterlist`
-  MODIFY `masterlist_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `masterlist_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `student_registration_requests`
+--
+ALTER TABLE `student_registration_requests`
+  MODIFY `request_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `system_settings`
@@ -697,7 +792,7 @@ ALTER TABLE `system_settings`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `user_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- Constraints for dumped tables
@@ -756,6 +851,12 @@ ALTER TABLE `professor_evaluation_answers`
   ADD CONSTRAINT `fk_answer_question` FOREIGN KEY (`question_id`) REFERENCES `evaluation_questions` (`question_id`);
 
 --
+-- Constraints for table `registration_verifications`
+--
+ALTER TABLE `registration_verifications`
+  ADD CONSTRAINT `fk_registration_masterlist` FOREIGN KEY (`masterlist_id`) REFERENCES `student_masterlist` (`masterlist_id`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `student_course_enrollments`
 --
 ALTER TABLE `student_course_enrollments`
@@ -767,6 +868,13 @@ ALTER TABLE `student_course_enrollments`
 --
 ALTER TABLE `student_masterlist`
   ADD CONSTRAINT `fk_masterlist_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `student_registration_requests`
+--
+ALTER TABLE `student_registration_requests`
+  ADD CONSTRAINT `fk_student_registration_masterlist` FOREIGN KEY (`masterlist_id`) REFERENCES `student_masterlist` (`masterlist_id`),
+  ADD CONSTRAINT `fk_student_registration_reviewer` FOREIGN KEY (`reviewed_by`) REFERENCES `users` (`user_id`) ON DELETE SET NULL;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

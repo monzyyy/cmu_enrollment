@@ -191,6 +191,46 @@ if (empty($_SESSION['csrf_token'])) {
 
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <!-- COR steps: keep the desktop layout, stack steps neatly on tablets and phones. -->
+    <style>
+      @media (max-width: 900px) {
+        .cl-steps {
+          display: flex !important;
+          flex-direction: column !important;
+          flex-wrap: nowrap !important;
+          align-items: stretch !important;
+          justify-content: flex-start !important;
+          gap: 0 !important;
+          min-width: 0 !important;
+        }
+        .cl-steps > .cl-step {
+          display: flex !important;
+          flex-direction: column !important;
+          align-items: center !important;
+          justify-content: center !important;
+          width: 100% !important;
+          max-width: none !important;
+          min-width: 0 !important;
+          flex: 0 0 auto !important;
+          box-sizing: border-box !important;
+          text-align: center !important;
+          margin: 0 !important;
+        }
+        .cl-steps > .cl-step-arrow {
+          display: block !important;
+          position: static !important;
+          align-self: center !important;
+          width: auto !important;
+          height: auto !important;
+          flex: 0 0 auto !important;
+          margin: 10px auto !important;
+          transform: rotate(90deg) !important;
+          text-align: center !important;
+        }
+      }
+    </style>
+
 </head>
 
 <body>

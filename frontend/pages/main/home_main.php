@@ -56,6 +56,43 @@ $schoolYear = $settings['school_year'] ?? '';
 $startDate = $settings['start_date'] ?? null;
 $endDate = $settings['end_date'] ?? null;
 
+// Use the same course offering and schedule tables as My Schedule.
+// PHP timezone is explicit so "today" follows Philippine campus time.
+$today = new DateTimeImmutable('now', new DateTimeZone('Asia/Manila'));
+$todayDayName = $today->format('l');
+$todaySchedules = [];
+
+$todayStmt = $conn->prepare(
+    'SELECT c.course_code, c.course_name, co.instructor_name,
+            cos.start_time, cos.end_time, cos.room
+     FROM course_offerings co
+     INNER JOIN courses c ON c.course_id = co.course_id
+     INNER JOIN course_offering_schedules cos ON cos.offering_id = co.offering_id
+     WHERE co.program = ?
+       AND co.year_level = ?
+       AND co.section = ?
+       AND co.semester = ?
+       AND REPLACE(co.school_year, " ", "") = REPLACE(?, " ", "")
+       AND LOWER(TRIM(cos.day_of_week)) = LOWER(?)
+     ORDER BY cos.start_time ASC, c.course_code ASC'
+);
+$todayStmt->bind_param(
+    'sissss',
+    $student['program'],
+    $student['year_level'],
+    $student['section'],
+    $semester,
+    $schoolYear,
+    $todayDayName
+);
+$todayStmt->execute();
+$todayResult = $todayStmt->get_result();
+while ($todayRow = $todayResult->fetch_assoc()) {
+    $todaySchedules[] = $todayRow;
+}
+$todayStmt->close();
+
+
 $latestCorSubmission = null;
 $corStatus = 'NOT_SUBMITTED';
 
@@ -120,6 +157,53 @@ if ($startDate && $endDate) {
 
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+/* Home dashboard: compact, responsive enrollment status panel */
+.home-panel .enrollment-status-panel {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 12px;
+    min-width: 0;
+    height: auto;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #334155;
+}
+.enrollment-status-heading { display: flex; align-items: flex-start; gap: 11px; min-width: 0; }
+.enrollment-status-icon {
+    display: grid; place-items: center; flex: 0 0 32px;
+    width: 32px; height: 32px; border-radius: 10px;
+    background: #e7f7ef; color: #15803d; font-size: 15px;
+}
+.enrollment-status-panel.is-closed .enrollment-status-icon { background: #fff3df; color: #a16207; }
+.enrollment-status-panel.is-unconfigured .enrollment-status-icon { background: #eaf2ff; color: #2563eb; }
+.enrollment-status-heading > div { min-width: 0; }
+.enrollment-status-heading strong { display: block; font-size: 14px; color: #123457; line-height: 1.4; }
+.enrollment-status-heading p { margin: 3px 0 0; color: #64748b; font-size: 12px; overflow-wrap: anywhere; }
+.enrollment-status-details {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 6px 12px; padding: 11px 12px;
+    background: #f5f8fc; border: 1px solid #e4ebf4; border-radius: 9px;
+}
+.enrollment-status-detail-label { display: inline-flex; align-items: center; gap: 7px; color: #64748b; font-size: 12px; }
+.enrollment-status-details strong { color: #1d385b; font-size: 12px; }
+.enrollment-status-message { margin: 0; color: #52637a; font-size: 12px; line-height: 1.55; }
+.enrollment-status-link {
+    display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+    align-self: flex-start; max-width: 100%; padding: 9px 12px;
+    border-radius: 8px; background: #e8f0ff; color: #1d57bd;
+    font-size: 12px; font-weight: 700; text-decoration: none;
+    transition: background .2s ease;
+}
+.enrollment-status-link:hover { background: #d7e6ff; }
+@media (max-width: 768px) {
+    .home-panel .enrollment-status-panel { padding: 14px; gap: 11px; }
+    .enrollment-status-link { align-self: stretch; }
+}
+</style>
 </head>
 
 <body>
@@ -165,7 +249,7 @@ if ($startDate && $endDate) {
                         </div>
 
                         <p class="semester-label">
-                            1st Semester, S.Y. 2026–2027
+                            <?= e(($semester ?: 'Semester not set') . ', S.Y. ' . ($schoolYear ?: 'Not set')) ?>
                         </p>
 
                         <h1>
@@ -633,7 +717,7 @@ if ($startDate && $endDate) {
 
                         <p>Enrollment period</p>
 
-                        <h2>June 1–15</h2>
+                        <h2><?= e($enrollmentPeriod ?: 'Not set') ?></h2>
 
                         <span>
                             Enrollment schedule
@@ -652,117 +736,78 @@ if ($startDate && $endDate) {
 
             <section class="home-lower">
 
-                <!-- ANNOUNCEMENTS -->
-
+                <!-- ENROLLMENT STATUS (from system_settings) -->
                 <div class="home-panel">
-
                     <div class="panel-header">
-
-                        <h2>Recent announcement</h2>
-
-                        <a href="<?= BASE_URL ?>?page=notifications">
-                            View all
-                            <i class="fa-solid fa-arrow-right"></i>
-                        </a>
-
+                        <h2>Enrollment Status</h2>
                     </div>
 
-
-                    <div class="announcement-item">
-
-                        <i class="fa-solid fa-bullhorn"></i>
-
-                        <div>
-                            <p>Enrollment schedule for 1st semester</p>
-                            <span>Important enrollment announcement</span>
-                        </div>
-
-                        <i class="fa-solid fa-chevron-right"></i>
-
+                    <div class="enrollment-status-panel <?= (!$settings || !$startDate || !$endDate) ? 'is-unconfigured' : (strtoupper(trim($enrollmentStatus)) === 'OPEN' ? 'is-open' : 'is-closed') ?>" role="status">
+                        <?php if (!$settings || !$startDate || !$endDate): ?>
+                            <div class="enrollment-status-heading">
+                                <span class="enrollment-status-icon"><i class="fa-solid fa-circle-info" aria-hidden="true"></i></span>
+                                <div><strong>Enrollment Period Not Available</strong><p>The Registrar has not configured the enrollment schedule yet.</p></div>
+                            </div>
+                        <?php else: ?>
+                            <div class="enrollment-status-heading">
+                                <span class="enrollment-status-icon"><i class="fa-solid <?= strtoupper(trim($enrollmentStatus)) === 'OPEN' ? 'fa-circle-check' : 'fa-lock' ?>" aria-hidden="true"></i></span>
+                                <div>
+                                    <strong>Enrollment is <?= strtoupper(trim($enrollmentStatus)) === 'OPEN' ? 'Open' : 'Closed' ?></strong>
+                                    <p><?= e($semester) ?>, S.Y. <?= e($schoolYear) ?></p>
+                                </div>
+                            </div>
+                            <div class="enrollment-status-details">
+                                <span class="enrollment-status-detail-label"><i class="fa-regular fa-calendar" aria-hidden="true"></i> Enrollment period</span>
+                                <strong><?= e($enrollmentPeriod) ?></strong>
+                            </div>
+                            <p class="enrollment-status-message">
+                                <?= strtoupper(trim($enrollmentStatus)) === 'OPEN'
+                                    ? 'Complete your faculty evaluations to begin the enrollment process.'
+                                    : 'Enrollment activities are currently unavailable. Please wait for the Registrar to open enrollment.' ?>
+                            </p>
+                            <?php if (strtoupper(trim($enrollmentStatus)) === 'OPEN'): ?>
+                                <a class="enrollment-status-link" href="<?= BASE_URL ?>?page=faculty_evaluation">
+                                    Go to Faculty Evaluation <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                                </a>
+                            <?php endif; ?>
+                        <?php endif; ?>
                     </div>
-
-
-                    <div class="announcement-item">
-
-                        <i class="fa-solid fa-bullhorn"></i>
-
-                        <div>
-                            <p>Reminder: Complete your enrollment process</p>
-                            <span>Enrollment reminder</span>
-                        </div>
-
-                        <i class="fa-solid fa-chevron-right"></i>
-
-                    </div>
-
-
-                    <div class="announcement-item">
-
-                        <i class="fa-solid fa-bullhorn"></i>
-
-                        <div>
-                            <p>Check out your courses now!</p>
-                            <span>Course offering information</span>
-                        </div>
-
-                        <i class="fa-solid fa-chevron-right"></i>
-
-                    </div>
-
                 </div>
 
 
-                <!-- WEEKLY SCHEDULE -->
+                <!-- TODAY'S SCHEDULE -->
 
                 <div class="home-panel">
-
                     <div class="panel-header">
-
-                        <h2>Weekly Schedule</h2>
-
+                        <h2>Today's Schedule <span class="today-day-label"><?= e($todayDayName) ?></span></h2>
                         <a href="<?= BASE_URL ?>?page=my_schedule">
                             View all
                             <i class="fa-solid fa-arrow-right"></i>
                         </a>
-
                     </div>
 
-
-                    <div class="schedule-item">
-
-                        <i class="fa-solid fa-book"></i>
-
-                        <div>
-                            <p>1:00 PM – 5:00 PM</p>
-                            <span>IT101 – Integrative Programming</span>
+                    <?php if (empty($todaySchedules)): ?>
+                        <div class="schedule-empty">
+                            <i class="fa-regular fa-calendar-check"></i>
+                            <p>No classes scheduled for today.</p>
                         </div>
-
-                    </div>
-
-
-                    <div class="schedule-item">
-
-                        <i class="fa-solid fa-book"></i>
-
-                        <div>
-                            <p>1:00 PM – 5:00 PM</p>
-                            <span>IT102 – Information Management</span>
-                        </div>
-
-                    </div>
-
-
-                    <div class="schedule-item">
-
-                        <i class="fa-solid fa-book"></i>
-
-                        <div>
-                            <p>1:00 PM – 5:00 PM</p>
-                            <span>IT103 – Networking</span>
-                        </div>
-
-                    </div>
-
+                    <?php else: ?>
+                        <?php foreach ($todaySchedules as $todayClass): ?>
+                            <div class="schedule-item">
+                                <i class="fa-solid fa-book"></i>
+                                <div>
+                                    <p><?= e(date('g:i A', strtotime($todayClass['start_time']))) ?> – <?= e(date('g:i A', strtotime($todayClass['end_time']))) ?></p>
+                                    <span><?= e($todayClass['course_code']) ?> – <?= e($todayClass['course_name']) ?></span>
+                                    <?php if (!empty($todayClass['room'])): ?>
+                                        <span>Room: <?= e($todayClass['room']) ?></span>
+                                    <?php endif; ?>
+                                    <?php if (!empty($todayClass['instructor_name'])): ?>
+                                        <span><?= e($todayClass['instructor_name']) ?></span>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
 
             </section>

@@ -247,6 +247,63 @@ function enrollment_phase_class(string $phase): string
         rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
+
+    <style>
+    /* Student Enrollment: mobile-only card layout, retaining the desktop table. */
+    @media (max-width: 768px) {
+        .admin-student-enrollment-card,
+        .admin-student-enrollment-table-wrapper { min-width: 0; max-width: 100%; }
+        .admin-student-enrollment-table-wrapper { overflow: visible; }
+        .admin-student-enrollment-table { display: block; width: 100%; min-width: 0 !important; border: 0; }
+        .admin-student-enrollment-table thead { display: none; }
+        .admin-student-enrollment-table tbody { display: grid; gap: 12px; padding: 12px; }
+        .admin-student-enrollment-table tbody tr {
+            display: flex; flex-direction: column; gap: 9px;
+            width: 100%; min-width: 0; padding: 14px;
+            background: #fff; border: 1px solid #dce6f2; border-radius: 12px;
+            box-shadow: 0 2px 7px rgba(21, 52, 90, .035);
+        }
+        .admin-student-enrollment-table tbody td {
+            display: flex; align-items: flex-start; justify-content: space-between;
+            gap: 12px; width: 100%; min-width: 0; height: auto;
+            padding: 0 !important; border: 0 !important;
+            font-size: 12px; text-align: right;
+            white-space: normal; overflow-wrap: anywhere;
+        }
+        .admin-student-enrollment-table tbody td::before {
+            content: attr(data-label); flex: 0 0 104px;
+            color: #718198; font-size: 11px; font-weight: 600;
+            text-align: left; overflow-wrap: normal;
+        }
+        .admin-student-enrollment-table tbody td[data-label="Student Name"] {
+            order: -2; display: block; text-align: left;
+            color: #153456; font-size: 15px; font-weight: 700;
+        }
+        .admin-student-enrollment-table tbody td[data-label="Student Name"]::before { display: none; }
+        .admin-student-enrollment-table tbody td[data-label="Student Number"] {
+            order: -1; justify-content: flex-start; color: #536780;
+            padding-bottom: 10px !important; border-bottom: 1px solid #e7edf5 !important;
+        }
+        .admin-student-enrollment-table tbody td[data-label="Student Number"]::before { content: "Student No."; }
+        .admin-student-enrollment-table tbody td[data-label="Current Phase"] {
+            align-items: center; padding-top: 9px !important;
+            border-top: 1px solid #e7edf5 !important;
+        }
+        .admin-student-enrollment-table tbody td.admin-student-enrollment-empty {
+            display: block; text-align: center; padding: 16px !important;
+        }
+        .admin-student-enrollment-table tbody td.admin-student-enrollment-empty::before { display: none; }
+        .admin-student-enrollment-pagination { flex-wrap: wrap; gap: 8px; justify-content: center; }
+        .admin-student-enrollment-card-header { flex-wrap: wrap; gap: 12px; }
+        .admin-student-enrollment-search { width: 100%; max-width: 100%; }
+        .admin-student-enrollment-search-box { width: 100%; max-width: 100%; }
+    }
+    @media (max-width: 390px) {
+        .admin-student-enrollment-table tbody { padding: 10px; }
+        .admin-student-enrollment-table tbody tr { padding: 12px; }
+        .admin-student-enrollment-table tbody td::before { flex-basis: 88px; }
+    }
+    </style>
 </head>
 
 <body>
@@ -486,7 +543,7 @@ function enrollment_phase_class(string $phase): string
 
                                 <tr>
 
-                                    <td>
+                                    <td data-label="Student Number">
                                         <?= htmlspecialchars(
                                             $student['student_number'],
                                             ENT_QUOTES,
@@ -494,7 +551,7 @@ function enrollment_phase_class(string $phase): string
                                         ) ?>
                                     </td>
 
-                                    <td>
+                                    <td data-label="Student Name">
                                         <?= htmlspecialchars(
                                             $fullName,
                                             ENT_QUOTES,
@@ -502,7 +559,7 @@ function enrollment_phase_class(string $phase): string
                                         ) ?>
                                     </td>
 
-                                    <td>
+                                    <td data-label="Program">
                                         <?= htmlspecialchars(
                                             $student['program'],
                                             ENT_QUOTES,
@@ -510,11 +567,11 @@ function enrollment_phase_class(string $phase): string
                                         ) ?>
                                     </td>
 
-                                    <td>
+                                    <td data-label="Year">
                                         <?= (int) $student['year_level'] ?>
                                     </td>
 
-                                    <td>
+                                    <td data-label="Section">
                                         <?= htmlspecialchars(
                                             $student['section'] ?? '—',
                                             ENT_QUOTES,
@@ -522,7 +579,7 @@ function enrollment_phase_class(string $phase): string
                                         ) ?>
                                     </td>
 
-                                    <td>
+                                    <td data-label="Current Phase">
 
                                         <span
                                             class="admin-enrollment-phase <?= enrollment_phase_class($phase) ?>">

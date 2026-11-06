@@ -1,0 +1,2 @@
+backend/config/secrets.php
+backend/logs/*.log
