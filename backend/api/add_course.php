@@ -22,9 +22,6 @@ if ($courseCode === '' || $courseName === '' || $units <= 0) {
     exit;
 }
 
-
-/* Check if course code already exists */
-
 $stmt = $conn->prepare(
     'SELECT course_id
      FROM courses
@@ -51,9 +48,6 @@ if ($result->num_rows > 0) {
 }
 
 $stmt->close();
-
-
-/* Insert course */
 
 $stmt = $conn->prepare(
     'INSERT INTO courses (
@@ -85,7 +79,6 @@ if (!$stmt->execute()) {
 }
 
 $stmt->close();
-
 
 echo json_encode([
     'success' => true,

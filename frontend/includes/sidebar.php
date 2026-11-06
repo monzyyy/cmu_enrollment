@@ -2,41 +2,41 @@
 
 
 if (!function_exists('e')) {
-    function e($value)
-    {
-        return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
-    }
+function e($value)
+{
+return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+}
 }
 
 $currentPage = $currentPage ?? '';
 
 $sidebarPagesUrl = BASE_URL;
 
-// Single source of truth for the menu. 'key' is matched against $currentPage.
+ 
 
 $sidebarMenu = [
-    [
-        'title' => 'Enrollment',
-        'items' => [
-            ['key' => 'faculty_evaluation', 'label' => 'Evaluation', 'icon' => 'fa-clipboard-check', 'link' => '?page=faculty_evaluation'],
-            ['key' => 'clearance_main', 'label' => 'Clearance', 'icon' => 'fa-file-signature', 'link' => '?page=clearance_main'],
-            ['key' => 'cor', 'label' => 'COR', 'icon' => 'fa-file-lines', 'link' => '?page=cor'],
-            
-        ],
-    ],
-    [
-        'title' => 'Status',
-        'items' => [
-            ['key' => 'myenrollment', 'label' => 'My Enrollment', 'icon' => 'fa-id-card', 'link' => '?page=my_enrollment'],
-            ['key' => 'course_offering', 'label' => 'My Schedule', 'icon' => 'fa-file-lines', 'link' => '?page=course_offering'],
-        ],
-    ],
-    [
-        'title' => 'System',
-        'items' => [
-            ['key' => 'profile',  'label' => 'Profile',          'icon' => 'fa-user',            'link' => '?page=profile'],
-        ],
-    ],
+[
+'title' => 'Enrollment',
+'items' => [
+['key' => 'faculty_evaluation', 'label' => 'Evaluation', 'icon' => 'fa-clipboard-check', 'link' => '?page=faculty_evaluation'],
+['key' => 'clearance_main', 'label' => 'Clearance', 'icon' => 'fa-file-signature', 'link' => '?page=clearance_main'],
+['key' => 'cor', 'label' => 'COR', 'icon' => 'fa-file-lines', 'link' => '?page=cor'],
+
+],
+],
+[
+'title' => 'Status',
+'items' => [
+['key' => 'myenrollment', 'label' => 'My Enrollment', 'icon' => 'fa-id-card', 'link' => '?page=my_enrollment'],
+['key' => 'course_offering', 'label' => 'My Schedule', 'icon' => 'fa-file-lines', 'link' => '?page=course_offering'],
+],
+],
+[
+'title' => 'System',
+'items' => [
+['key' => 'profile',  'label' => 'Profile',          'icon' => 'fa-user',            'link' => '?page=profile'],
+],
+],
 ];
 ?>
 

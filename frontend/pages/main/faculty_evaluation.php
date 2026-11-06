@@ -9,31 +9,30 @@ require_once dirname(__DIR__, 3) . '/backend/helpers/evaluation_completion.php';
 $studentId = $_SESSION['student_id'] ?? null;
 
 if (!$studentId) {
-    header('Location: ' . BASE_URL . '?page=login');
-    exit;
+header('Location: ' . BASE_URL . '?page=login');
+exit;
 }
 
 $student = student_find_by_id($conn, (int) $studentId);
 
 if (!$student) {
-    header('Location: ' . BASE_URL . '?page=login');
-    exit;
+header('Location: ' . BASE_URL . '?page=login');
+exit;
 }
 
 $userName = trim(
-    $student['first_name'] . ' ' .
-    ($student['middle_name'] ? $student['middle_name'] . ' ' : '') .
-    $student['last_name']
+$student['first_name'] . ' ' .
+($student['middle_name'] ? $student['middle_name'] . ' ' : '') .
+$student['last_name']
 );
 
 $currentPage = 'faculty_evaluation';
 
 
-/* ------------------------------------------
-   DYNAMIC FACULTY EVALUATION SUBJECTS
------------------------------------------- */
 
-// Get current semester and school year
+
+
+ 
 $settingsQuery = $conn->query("
     SELECT semester, school_year, enrollment_status
     FROM system_settings
@@ -47,13 +46,11 @@ $semester = $settings['semester'] ?? '';
 $schoolYear = $settings['school_year'] ?? '';
 $evaluationOpen = (($settings['enrollment_status'] ?? '') === 'OPEN');
 try {
-    [$previousSemester, $previousSchoolYear] = evaluationPreviousTerm($semester, $schoolYear);
+[$previousSemester, $previousSchoolYear] = evaluationPreviousTerm($semester, $schoolYear);
 } catch (RuntimeException $e) {
-    $previousSemester = '';
-    $previousSchoolYear = '';
+$previousSemester = '';
+$previousSchoolYear = '';
 }
-
-
 
 $sql = "
     SELECT
@@ -87,7 +84,6 @@ $sql = "
     ORDER BY c.course_code ASC
 ";
 
-
 $stmt = $conn->prepare($sql);
 
 $stmt->bind_param("iss", $studentId, $previousSemester, $previousSchoolYear);
@@ -100,37 +96,37 @@ $subjects = [];
 
 while ($row = $result->fetch_assoc()) {
 
-    $hasInstructor = !empty(
-        trim($row['instructor'] ?? '')
-    );
+$hasInstructor = !empty(
+trim($row['instructor'] ?? '')
+);
 
-    $subjects[] = [
-        'id' => (int) $row['id'],
-        'code' => $row['code'],
-        'name' => $row['name'],
-        'instructor' => $hasInstructor
-            ? $row['instructor']
-            : 'Awaiting Faculty Assignment',
-        'has_instructor' => $hasInstructor,
-        'evaluated' => (bool) $row['evaluated']
-    ];
+$subjects[] = [
+'id' => (int) $row['id'],
+'code' => $row['code'],
+'name' => $row['name'],
+'instructor' => $hasInstructor
+? $row['instructor']
+: 'Awaiting Faculty Assignment',
+'has_instructor' => $hasInstructor,
+'evaluated' => (bool) $row['evaluated']
+];
 }
 
 $stmt->close();
 
-// Calculate actual evaluation progress
+ 
 $totalSubjects = count($subjects);
 
 $evaluatedCount = count(
-    array_filter(
-        $subjects,
-        fn($subject) => $subject['evaluated']
-    )
+array_filter(
+$subjects,
+fn($subject) => $subject['evaluated']
+)
 );
 
 $progressPercent = $totalSubjects > 0
-    ? round(($evaluatedCount / $totalSubjects) * 100)
-    : 0;
+? round(($evaluatedCount / $totalSubjects) * 100)
+: 0;
 
 ?>
 

@@ -1,10 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Sora:wght@100..800&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Sora:wght@100..800&display=swap");
 
-/* =========================================================
-   GLOBAL VARIABLES
-========================================================= */
-
 :root {
   --graystuble: #F8FAFC;
   --bluesubtle: #F0F7FD;
@@ -53,10 +49,6 @@
   --sidebar-w: 240px;
 }
 
-/* =========================================================
-   RESET
-========================================================= */
-
 * {
   box-sizing: border-box;
 }
@@ -77,9 +69,7 @@ body {
   font-family: "DM Sans", sans-serif;
   color: var(--text);
 
-  /* Only hide sideways overflow. The page itself must be able to scroll
-     vertically, otherwise anything taller than the screen gets cut off. */
-  overflow-x: hidden;
+overflow-x: hidden;
 }
 
 a {
@@ -93,10 +83,6 @@ textarea,
 select {
   font-family: inherit;
 }
-
-/* =========================================================
-   MAIN LAYOUT
-========================================================= */
 
 .layout {
   display: grid;
@@ -112,9 +98,7 @@ select {
   background: rgb(240, 247, 253, 0.8);
   padding: 16px;
 }
-/* =========================================================
-   Logo
-========================================================= */
+
 .imglogo {
   grid-column: 1;
   grid-row: 1;
@@ -131,22 +115,10 @@ select {
   border-radius: var(--radius-sm);
 }
 
-/* .imglogo img {
-  display: block;
-
-  width: 120px;
-  height: auto;
-
-  object-fit: contain;
-} */
- .imglogo span {
+.imglogo span {
   font-size: 36px;
   font-weight: 700;
  }
-
-/* =========================================================
-   SIDEBAR
-========================================================= */
 
 .sidebar {
   grid-column: 1;
@@ -184,12 +156,6 @@ select {
   background: #cbd5e1;
   border-radius: 10px;
 }
-
-
-  
-/* =========================================================
-   SIDEBAR MENU
-========================================================= */
 
 .menu {
   flex: 1;
@@ -271,10 +237,6 @@ select {
   color: var(--primary);
 }
 
-/* =========================================================
-   LOGOUT
-========================================================= */
-
 .logout-form {
   width: 100%;
 }
@@ -317,10 +279,6 @@ select {
     font-size: 13px;
 }
 
-/* =========================================================
-   TOPBAR
-========================================================= */
-
 .topbar {
   grid-row: 1;
 
@@ -339,9 +297,6 @@ select {
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
 }
-/* =========================================================
-   MAIN
-========================================================= */
 
 .main {
   grid-column: 2;
@@ -358,12 +313,6 @@ select {
 
   background: transparent;
 }
-
-
-
-/* =========================================================
-   MOBILE MENU BUTTON
-========================================================= */
 
 .menu-button {
   display: none;
@@ -383,10 +332,6 @@ select {
 
   cursor: pointer;
 }
-
-/* =========================================================
-   TOP ACTIONS
-========================================================= */
 
 .top-actions {
   display: flex;
@@ -542,7 +487,6 @@ select {
 
 }
 
-/* Student shared responsive layout: desktop, tablet and mobile. */
 @media (max-width: 900px) {
   .layout { display: block; min-height: 100vh; padding: 12px; }
   .imglogo { display: none; }
@@ -580,12 +524,11 @@ select {
   .sidebar, .layout > .sidebar, .overlay { transition: none; }
 }
 
-/* Keep the student sidebar independent of tall page content. */
 @media (min-width: 901px) {
   .layout > .sidebar {
     position: fixed;
     left: 16px;
-    top: 90px; /* 16px layout padding + 58px logo + 16px gap */
+    top: 90px;
     bottom: 16px;
     width: var(--sidebar-w, 240px);
     height: auto;
@@ -594,12 +537,11 @@ select {
     overflow-x: hidden;
   }
 }
-/* The menu scrolls if needed; logout stays reachable at the bottom. */
+
 .layout > .sidebar { min-height: 0; }
 .layout > .sidebar > .menu { min-height: 0; overflow-y: auto; flex: 1 1 auto; }
 .layout > .sidebar > .logout-form { flex: 0 0 auto; }
 
-/* Student navigation refinement: fixed desktop logo and fixed sidebar. */
 .sidebar-mobile-logo { display: none; }
 @media (min-width: 901px) {
   .layout > .imglogo {
@@ -632,12 +574,10 @@ select {
     background: var(--bluesubtle);
   }
   .layout > .sidebar { top: 0; bottom: 0; height: 100dvh; max-height: 100dvh; }
-  /* The topbar remains in the normal document flow. */
+
   .layout > .main > .topbar { position: relative; top: auto; }
 }
 
-
-/* Student mobile navigation: keep the menu accessible on long pages. */
 @media (max-width: 900px) {
   .layout > .main > .topbar {
     position: sticky;

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 05, 2026 at 06:41 PM
+-- Generation Time: Nov 06, 2026 at 08:57 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -11,11 +11,6 @@ SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
 
-CREATE DATABASE IF NOT EXISTS cmuenrollment_db
-    CHARACTER SET utf8mb4
-    COLLATE utf8mb4_unicode_ci;
-
-USE cmuenrollment_db;
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -187,7 +182,7 @@ CREATE TABLE `enrollment_periods` (
 
 INSERT INTO `enrollment_periods` (`period_id`, `semester`, `school_year`, `start_date`, `end_date`, `status`, `created_at`, `closed_at`) VALUES
 (1, '1st Semester', '2026 - 2027', '2026-09-01', '2026-10-05', 'CLOSED', '2026-11-05 00:13:28', '2026-11-05 01:02:21'),
-(2, '2nd Semester', '2026 - 2027', '2026-11-05', '2026-11-15', 'OPEN', '2026-11-05 01:16:45', NULL);
+(2, '2nd Semester', '2026 - 2027', '2026-11-05', '2026-11-15', 'CLOSED', '2026-11-05 01:16:45', '2026-11-06 14:21:44');
 
 -- --------------------------------------------------------
 
@@ -214,7 +209,8 @@ INSERT INTO `enrollment_status_history` (`history_id`, `status`, `changed_at`, `
 (27, 'CLOSED', '2026-11-05 23:31:11', 8),
 (28, 'OPENED', '2026-11-06 00:07:47', 8),
 (29, 'CLOSED', '2026-11-06 01:02:29', 8),
-(30, 'OPENED', '2026-11-06 01:07:43', 8);
+(30, 'OPENED', '2026-11-06 01:07:43', 8),
+(31, 'CLOSED', '2026-11-06 14:21:44', 8);
 
 -- --------------------------------------------------------
 
@@ -289,6 +285,20 @@ CREATE TABLE `professor_evaluations` (
   `submitted_at` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `professor_evaluations`
+--
+
+INSERT INTO `professor_evaluations` (`evaluation_id`, `student_id`, `offering_id`, `instructor_name_at_submission`, `submitted_at`) VALUES
+(21, 17, 12, 'Prof. Arsenio Ranay', '2026-11-06 11:51:39'),
+(22, 17, 13, 'Prof.  Rich Caranguian', '2026-11-06 11:52:23'),
+(23, 17, 14, 'Prof. Greg Roslin', '2026-11-06 11:53:09'),
+(24, 17, 15, 'CERWIN JOHN ZAULDA', '2026-11-06 11:54:18'),
+(25, 17, 16, 'Gian Carlo Cruz', '2026-11-06 11:55:08'),
+(26, 17, 17, 'Ronaldo Jaime', '2026-11-06 11:55:55'),
+(27, 17, 18, 'JED CONCEPCION', '2026-11-06 11:56:45'),
+(28, 17, 19, 'CERWIN JOHN ZAULDA', '2026-11-06 11:57:45');
+
 -- --------------------------------------------------------
 
 --
@@ -301,6 +311,172 @@ CREATE TABLE `professor_evaluation_answers` (
   `question_id` int(10) UNSIGNED NOT NULL,
   `rating` tinyint(3) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `professor_evaluation_answers`
+--
+
+INSERT INTO `professor_evaluation_answers` (`answer_id`, `evaluation_id`, `question_id`, `rating`) VALUES
+(401, 21, 1, 5),
+(402, 21, 2, 5),
+(403, 21, 3, 5),
+(404, 21, 4, 5),
+(405, 21, 5, 5),
+(406, 21, 6, 5),
+(407, 21, 7, 5),
+(408, 21, 8, 5),
+(409, 21, 9, 5),
+(410, 21, 10, 5),
+(411, 21, 11, 5),
+(412, 21, 12, 5),
+(413, 21, 13, 5),
+(414, 21, 14, 5),
+(415, 21, 15, 5),
+(416, 21, 16, 5),
+(417, 21, 17, 5),
+(418, 21, 18, 5),
+(419, 21, 19, 5),
+(420, 21, 20, 5),
+(421, 22, 1, 5),
+(422, 22, 2, 5),
+(423, 22, 3, 5),
+(424, 22, 4, 5),
+(425, 22, 5, 5),
+(426, 22, 6, 5),
+(427, 22, 7, 5),
+(428, 22, 8, 5),
+(429, 22, 9, 5),
+(430, 22, 10, 5),
+(431, 22, 11, 5),
+(432, 22, 12, 5),
+(433, 22, 13, 5),
+(434, 22, 14, 5),
+(435, 22, 15, 5),
+(436, 22, 16, 5),
+(437, 22, 17, 5),
+(438, 22, 18, 5),
+(439, 22, 19, 5),
+(440, 22, 20, 5),
+(441, 23, 1, 5),
+(442, 23, 2, 5),
+(443, 23, 3, 5),
+(444, 23, 4, 5),
+(445, 23, 5, 5),
+(446, 23, 6, 5),
+(447, 23, 7, 5),
+(448, 23, 8, 5),
+(449, 23, 9, 5),
+(450, 23, 10, 5),
+(451, 23, 11, 5),
+(452, 23, 12, 5),
+(453, 23, 13, 5),
+(454, 23, 14, 5),
+(455, 23, 15, 5),
+(456, 23, 16, 5),
+(457, 23, 17, 5),
+(458, 23, 18, 5),
+(459, 23, 19, 5),
+(460, 23, 20, 5),
+(461, 24, 1, 5),
+(462, 24, 2, 5),
+(463, 24, 3, 5),
+(464, 24, 4, 5),
+(465, 24, 5, 5),
+(466, 24, 6, 5),
+(467, 24, 7, 5),
+(468, 24, 8, 5),
+(469, 24, 9, 5),
+(470, 24, 10, 5),
+(471, 24, 11, 5),
+(472, 24, 12, 5),
+(473, 24, 13, 5),
+(474, 24, 14, 5),
+(475, 24, 15, 5),
+(476, 24, 16, 5),
+(477, 24, 17, 5),
+(478, 24, 18, 5),
+(479, 24, 19, 5),
+(480, 24, 20, 5),
+(481, 25, 1, 5),
+(482, 25, 2, 5),
+(483, 25, 3, 5),
+(484, 25, 4, 5),
+(485, 25, 5, 5),
+(486, 25, 6, 5),
+(487, 25, 7, 5),
+(488, 25, 8, 5),
+(489, 25, 9, 5),
+(490, 25, 10, 5),
+(491, 25, 11, 5),
+(492, 25, 12, 5),
+(493, 25, 13, 5),
+(494, 25, 14, 5),
+(495, 25, 15, 5),
+(496, 25, 16, 5),
+(497, 25, 17, 5),
+(498, 25, 18, 5),
+(499, 25, 19, 5),
+(500, 25, 20, 5),
+(501, 26, 1, 5),
+(502, 26, 2, 5),
+(503, 26, 3, 5),
+(504, 26, 4, 5),
+(505, 26, 5, 5),
+(506, 26, 6, 5),
+(507, 26, 7, 5),
+(508, 26, 8, 5),
+(509, 26, 9, 5),
+(510, 26, 10, 5),
+(511, 26, 11, 5),
+(512, 26, 12, 5),
+(513, 26, 13, 5),
+(514, 26, 14, 5),
+(515, 26, 15, 5),
+(516, 26, 16, 5),
+(517, 26, 17, 5),
+(518, 26, 18, 5),
+(519, 26, 19, 5),
+(520, 26, 20, 5),
+(521, 27, 1, 5),
+(522, 27, 2, 5),
+(523, 27, 3, 5),
+(524, 27, 4, 5),
+(525, 27, 5, 5),
+(526, 27, 6, 5),
+(527, 27, 7, 5),
+(528, 27, 8, 5),
+(529, 27, 9, 5),
+(530, 27, 10, 5),
+(531, 27, 11, 5),
+(532, 27, 12, 5),
+(533, 27, 13, 5),
+(534, 27, 14, 5),
+(535, 27, 15, 5),
+(536, 27, 16, 5),
+(537, 27, 17, 5),
+(538, 27, 18, 5),
+(539, 27, 19, 5),
+(540, 27, 20, 5),
+(541, 28, 1, 5),
+(542, 28, 2, 5),
+(543, 28, 3, 5),
+(544, 28, 4, 5),
+(545, 28, 5, 5),
+(546, 28, 6, 5),
+(547, 28, 7, 5),
+(548, 28, 8, 5),
+(549, 28, 9, 5),
+(550, 28, 10, 5),
+(551, 28, 11, 5),
+(552, 28, 12, 5),
+(553, 28, 13, 5),
+(554, 28, 14, 5),
+(555, 28, 15, 5),
+(556, 28, 16, 5),
+(557, 28, 17, 5),
+(558, 28, 18, 5),
+(559, 28, 19, 5),
+(560, 28, 20, 5);
 
 -- --------------------------------------------------------
 
@@ -353,7 +529,7 @@ INSERT INTO `students` (`student_id`, `user_id`, `student_number`, `first_name`,
 (14, 20, '20240529', 'Richmond', 'Aquino', 'Quizon', 'Bachelor of Science in Information Technology', 3, 'D', 'richmondquizon0948@gmail.com', '09683365853', '$2y$10$3O8ZxThF/cq1kA.hBgqh/.fDuQ2NnY5EwRIO295x/kqK8Z0BcrQXa', 'NOT_STARTED', 'Closed', '2026-11-05 11:51:38'),
 (15, 21, '202400764', 'Dennis', '', 'Jorta', 'Bachelor of Science in Information Technology', 3, 'D', 'dennissantiagojorta@gmail.com', '09318866752', '$2y$10$8x2VLMRovE1nPr9ofcXT4ubxW0xxxC38QPLWp4dZimGiD/2wiGkAS', 'NOT_STARTED', 'Closed', '2026-11-05 12:38:02'),
 (16, 22, '202400847', 'John Romar', '', 'Saptang', 'Bachelor of Science in Information Technology', 3, 'D', 'johnromarsaptang02@gmail.com', '09515295684', '$2y$10$Ru5HH.euldk2ddYuE0buK./dELSwrsewaaLRQoBAVkuld3KvapjB2', 'NOT_STARTED', 'Closed', '2026-11-05 12:38:47'),
-(17, 23, '202401207', 'Jhosua', '', 'Alfaro', 'Bachelor of Science in Information Technology', 3, 'D', 'jhosuaalfaro28@gmail.com', '09753876340', '$2y$10$oOfIFHlickuf0M2.22VX1eHq4x0Sd//CzdrBmCgOIkbLddhrYNENS', 'NOT_STARTED', 'Closed', '2026-11-05 12:39:20'),
+(17, 23, '202401207', 'Jhosua', '', 'Alfaro', 'Bachelor of Science in Information Technology', 3, 'D', 'jhosuaalfaro28@gmail.com', '09753876340', '$2y$10$oOfIFHlickuf0M2.22VX1eHq4x0Sd//CzdrBmCgOIkbLddhrYNENS', 'EVALUATION', 'Evaluation', '2026-11-05 12:39:20'),
 (18, 24, '202400745', 'Jonathan', '', 'Pasa', 'Bachelor of Science in Information Technology', 3, 'D', 'pasajonathan4@gmail.com', '09216992548', '$2y$10$EWnxlM.lQwKxAisabM/8dOOTr.AEByxRaFlxug2a5P0GSb.myLKJm', 'NOT_STARTED', 'Closed', '2026-11-05 12:40:09'),
 (19, 25, '202400924', 'Ronald', '', 'Pineda', 'Bachelor of Science in Information Technology', 3, 'D', 'ronaldpineda642@gmail.com', '09122241752', '$2y$10$DT1P4apIl0lnzILeSDLyuenTuGXngWES.efyAC5PqZyhl5wgdpJoy', 'NOT_STARTED', 'Closed', '2026-11-05 12:50:17');
 
@@ -507,7 +683,7 @@ CREATE TABLE `system_settings` (
 --
 
 INSERT INTO `system_settings` (`setting_id`, `enrollment_status`, `semester`, `school_year`, `start_date`, `end_date`, `updated_at`) VALUES
-(1, 'OPEN', '2nd Semester', '2026 - 2027', '2026-11-05', '2026-11-15', '2026-11-06 01:07:43');
+(1, 'CLOSED', '2nd Semester', '2026 - 2027', '2026-11-05', '2026-11-15', '2026-11-06 14:21:44');
 
 -- --------------------------------------------------------
 
@@ -726,7 +902,7 @@ ALTER TABLE `enrollment_periods`
 -- AUTO_INCREMENT for table `enrollment_status_history`
 --
 ALTER TABLE `enrollment_status_history`
-  MODIFY `history_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+  MODIFY `history_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 
 --
 -- AUTO_INCREMENT for table `evaluation_questions`
@@ -744,13 +920,13 @@ ALTER TABLE `faculty_assignment_finalizations`
 -- AUTO_INCREMENT for table `professor_evaluations`
 --
 ALTER TABLE `professor_evaluations`
-  MODIFY `evaluation_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `evaluation_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT for table `professor_evaluation_answers`
 --
 ALTER TABLE `professor_evaluation_answers`
-  MODIFY `answer_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=401;
+  MODIFY `answer_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=561;
 
 --
 -- AUTO_INCREMENT for table `registration_verifications`

@@ -1,5 +1,5 @@
 <?php
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT); // throw exceptions
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);  
 
 $db_server = "localhost";
 $db_user   = "root";
@@ -14,4 +14,4 @@ try {
     error_log($e->getMessage());
     exit(json_encode(['success' => false, 'message' => 'Database connection failed.']));
 }
-// Don't close here. PHP closes it automatically when the request ends.
+ 

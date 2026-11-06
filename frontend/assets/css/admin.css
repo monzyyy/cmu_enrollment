@@ -1,6 +1,4 @@
-/* =========================================================
-   ADMIN DASHBOARD
-========================================================= */
+
 
 .admin-enrollment-card {
     display: grid;
@@ -17,11 +15,6 @@
 
     border-radius: 14px;
 }
-
-
-/* =========================================================
-   ENROLLMENT STATUS
-========================================================= */
 
 .admin-enrollment-left {
     min-width: 0;
@@ -91,7 +84,6 @@
     background: #667085;
 }
 
-
 .admin-enrollment-left h1 {
     margin: 0;
 
@@ -111,11 +103,6 @@
 
     color: var(--text);
 }
-
-
-/* =========================================================
-   ENROLLMENT PERIOD BUTTON
-========================================================= */
 
 .admin-period-button {
     display: inline-flex;
@@ -148,11 +135,6 @@
 .admin-period-button i {
     font-size: 13px;
 }
-
-
-/* =========================================================
-   ENROLLMENT INFORMATION
-========================================================= */
 
 .admin-enrollment-info {
     display: flex;
@@ -204,11 +186,6 @@
     font-weight: 500;
 }
 
-
-/* =========================================================
-   STATISTICS
-========================================================= */
-
 .admin-stat-grid {
     display: grid;
 
@@ -216,7 +193,6 @@
 
     gap: 9px;
 }
-
 
 .admin-stat-card {
     display: flex;
@@ -234,7 +210,6 @@
     border-radius: 13px;
 }
 
-
 .admin-stat-icon {
     display: flex;
 
@@ -250,7 +225,6 @@
 
     font-size: 16px;
 }
-
 
 .admin-stat-content {
     padding: 12px 13px 14px;
@@ -300,11 +274,6 @@
     gap: 5px;
 }
 
-
-/* =========================================================
-   STUDENT TABLE
-========================================================= */
-
 .admin-student-table {
     overflow: hidden;
 
@@ -314,7 +283,6 @@
 
     border-radius: 13px;
 }
-
 
 .admin-table-header,
 .admin-table-row {
@@ -326,7 +294,6 @@
 
     column-gap: 10px;
 }
-
 
 .admin-table-header {
     min-height: 35px;
@@ -341,7 +308,6 @@
 
     font-weight: 800;
 }
-
 
 .admin-table-row {
     min-height: 67px;
@@ -362,11 +328,6 @@
 .admin-table-row:nth-child(even) {
     background: #ffffff;
 }
-
-
-/* =========================================================
-   TABLE STATUS
-========================================================= */
 
 .admin-table-status {
     display: flex;
@@ -412,11 +373,6 @@
     color: #16803c;
 }
 
-
-/* =========================================================
-   RESPONSIVE
-========================================================= */
-
 @media (max-width: 1000px) {
 
     .admin-enrollment-card {
@@ -438,7 +394,6 @@
     }
 
 }
-
 
 @media (max-width: 700px) {
 
@@ -468,17 +423,12 @@
 
 }
 
-/* =========================================================
-   ENROLLMENT PERIOD
-========================================================= */
-
 .admin-period-card {
     background: var(--white);
     border: 1px solid var(--border);
     border-radius: 14px;
     padding: 20px;
 }
-
 
 .admin-period-card-header {
     display: flex;
@@ -489,7 +439,6 @@
     border-bottom: 1px solid var(--border);
 }
 
-
 .admin-period-card-header h2 {
     margin: 0 0 5px;
     font-size: 24px;
@@ -497,13 +446,11 @@
     color: var(--primary);
 }
 
-
 .admin-period-card-header p {
     margin: 0;
     font-size: 12px;
     color: var(--text);
 }
-
 
 .admin-period-details {
     display: grid;
@@ -512,14 +459,12 @@
     margin-top: 18px;
 }
 
-
 .admin-period-detail {
     padding: 14px;
     background: #f8fafc;
     border: 1px solid var(--border);
     border-radius: 10px;
 }
-
 
 .admin-period-detail span {
     display: block;
@@ -529,13 +474,11 @@
     color: var(--primary);
 }
 
-
 .admin-period-detail strong {
     font-size: 13px;
     font-weight: 600;
     color: #596579;
 }
-
 
 @media (max-width: 700px) {
 
@@ -548,10 +491,6 @@
     }
 
 }
-
-/* =========================================================
-   ENROLLMENT PERIOD MODAL
-========================================================= */
 
 .admin-modal-overlay {
     position: fixed;
@@ -568,11 +507,9 @@
     backdrop-filter: blur(5px);
 }
 
-
 .admin-modal-overlay.active {
     display: flex;
 }
-
 
 .admin-enrollment-modal {
     width: min(100%, 420px);
@@ -589,7 +526,6 @@
     box-shadow: 0 20px 50px rgba(15, 23, 42, 0.15);
 }
 
-
 .admin-enrollment-modal h2 {
     margin: 0 auto 12px;
 
@@ -602,7 +538,6 @@
     color: var(--primary);
 }
 
-
 .admin-enrollment-modal p {
     margin: 0 auto;
 
@@ -613,7 +548,6 @@
 
     color: var(--text);
 }
-
 
 .admin-modal-warning {
     display: block;
@@ -628,7 +562,6 @@
     color: var(--primary);
 }
 
-
 .admin-modal-actions {
     display: flex;
     align-items: center;
@@ -636,7 +569,6 @@
 
     gap: 10px;
 }
-
 
 .admin-modal-cancel,
 .admin-modal-confirm {
@@ -655,7 +587,6 @@
     transition: 0.15s ease;
 }
 
-
 .admin-modal-cancel {
     border: 1px solid transparent;
 
@@ -664,11 +595,9 @@
     color: #596579;
 }
 
-
 .admin-modal-cancel:hover {
     background: #f3f4f6;
 }
-
 
 .admin-modal-confirm {
     border: 1px solid #fecaca;
@@ -678,11 +607,9 @@
     color: #c62828;
 }
 
-
 .admin-modal-confirm:hover {
     background: #ffe4e6;
 }
-
 
 @media (max-width: 500px) {
 
@@ -724,7 +651,6 @@
     color: var(--text);
 }
 
-
 .admin-close-enrollment-button,
 .admin-open-enrollment-button {
     min-height: 36px;
@@ -740,7 +666,6 @@
     cursor: pointer;
 }
 
-
 .admin-close-enrollment-button {
     border: 1px solid #fecaca;
 
@@ -748,7 +673,6 @@
 
     color: #b42318;
 }
-
 
 .admin-open-enrollment-button {
     border: 1px solid #bbf7d0;
@@ -952,10 +876,6 @@
     text-align: center;
 }
 
-/* =========================================================
-   STUDENT ENROLLMENT
-   ========================================================= */
-
 .admin-student-enrollment-header {
     display: flex;
     justify-content: space-between;
@@ -974,9 +894,6 @@
     color: #777;
     font-size: 14px;
 }
-
-
-/* SUMMARY CARDS */
 
 .admin-enrollment-summary {
     display: grid;
@@ -1007,9 +924,6 @@
     color: #222;
 }
 
-
-/* STUDENT TABLE CARD */
-
 .admin-student-enrollment-card {
     background: #ffffff;
     border: 1px solid #e8e8e8;
@@ -1036,9 +950,6 @@
     color: #777;
     font-size: 13px;
 }
-
-
-/* TABLE */
 
 .admin-student-enrollment-table-wrapper {
     width: 100%;
@@ -1078,9 +989,6 @@
     background: #fafafa;
 }
 
-
-/* PHASE BADGES */
-
 .admin-enrollment-phase {
     display: inline-flex;
     align-items: center;
@@ -1117,17 +1025,11 @@
     color: #24804a;
 }
 
-
-/* EMPTY STATE */
-
 .admin-student-enrollment-empty {
     padding: 40px 20px !important;
     text-align: center !important;
     color: #888 !important;
 }
-
-
-/* RESPONSIVE */
 
 @media (max-width: 900px) {
 
@@ -1156,10 +1058,6 @@
     }
 
 }
-
-/* =========================================================
-   STUDENT ENROLLMENT SEARCH + PAGINATION
-   ========================================================= */
 
 .admin-student-enrollment-card-header {
     gap: 20px;
@@ -1201,9 +1099,6 @@
     border-color: #999;
 }
 
-
-/* RESULT COUNT */
-
 .admin-student-enrollment-table-info {
     display: flex;
     align-items: center;
@@ -1212,9 +1107,6 @@
     color: #777;
     font-size: 12px;
 }
-
-
-/* PAGINATION */
 
 .admin-student-enrollment-pagination {
     display: flex;
@@ -1248,7 +1140,6 @@
     pointer-events: none;
 }
 
-
 .admin-student-enrollment-page-numbers {
     display: flex;
     align-items: center;
@@ -1279,9 +1170,6 @@
     color: #ffffff;
 }
 
-
-/* RESPONSIVE */
-
 @media (max-width: 700px) {
 
     .admin-student-enrollment-card-header {
@@ -1305,10 +1193,6 @@
 
 }
 
-/* =========================================================
-   COR SUBMISSIONS
-   ========================================================= */
-
 .admin-cor-header {
     display: flex;
     justify-content: space-between;
@@ -1327,9 +1211,6 @@
     color: #777;
     font-size: 14px;
 }
-
-
-/* SUMMARY */
 
 .admin-cor-summary {
     display: grid;
@@ -1360,9 +1241,6 @@
     font-weight: 700;
 }
 
-
-/* MAIN CARD */
-
 .admin-cor-card {
     background: #ffffff;
     border: 1px solid #e8e8e8;
@@ -1390,9 +1268,6 @@
     color: #777;
     font-size: 13px;
 }
-
-
-/* SEARCH */
 
 .admin-cor-search {
     margin-left: auto;
@@ -1430,9 +1305,6 @@
     border-color: #999;
 }
 
-
-/* TOOLBAR */
-
 .admin-cor-toolbar {
     display: flex;
     align-items: center;
@@ -1464,9 +1336,6 @@
     outline: none;
 }
 
-
-/* TABLE INFO */
-
 .admin-cor-table-info {
     display: flex;
     align-items: center;
@@ -1475,9 +1344,6 @@
     color: #777;
     font-size: 12px;
 }
-
-
-/* TABLE */
 
 .admin-cor-table-wrapper {
     width: 100%;
@@ -1517,9 +1383,6 @@
     background: #fafafa;
 }
 
-
-/* STATUS */
-
 .admin-cor-status {
     display: inline-flex;
     align-items: center;
@@ -1545,9 +1408,6 @@
     color: #b43b3b;
 }
 
-
-/* VIEW BUTTON */
-
 .admin-cor-view-button {
     padding: 7px 13px;
     border: 1px solid #dddddd;
@@ -1564,17 +1424,11 @@
     background: #f5f5f5;
 }
 
-
-/* EMPTY */
-
 .admin-cor-empty {
     padding: 40px 20px !important;
     text-align: center !important;
     color: #888 !important;
 }
-
-
-/* PAGINATION */
 
 .admin-cor-pagination {
     display: flex;
@@ -1638,9 +1492,6 @@
     color: #ffffff;
 }
 
-
-/* RESPONSIVE */
-
 @media (max-width: 900px) {
 
     .admin-cor-summary {
@@ -1672,10 +1523,6 @@
 
 }
 
-/* =========================================================
-   COR VIEW MODAL
-========================================================= */
-
 .admin-cor-modal {
     position: fixed;
     inset: 0;
@@ -1692,14 +1539,12 @@
     display: flex;
 }
 
-
 .admin-cor-modal-overlay {
     position: absolute;
     inset: 0;
 
     background: rgba(10, 25, 45, 0.55);
 }
-
 
 .admin-cor-modal-content {
     position: relative;
@@ -1717,9 +1562,6 @@
         0 20px 60px rgba(0, 0, 0, 0.20);
 }
 
-
-/* HEADER */
-
 .admin-cor-modal-header {
 
     display: flex;
@@ -1733,7 +1575,6 @@
     border-bottom: 1px solid #e7edf4;
 }
 
-
 .admin-cor-modal-header h2 {
 
     margin: 0 0 4px;
@@ -1743,7 +1584,6 @@
     color: #12284a;
 }
 
-
 .admin-cor-modal-header p {
 
     margin: 0;
@@ -1752,7 +1592,6 @@
 
     color: #66788f;
 }
-
 
 .admin-cor-modal-close {
 
@@ -1772,15 +1611,11 @@
     font-size: 16px;
 }
 
-
 .admin-cor-modal-close:hover {
 
     background: #e7edf4;
 
 }
-
-
-/* STUDENT INFORMATION */
 
 .admin-cor-modal-info {
 
@@ -1796,7 +1631,6 @@
     border-bottom: 1px solid #e7edf4;
 }
 
-
 .admin-cor-modal-info > div {
 
     display: flex;
@@ -1806,14 +1640,12 @@
     gap: 4px;
 }
 
-
 .admin-cor-modal-info small {
 
     font-size: 11px;
 
     color: #7b8da4;
 }
-
 
 .admin-cor-modal-info strong {
 
@@ -1824,20 +1656,15 @@
     word-break: break-word;
 }
 
-
-/* FILE */
-
 .admin-cor-modal-file {
 
     padding: 20px 24px 24px;
 }
 
-
 .admin-cor-modal-file-header {
 
     margin-bottom: 14px;
 }
-
 
 .admin-cor-modal-file-header h3 {
 
@@ -1848,7 +1675,6 @@
     color: #12284a;
 }
 
-
 .admin-cor-modal-file-header span {
 
     font-size: 12px;
@@ -1857,9 +1683,6 @@
 
     word-break: break-all;
 }
-
-
-/* PREVIEW */
 
 .admin-cor-file-preview {
 
@@ -1883,7 +1706,6 @@
     overflow: hidden;
 }
 
-
 .admin-cor-preview-image {
 
     display: block;
@@ -1900,7 +1722,6 @@
     border-radius: 6px;
 }
 
-
 .admin-cor-preview-pdf {
 
     width: 100%;
@@ -1913,7 +1734,6 @@
 
     background: #ffffff;
 }
-
 
 .admin-cor-file-placeholder {
 
@@ -1933,12 +1753,10 @@
     text-align: center;
 }
 
-
 .admin-cor-file-placeholder i {
 
     font-size: 36px;
 }
-
 
 .admin-cor-file-placeholder p {
 
@@ -1946,9 +1764,6 @@
 
     font-size: 13px;
 }
-
-
-/* RESPONSIVE */
 
 @media (max-width: 700px) {
 
@@ -1958,8 +1773,7 @@
 
     }
 
-
-    .admin-cor-modal-content {
+.admin-cor-modal-content {
 
         max-height: 94vh;
 
@@ -1967,8 +1781,7 @@
 
     }
 
-
-    .admin-cor-modal-info {
+.admin-cor-modal-info {
 
         grid-template-columns: 1fr 1fr;
 
@@ -1976,22 +1789,19 @@
 
     }
 
-
-    .admin-cor-modal-file {
+.admin-cor-modal-file {
 
         padding: 18px;
 
     }
 
-
-    .admin-cor-preview-pdf {
+.admin-cor-preview-pdf {
 
         height: 500px;
 
     }
 
 }
-
 
 @media (max-width: 480px) {
 
@@ -2001,8 +1811,7 @@
 
     }
 
-
-    .admin-cor-modal-header {
+.admin-cor-modal-header {
 
         padding: 18px;
 
@@ -2151,10 +1960,6 @@
     background: #e9eef4;
 }
 
-/* =========================================================
-   COURSE OFFERINGS
-========================================================= */
-
 .course-offering-filters {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -2267,10 +2072,6 @@
 
 }
 
-/* =========================================================
-   COURSE OFFERINGS BUTTONS
-========================================================= */
-
 .course-offering-header-button {
     display: inline-flex;
     align-items: center;
@@ -2298,7 +2099,6 @@
     font-size: 11px;
 }
 
-
 .course-offering-filter-button button {
     display: inline-flex;
     align-items: center;
@@ -2324,10 +2124,6 @@
 .course-offering-filter-button button i {
     font-size: 12px;
 }
-
-/* =========================================================
-   ADD COURSE OFFERING MODAL
-========================================================= */
 
 .course-offering-modal {
     position: fixed;
@@ -2616,10 +2412,6 @@
 
 }
 
-/* =========================================================
-   COURSE OFFERING EDIT
-========================================================= */
-
 .course-offering-edit-button {
     display: inline-flex;
     align-items: center;
@@ -2819,9 +2611,6 @@
     text-align: center;
 }
 
-/* =========================================
-   COURSE MANAGEMENT - EDIT MODAL
-========================================= */
 #addCourseForm {
     padding: 20px;
 }
@@ -2895,9 +2684,6 @@
     color: #314b68;
 }
 
-
-/* FORM */
-
 #editCourseForm {
     padding: 20px;
 }
@@ -2934,9 +2720,6 @@
     box-shadow: 0 0 0 3px rgba(47, 111, 178, 0.10);
 }
 
-
-/* MESSAGE */
-
 .course-management-form-message {
     display: none;
     margin-bottom: 14px;
@@ -2952,9 +2735,6 @@
 .course-management-form-message.show {
     display: block;
 }
-
-
-/* ACTIONS */
 
 .course-management-modal-actions {
     display: flex;
@@ -3005,10 +2785,6 @@
     font-size: 10px;
 }
 
-/* =========================================
-   COURSE MANAGEMENT - ACTIONS
-========================================= */
-
 .course-management-actions {
     display: flex;
     align-items: center;
@@ -3037,9 +2813,6 @@
     font-size: 10px;
 }
 
-
-/* DEACTIVATE */
-
 .course-management-status-button.is-deactivate {
     border: 1px solid #ead6d6;
     background: #ffffff;
@@ -3051,9 +2824,6 @@
     background: #fff5f5;
 }
 
-
-/* REACTIVATE */
-
 .course-management-status-button.is-activate {
     border: 1px solid #d2e4d8;
     background: #ffffff;
@@ -3064,10 +2834,6 @@
     border-color: #bdd8c7;
     background: #f3faf5;
 }
-
-/* =========================================================
-   STUDENT MANAGEMENT
-   ========================================================= */
 
 .admin-primary-button {
     display: inline-flex;
@@ -3088,11 +2854,6 @@
 .admin-primary-button:hover {
     background: #1d4ed8;
 }
-
-
-/* =========================================================
-   STUDENT SUMMARY
-   ========================================================= */
 
 .admin-summary-card {
     display: flex;
@@ -3133,11 +2894,6 @@
     font-size: 22px;
     font-weight: 800;
 }
-
-
-/* =========================================================
-   SEARCH / FILTER BAR
-   ========================================================= */
 
 .admin-filter-bar {
     display: flex;
@@ -3187,11 +2943,6 @@
     border-color: #2563eb;
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
 }
-
-
-/* =========================================================
-   STUDENT TABLE
-   ========================================================= */
 
 .admin-table-card {
     width: 100%;
@@ -3249,11 +3000,6 @@
     font-weight: 700;
 }
 
-
-/* =========================================================
-   STATUS BADGES
-   ========================================================= */
-
 .admin-status-badge {
     display: inline-flex;
     align-items: center;
@@ -3275,11 +3021,6 @@
     background: #fef2f2;
     color: #b91c1c;
 }
-
-
-/* =========================================================
-   STUDENT MANAGEMENT ACTIONS
-   ========================================================= */
 
 .student-management-actions {
     display: flex;
@@ -3316,22 +3057,12 @@
     font-size: 11px;
 }
 
-
-/* =========================================================
-   EMPTY STATE
-   ========================================================= */
-
 .admin-empty-state {
     padding: 40px 20px !important;
     color: #9ca3af !important;
     text-align: center !important;
     font-size: 13px !important;
 }
-
-
-/* =========================================================
-   RESPONSIVE
-   ========================================================= */
 
 @media (max-width: 768px) {
 
@@ -3356,10 +3087,6 @@
     }
 
 }
-
-/* =========================================================
-   STUDENT MANAGEMENT MODAL
-   ========================================================= */
 
 .student-modal-overlay {
     position: fixed;

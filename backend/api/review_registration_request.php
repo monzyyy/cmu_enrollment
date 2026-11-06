@@ -52,8 +52,8 @@ try {
     if ($hash === '' || password_get_info($hash)['algo'] === null) {
         throw new DomainException('This request has no valid student-created password. Ask the student to register again.');
     }
-    // Only approved regular-student historical class records are linked.
-    // Match the official previous term, ignoring whitespace in school-year formatting.
+     
+     
     $previousProgram = trim((string)($record['previous_program'] ?? ''));
     $previousYear = (int)($record['previous_year_level'] ?? 0);
     $previousSection = trim((string)($record['previous_section'] ?? ''));
@@ -91,8 +91,8 @@ try {
     $stmt->bind_param('isssssissss', $userId, $number, $first, $middle, $last, $program, $year, $section, $email, $hash, $phase);
     $stmt->execute(); $studentId = (int)$conn->insert_id; $stmt->close();
 
-    // Link each verified offering to the new student within the same transaction.
-    // The account is not approved if any enrollment insert fails.
+     
+     
     $enrollmentType = 'REGULAR';
     $stmt = $conn->prepare('INSERT INTO student_course_enrollments (student_id, offering_id, enrollment_type) VALUES (?, ?, ?)');
     foreach ($offeringIds as $offeringId) {

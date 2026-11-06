@@ -6,7 +6,6 @@ require_role('ADMIN');
 
 header('Content-Type: application/json');
 
-
 try {
 
     $data = json_decode(
@@ -18,7 +17,6 @@ try {
         throw new Exception('Invalid request.');
     }
 
-
     $courseId = (int) ($data['course_id'] ?? 0);
     $program = trim($data['program'] ?? '');
     $yearLevel = (int) ($data['year_level'] ?? 0);
@@ -28,13 +26,6 @@ try {
     $instructorName = trim($data['instructor_name'] ?? '');
 
     $schedules = $data['schedules'] ?? [];
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Validation
-    |--------------------------------------------------------------------------
-    */
 
     if ($courseId <= 0) {
         throw new Exception('Please select a course.');
@@ -60,13 +51,6 @@ try {
         throw new Exception('Please enter the school year.');
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Check Course
-    |--------------------------------------------------------------------------
-    */
-
     $stmt = $conn->prepare(
         'SELECT course_id
          FROM courses
@@ -86,28 +70,13 @@ try {
 
     $stmt->close();
 
-
-    if (!$course) {
+if (!$course) {
         throw new Exception(
             'The selected course is not available.'
         );
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Start Transaction
-    |--------------------------------------------------------------------------
-    */
-
     $conn->begin_transaction();
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Check Duplicate Offering
-    |--------------------------------------------------------------------------
-    */
 
     $stmt = $conn->prepare(
         'SELECT offering_id
@@ -138,21 +107,13 @@ try {
 
     $stmt->close();
 
-
-    if ($existing) {
+if ($existing) {
 
         throw new Exception(
             'This course is already assigned to the selected section.'
         );
 
     }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Insert Course Offering
-    |--------------------------------------------------------------------------
-    */
 
     $stmt = $conn->prepare(
         'INSERT INTO course_offerings (
@@ -188,13 +149,6 @@ try {
 
     $stmt->close();
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Insert Schedules
-    |--------------------------------------------------------------------------
-    */
-
     if (is_array($schedules)) {
 
         foreach ($schedules as $schedule) {
@@ -208,11 +162,6 @@ try {
             $endTime = trim($schedule['end_time'] ?? '');
             $room = trim($schedule['room'] ?? '');
 
-
-            /*
-             * Skip completely empty schedule rows.
-             */
-
             if (
                 $day === '' &&
                 $startTime === '' &&
@@ -221,12 +170,6 @@ try {
             ) {
                 continue;
             }
-
-
-            /*
-             * If a schedule is partially filled,
-             * require the basic schedule information.
-             */
 
             if (
                 $day === '' ||
@@ -238,11 +181,9 @@ try {
                 );
             }
 
-
             $roomValue = $room !== ''
                 ? $room
                 : null;
-
 
             $stmt = $conn->prepare(
                 'INSERT INTO course_offering_schedules (
@@ -272,34 +213,24 @@ try {
 
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Commit
-    |--------------------------------------------------------------------------
-    */
-
     $conn->commit();
 
-
-    echo json_encode([
+echo json_encode([
         'success' => true,
         'message' => 'Course offering added successfully.'
     ]);
 
-
 } catch (Throwable $e) {
 
     if ($conn->errno === 0) {
-        // No active database error.
+
     }
 
     if ($conn->in_transaction) {
         $conn->rollback();
     }
 
-
-    echo json_encode([
+echo json_encode([
         'success' => false,
         'message' => $e->getMessage()
     ]);

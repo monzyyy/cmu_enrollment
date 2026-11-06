@@ -24,25 +24,25 @@ try {
     $stmt=$conn->prepare('SELECT period_id,status FROM enrollment_periods WHERE semester=? AND REPLACE(school_year," ","")=REPLACE(?," ","") FOR UPDATE');
     $stmt->bind_param('ss',$semester,$schoolYear); $stmt->execute(); $existing=$stmt->get_result()->fetch_assoc(); $stmt->close();
     if ($existing) throw new RuntimeException('That enrollment period already exists.');
-    // Verify and lock the current period by its actual record, not UPDATE affected_rows.
+     
     $stmt=$conn->prepare('SELECT period_id FROM enrollment_periods WHERE semester=? AND REPLACE(school_year," ","")=REPLACE(?," ","") FOR UPDATE');
     $stmt->bind_param('ss',$settings['semester'],$settings['school_year']);
     $stmt->execute(); $currentPeriod=$stmt->get_result()->fetch_assoc(); $stmt->close();
     if (!$currentPeriod) throw new RuntimeException('Current enrollment period was not found in enrollment_periods.');
     $currentPeriodId=(int)$currentPeriod['period_id'];
-    // Do not reset while any submission awaits review; resolve it first.
+     
     $stmt=$conn->prepare('SELECT COUNT(*) AS n FROM cor_submissions c JOIN enrollment_periods p ON c.period_id=p.period_id WHERE p.semester=? AND REPLACE(p.school_year," ","")=REPLACE(?," ","") AND c.status="PENDING"');
     $stmt->bind_param('ss',$settings['semester'],$settings['school_year']); $stmt->execute(); $pendingCor=(int)$stmt->get_result()->fetch_assoc()['n']; $stmt->close();
     $stmt=$conn->prepare('SELECT COUNT(*) AS n FROM clearance_submissions WHERE semester=? AND REPLACE(school_year," ","")=REPLACE(?," ","") AND status="PENDING"');
     $stmt->bind_param('ss',$settings['semester'],$settings['school_year']); $stmt->execute(); $pendingClearance=(int)$stmt->get_result()->fetch_assoc()['n']; $stmt->close();
     if ($pendingCor || $pendingClearance) throw new RuntimeException('Resolve pending COR and Clearance submissions before starting a new period.');
-    // Old COR records with no period cannot safely be archived or scoped.
+     
     $result=$conn->query('SELECT COUNT(*) AS n FROM cor_submissions WHERE period_id IS NULL');
     if ((int)$result->fetch_assoc()['n'] > 0) throw new RuntimeException('Some old COR submissions have no period_id. Verify and assign their period before starting a new period.');
-    // Preserve each student's current block-section offerings before the new period.
-    // Only current-term offerings are snapshotted. Older records remain untouched.
-    // Existing manual assignments are kept, and the unique (student_id, offering_id)
-    // index ensures a student cannot receive the same offering twice.
+     
+     
+     
+     
     $stmt = $conn->prepare(
         'INSERT INTO student_course_enrollments
             (student_id, offering_id, enrollment_type)

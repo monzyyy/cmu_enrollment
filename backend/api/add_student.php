@@ -53,8 +53,8 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     exit;
 }
 
-// Phone is optional, but supplied Philippine mobile numbers must use
-// 09XXXXXXXXX (11 digits) or +639XXXXXXXXX (13 characters).
+ 
+ 
 if ($phone !== '' && !preg_match('/^(?:09[0-9]{9}|\+639[0-9]{9})$/D', $phone)) {
     echo json_encode([
         'success' => false,

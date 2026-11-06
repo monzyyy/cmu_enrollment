@@ -11,7 +11,7 @@ try {
  $conn->begin_transaction();
  $r=$conn->query('SELECT semester,school_year FROM system_settings WHERE setting_id=1 FOR UPDATE')->fetch_assoc();
  if (!$r) throw new RuntimeException('Current period missing.');
- // Semester/year are intentionally ignored: changing them requires Start New Period.
+  
  $s=$conn->prepare('UPDATE enrollment_periods SET start_date=?,end_date=? WHERE semester=? AND REPLACE(school_year," ","")=REPLACE(?," ","")');
  $s->bind_param('ssss',$start,$end,$r['semester'],$r['school_year']); $s->execute(); $s->close();
  $s=$conn->prepare('SELECT period_id FROM enrollment_periods WHERE semester=? AND REPLACE(school_year," ","")=REPLACE(?," ","") LIMIT 1');

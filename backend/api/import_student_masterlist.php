@@ -16,7 +16,7 @@ $extension=strtolower(pathinfo($file['name'],PATHINFO_EXTENSION));
 if (!in_array($extension,['csv','xlsx'],true) || $file['size'] > 5*1024*1024 || $file['size'] === 0 || !is_uploaded_file($file['tmp_name'])) output_import(false,'Upload a CSV or XLSX file smaller than 5 MB.',[],422);
 $expected=['student_number','first_name','middle_name','last_name','date_of_birth','email','program','year_level','section','previous_program','previous_year_level','previous_section','previous_semester','previous_school_year'];
 
-/** Read only the first worksheet. XLSX is a ZIP package of XML files. */
+ 
 function read_xlsx_masterlist(string $path): array {
     if (!class_exists('ZipArchive') || !function_exists('simplexml_load_string')) throw new RuntimeException('XLSX requires the PHP zip and SimpleXML extensions. Enable them in php.ini and restart Apache.');
     $zip=new ZipArchive();
@@ -82,7 +82,7 @@ function read_xlsx_masterlist(string $path): array {
                 $column=0;
                 foreach (str_split(strtoupper($match[1])) as $letter) $column=$column*26+ord($letter)-64;
                 if ($column<1 || $column>14) {
-                    // Ignore formatting-only cells outside the template columns.
+                     
                     continue;
                 }
                 $type=(string)$cell['t'];
@@ -97,7 +97,7 @@ function read_xlsx_masterlist(string $path): array {
                         $value=$shared[(int)$value];
                     }
                 }
-                // Excel often stores date-formatted cells as serial numbers.
+                 
                 if ($column===5 && $value!=='' && is_numeric($value)) {
                     $serial=(float)$value;
                     if ($serial>=1 && $serial<=2958465) {

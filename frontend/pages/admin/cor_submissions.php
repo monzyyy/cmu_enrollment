@@ -4,38 +4,34 @@ require_role('ADMIN');
 
 $currentPage = 'cor_submissions';
 
-
-/* SEARCH */
+ 
 
 $search = trim($_GET['search'] ?? '');
 
-
-/* STATUS FILTER */
+ 
 
 $statusFilter = $_GET['status'] ?? '';
 
 $allowedStatuses = [
-    'PENDING',
-    'APPROVED',
-    'REJECTED'
+'PENDING',
+'APPROVED',
+'REJECTED'
 ];
 
 if (!in_array($statusFilter, $allowedStatuses, true)) {
-    $statusFilter = '';
+$statusFilter = '';
 }
 
-
-/* PAGINATION */
+ 
 
 $studentsPerPage = 5;
 
 $currentPageNumber = max(
-    1,
-    (int) ($_GET['cor_page'] ?? 1)
+1,
+(int) ($_GET['cor_page'] ?? 1)
 );
 
-
-/* COUNT SUBMISSIONS */
+ 
 
 $countSql = '
     SELECT COUNT(*) AS total
@@ -48,10 +44,9 @@ $countSql = '
 $countTypes = '';
 $countValues = [];
 
-
 if ($search !== '') {
 
-    $countSql .= '
+$countSql .= '
         AND (
             s.student_number LIKE ?
             OR s.first_name LIKE ?
@@ -62,39 +57,35 @@ if ($search !== '') {
         )
     ';
 
-    $searchValue = '%' . $search . '%';
+$searchValue = '%' . $search . '%';
 
-    $countTypes .= 'ssssss';
+$countTypes .= 'ssssss';
 
-    $countValues = [
-        $searchValue,
-        $searchValue,
-        $searchValue,
-        $searchValue,
-        $searchValue,
-        $searchValue
-    ];
+$countValues = [
+$searchValue,
+$searchValue,
+$searchValue,
+$searchValue,
+$searchValue,
+$searchValue
+];
 }
-
 
 if ($statusFilter !== '') {
 
-    $countSql .= '
+$countSql .= '
         AND c.status = ?
     ';
 
-    $countTypes .= 's';
-    $countValues[] = $statusFilter;
+$countTypes .= 's';
+$countValues[] = $statusFilter;
 }
-
 
 $countStmt = $conn->prepare($countSql);
 
-
 if (!empty($countValues)) {
-    $countStmt->bind_param($countTypes, ...$countValues);
+$countStmt->bind_param($countTypes, ...$countValues);
 }
-
 
 $countStmt->execute();
 
@@ -104,25 +95,23 @@ $totalSubmissions = (int) ($countResult['total'] ?? 0);
 
 $countStmt->close();
 
-
-/* TOTAL PAGES */
+ 
 
 $totalPages = max(
-    1,
-    (int) ceil($totalSubmissions / $studentsPerPage)
+1,
+(int) ceil($totalSubmissions / $studentsPerPage)
 );
 
 $currentPageNumber = min(
-    $currentPageNumber,
-    $totalPages
+$currentPageNumber,
+$totalPages
 );
 
 $offset = (
-    $currentPageNumber - 1
+$currentPageNumber - 1
 ) * $studentsPerPage;
 
-
-/* GET SUBMISSIONS */
+ 
 
 $sql = '
     SELECT
@@ -152,10 +141,9 @@ $sql = '
 $types = '';
 $values = [];
 
-
 if ($search !== '') {
 
-    $sql .= '
+$sql .= '
         AND (
             s.student_number LIKE ?
             OR s.first_name LIKE ?
@@ -166,29 +154,27 @@ if ($search !== '') {
         )
     ';
 
-    $types .= 'ssssss';
+$types .= 'ssssss';
 
-    $values = [
-        $searchValue,
-        $searchValue,
-        $searchValue,
-        $searchValue,
-        $searchValue,
-        $searchValue
-    ];
+$values = [
+$searchValue,
+$searchValue,
+$searchValue,
+$searchValue,
+$searchValue,
+$searchValue
+];
 }
-
 
 if ($statusFilter !== '') {
 
-    $sql .= '
+$sql .= '
         AND c.status = ?
     ';
 
-    $types .= 's';
-    $values[] = $statusFilter;
+$types .= 's';
+$values[] = $statusFilter;
 }
-
 
 $sql .= '
     ORDER BY c.submitted_at DESC
@@ -200,7 +186,6 @@ $types .= 'ii';
 $values[] = $studentsPerPage;
 $values[] = $offset;
 
-
 $stmt = $conn->prepare($sql);
 
 $stmt->bind_param($types, ...$values);
@@ -208,20 +193,19 @@ $stmt->bind_param($types, ...$values);
 $stmt->execute();
 
 $submissions = $stmt
-    ->get_result()
-    ->fetch_all(MYSQLI_ASSOC);
+->get_result()
+->fetch_all(MYSQLI_ASSOC);
 
 $stmt->close();
 
-
-/* STATUS COUNTS */
+ 
 
 $pendingCount = 0;
 $approvedCount = 0;
 $rejectedCount = 0;
 
 $statusResult = $conn->query(
-    "SELECT
+"SELECT
         SUM(status = 'PENDING') AS pending_count,
         SUM(status = 'APPROVED') AS approved_count,
         SUM(status = 'REJECTED') AS rejected_count
@@ -230,37 +214,35 @@ $statusResult = $conn->query(
 
 if ($statusResult) {
 
-    $statusCounts = $statusResult->fetch_assoc();
+$statusCounts = $statusResult->fetch_assoc();
 
-    $pendingCount = (int) ($statusCounts['pending_count'] ?? 0);
-    $approvedCount = (int) ($statusCounts['approved_count'] ?? 0);
-    $rejectedCount = (int) ($statusCounts['rejected_count'] ?? 0);
+$pendingCount = (int) ($statusCounts['pending_count'] ?? 0);
+$approvedCount = (int) ($statusCounts['approved_count'] ?? 0);
+$rejectedCount = (int) ($statusCounts['rejected_count'] ?? 0);
 }
 
-
-/* STATUS LABEL */
+ 
 
 function cor_status_label(string $status): string
 {
-    return match ($status) {
-        'PENDING' => 'Pending',
-        'APPROVED' => 'Approved',
-        'REJECTED' => 'Rejected',
-        default => 'Unknown',
-    };
+return match ($status) {
+'PENDING' => 'Pending',
+'APPROVED' => 'Approved',
+'REJECTED' => 'Rejected',
+default => 'Unknown',
+};
 }
 
-
-/* STATUS CLASS */
+ 
 
 function cor_status_class(string $status): string
 {
-    return match ($status) {
-        'PENDING' => 'admin-cor-status-pending',
-        'APPROVED' => 'admin-cor-status-approved',
-        'REJECTED' => 'admin-cor-status-rejected',
-        default => '',
-    };
+return match ($status) {
+'PENDING' => 'admin-cor-status-pending',
+'APPROVED' => 'admin-cor-status-approved',
+'REJECTED' => 'admin-cor-status-rejected',
+default => '',
+};
 }
 
 ?>
@@ -498,14 +480,14 @@ function cor_status_class(string $status): string
 
                         <?php
 
-                        $displayStart = $offset + 1;
+$displayStart = $offset + 1;
 
-                        $displayEnd = min(
-                            $offset + $studentsPerPage,
-                            $totalSubmissions
-                        );
+$displayEnd = min(
+$offset + $studentsPerPage,
+$totalSubmissions
+);
 
-                        ?>
+?>
 
                         <span>
                             Showing <?= $displayStart ?>–<?= $displayEnd ?>
@@ -590,15 +572,15 @@ function cor_status_class(string $status): string
 
                                 <?php
 
-                                $fullName = trim(
-                                    $submission['first_name']
-                                    . ' '
-                                    . ($submission['middle_name'] ?? '')
-                                    . ' '
-                                    . $submission['last_name']
-                                );
+$fullName = trim(
+$submission['first_name']
+. ' '
+. ($submission['middle_name'] ?? '')
+. ' '
+. $submission['last_name']
+);
 
-                                ?>
+?>
 
 
                                 <tr>
@@ -607,8 +589,8 @@ function cor_status_class(string $status): string
                                     <td>
 
                                         <?= e(
-                                            $submission['student_number']
-                                        ) ?>
+$submission['student_number']
+) ?>
 
                                     </td>
 
@@ -623,8 +605,8 @@ function cor_status_class(string $status): string
                                     <td>
 
                                         <?= e(
-                                            $submission['program']
-                                        ) ?>
+$submission['program']
+) ?>
 
                                     </td>
 
@@ -639,11 +621,11 @@ function cor_status_class(string $status): string
                                     <td>
 
                                         <?= date(
-                                            'M j, Y',
-                                            strtotime(
-                                                $submission['submitted_at']
-                                            )
-                                        ) ?>
+'M j, Y',
+strtotime(
+$submission['submitted_at']
+)
+) ?>
 
                                     </td>
 
@@ -655,8 +637,8 @@ function cor_status_class(string $status): string
                                         >
 
                                             <?= cor_status_label(
-                                                $submission['status']
-                                            ) ?>
+$submission['status']
+) ?>
 
                                         </span>
 
@@ -710,13 +692,13 @@ function cor_status_class(string $status): string
 
                         <a
                             href="<?= e(
-                                BASE_URL
-                                . '?page=cor_submissions'
-                                . '&search=' . urlencode($search)
-                                . '&status=' . urlencode($statusFilter)
-                                . '&cor_page='
-                                . ($currentPageNumber - 1)
-                            ) ?>"
+BASE_URL
+. '?page=cor_submissions'
+. '&search=' . urlencode($search)
+. '&status=' . urlencode($statusFilter)
+. '&cor_page='
+. ($currentPageNumber - 1)
+) ?>"
                             class="<?= $currentPageNumber <= 1 ? 'disabled' : '' ?>"
                         >
 
@@ -730,20 +712,20 @@ function cor_status_class(string $status): string
                         <div class="admin-cor-page-numbers">
 
                             <?php for (
-                                $pageNumber = 1;
-                                $pageNumber <= $totalPages;
-                                $pageNumber++
-                            ): ?>
+$pageNumber = 1;
+$pageNumber <= $totalPages;
+$pageNumber++
+): ?>
 
                                 <a
                                     href="<?= e(
-                                        BASE_URL
-                                        . '?page=cor_submissions'
-                                        . '&search=' . urlencode($search)
-                                        . '&status=' . urlencode($statusFilter)
-                                        . '&cor_page='
-                                        . $pageNumber
-                                    ) ?>"
+BASE_URL
+. '?page=cor_submissions'
+. '&search=' . urlencode($search)
+. '&status=' . urlencode($statusFilter)
+. '&cor_page='
+. $pageNumber
+) ?>"
                                     class="<?= $pageNumber === $currentPageNumber ? 'active' : '' ?>"
                                 >
 
@@ -758,13 +740,13 @@ function cor_status_class(string $status): string
 
                         <a
                             href="<?= e(
-                                BASE_URL
-                                . '?page=cor_submissions'
-                                . '&search=' . urlencode($search)
-                                . '&status=' . urlencode($statusFilter)
-                                . '&cor_page='
-                                . ($currentPageNumber + 1)
-                            ) ?>"
+BASE_URL
+. '?page=cor_submissions'
+. '&search=' . urlencode($search)
+. '&status=' . urlencode($statusFilter)
+. '&cor_page='
+. ($currentPageNumber + 1)
+) ?>"
                             class="<?= $currentPageNumber >= $totalPages ? 'disabled' : '' ?>"
                         >
 

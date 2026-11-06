@@ -11,34 +11,32 @@ if (empty($_SESSION['registration_review_csrf'])) { $_SESSION['registration_revi
 $studentsPerPage = 5;
 
 $currentStudentPage = max(
-    1,
-    (int) ($_GET['student_page'] ?? 1)
+1,
+(int) ($_GET['student_page'] ?? 1)
 );
 
 $search = trim($_GET['search'] ?? '');
 
-
-/* TOTAL STUDENTS */
+ 
 
 $result = $conn->query(
-    'SELECT COUNT(*) AS total
+'SELECT COUNT(*) AS total
      FROM students'
 );
 
 $totalStudents = 0;
 
 if ($result) {
-    $row = $result->fetch_assoc();
-    $totalStudents = (int) ($row['total'] ?? 0);
+$row = $result->fetch_assoc();
+$totalStudents = (int) ($row['total'] ?? 0);
 }
 
-
-/* COUNT FILTERED STUDENTS */
+ 
 
 if ($search !== '') {
 
-    $countStmt = $conn->prepare(
-        'SELECT COUNT(*) AS total
+$countStmt = $conn->prepare(
+'SELECT COUNT(*) AS total
          FROM students
          WHERE
             student_number LIKE ?
@@ -48,66 +46,64 @@ if ($search !== '') {
             OR program LIKE ?
             OR section LIKE ?
             OR email LIKE ?'
-    );
+);
 
-    $searchValue = '%' . $search . '%';
+$searchValue = '%' . $search . '%';
 
-    $countStmt->bind_param(
-        'sssssss',
-        $searchValue,
-        $searchValue,
-        $searchValue,
-        $searchValue,
-        $searchValue,
-        $searchValue,
-        $searchValue
-    );
+$countStmt->bind_param(
+'sssssss',
+$searchValue,
+$searchValue,
+$searchValue,
+$searchValue,
+$searchValue,
+$searchValue,
+$searchValue
+);
 
 } else {
 
-    $countStmt = $conn->prepare(
-        'SELECT COUNT(*) AS total
+$countStmt = $conn->prepare(
+'SELECT COUNT(*) AS total
          FROM students'
-    );
+);
 }
 
 $countStmt->execute();
 
 $countResult =
-    $countStmt->get_result()->fetch_assoc();
+$countStmt->get_result()->fetch_assoc();
 
 $totalFilteredStudents =
-    (int) ($countResult['total'] ?? 0);
+(int) ($countResult['total'] ?? 0);
 
 $countStmt->close();
 
-
-/* PAGINATION */
+ 
 
 $totalStudentPages = max(
-    1,
-    (int) ceil(
-        $totalFilteredStudents /
-        $studentsPerPage
-    )
+1,
+(int) ceil(
+$totalFilteredStudents /
+$studentsPerPage
+)
 );
 
 $currentStudentPage = min(
-    $currentStudentPage,
-    $totalStudentPages
+$currentStudentPage,
+$totalStudentPages
 );
 
 $studentOffset =
-    ($currentStudentPage - 1) *
-    $studentsPerPage;
+($currentStudentPage - 1) *
+$studentsPerPage;
 
-
-/* GET STUDENTS */
+ 
 
 if ($search !== '') {
 
-    $stmt = $conn->prepare(
-        'SELECT
+$stmt = $conn->prepare(
+'SELECT
             s.student_id,
             s.student_number,
             s.first_name,
@@ -135,25 +131,25 @@ if ($search !== '') {
             s.last_name ASC,
             s.first_name ASC
          LIMIT ? OFFSET ?'
-    );
+);
 
-    $stmt->bind_param(
-        'sssssssii',
-        $searchValue,
-        $searchValue,
-        $searchValue,
-        $searchValue,
-        $searchValue,
-        $searchValue,
-        $searchValue,
-        $studentsPerPage,
-        $studentOffset
-    );
+$stmt->bind_param(
+'sssssssii',
+$searchValue,
+$searchValue,
+$searchValue,
+$searchValue,
+$searchValue,
+$searchValue,
+$searchValue,
+$studentsPerPage,
+$studentOffset
+);
 
 } else {
 
-    $stmt = $conn->prepare(
-        'SELECT
+$stmt = $conn->prepare(
+'SELECT
             s.student_id,
             s.student_number,
             s.first_name,
@@ -173,24 +169,23 @@ if ($search !== '') {
             s.last_name ASC,
             s.first_name ASC
          LIMIT ? OFFSET ?'
-    );
+);
 
-    $stmt->bind_param(
-        'ii',
-        $studentsPerPage,
-        $studentOffset
-    );
+$stmt->bind_param(
+'ii',
+$studentsPerPage,
+$studentOffset
+);
 }
 
 $stmt->execute();
 
 $students =
-    $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
 $stmt->close();
 
-
-/* Registration requests are reviewed separately from active student accounts. */
+ 
 $registrationRequests = [];
 $registrationRequestError = false;
 $registrationSql = "SELECT r.request_id, r.status, r.requested_at, r.reviewed_at,
@@ -202,11 +197,11 @@ $registrationSql = "SELECT r.request_id, r.status, r.requested_at, r.reviewed_at
                              r.requested_at DESC";
 $registrationResult = $conn->query($registrationSql);
 if ($registrationResult) {
-    $registrationRequests = $registrationResult->fetch_all(MYSQLI_ASSOC);
-    $registrationResult->free();
+$registrationRequests = $registrationResult->fetch_all(MYSQLI_ASSOC);
+$registrationResult->free();
 } else {
-    $registrationRequestError = true;
-    error_log('Student Management registration requests query failed: ' . $conn->error);
+$registrationRequestError = true;
+error_log('Student Management registration requests query failed: ' . $conn->error);
 }
 $pendingRegistrationCount = count(array_filter($registrationRequests, static fn($r) => $r['status'] === 'PENDING'));
 
@@ -412,15 +407,15 @@ $pendingRegistrationCount = count(array_filter($registrationRequests, static fn(
 
                         <?php
 
-                        $displayStart =
-                            $studentOffset + 1;
+$displayStart =
+$studentOffset + 1;
 
-                        $displayEnd = min(
-                            $studentOffset + $studentsPerPage,
-                            $totalFilteredStudents
-                        );
+$displayEnd = min(
+$studentOffset + $studentsPerPage,
+$totalFilteredStudents
+);
 
-                        ?>
+?>
 
                         <span>
                             Showing <?= $displayStart ?>–<?= $displayEnd ?>
@@ -488,19 +483,19 @@ $pendingRegistrationCount = count(array_filter($registrationRequests, static fn(
 
                                 <?php
 
-                                $studentName = trim(
-                                    ($student['first_name'] ?? '') . ' ' .
-                                    ($student['middle_name'] ?? '') . ' ' .
-                                    ($student['last_name'] ?? '')
-                                );
+$studentName = trim(
+($student['first_name'] ?? '') . ' ' .
+($student['middle_name'] ?? '') . ' ' .
+($student['last_name'] ?? '')
+);
 
-                                $enrollmentPhase =
-                                    $student['enrollment_phase'] ?? 'NOT_STARTED';
+$enrollmentPhase =
+$student['enrollment_phase'] ?? 'NOT_STARTED';
 
-                                $isActive =
-                                    (int) ($student['is_active'] ?? 0) === 1;
+$isActive =
+(int) ($student['is_active'] ?? 0) === 1;
 
-                                ?>
+?>
 
                                 <tr>
 
@@ -591,12 +586,12 @@ $pendingRegistrationCount = count(array_filter($registrationRequests, static fn(
 
                         <a
                             href="<?= e(
-                                BASE_URL
-                                . '?page=student_management'
-                                . '&search=' . urlencode($search)
-                                . '&student_page='
-                                . ($currentStudentPage - 1)
-                            ) ?>"
+BASE_URL
+. '?page=student_management'
+. '&search=' . urlencode($search)
+. '&student_page='
+. ($currentStudentPage - 1)
+) ?>"
                             class="<?= $currentStudentPage <= 1 ? 'disabled' : '' ?>"
                         >
                             <i class="fa-solid fa-chevron-left"></i>
@@ -607,19 +602,19 @@ $pendingRegistrationCount = count(array_filter($registrationRequests, static fn(
                         <div class="admin-student-enrollment-page-numbers">
 
                             <?php for (
-                                $pageNumber = 1;
-                                $pageNumber <= $totalStudentPages;
-                                $pageNumber++
-                            ): ?>
+$pageNumber = 1;
+$pageNumber <= $totalStudentPages;
+$pageNumber++
+): ?>
 
                                 <a
                                     href="<?= e(
-                                        BASE_URL
-                                        . '?page=student_management'
-                                        . '&search=' . urlencode($search)
-                                        . '&student_page='
-                                        . $pageNumber
-                                    ) ?>"
+BASE_URL
+. '?page=student_management'
+. '&search=' . urlencode($search)
+. '&student_page='
+. $pageNumber
+) ?>"
                                     class="<?= $pageNumber === $currentStudentPage ? 'active' : '' ?>"
                                 >
                                     <?= $pageNumber ?>
@@ -632,12 +627,12 @@ $pendingRegistrationCount = count(array_filter($registrationRequests, static fn(
 
                         <a
                             href="<?= e(
-                                BASE_URL
-                                . '?page=student_management'
-                                . '&search=' . urlencode($search)
-                                . '&student_page='
-                                . ($currentStudentPage + 1)
-                            ) ?>"
+BASE_URL
+. '?page=student_management'
+. '&search=' . urlencode($search)
+. '&student_page='
+. ($currentStudentPage + 1)
+) ?>"
                             class="<?= $currentStudentPage >= $totalStudentPages ? 'disabled' : '' ?>"
                         >
                             Next

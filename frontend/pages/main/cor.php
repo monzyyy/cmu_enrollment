@@ -8,23 +8,23 @@ require_once dirname(__DIR__, 3) . '/backend/models/student.php';
 $studentId = $_SESSION['student_id'] ?? null;
 
 if (!$studentId) {
-    header('Location: ' . BASE_URL . '?page=login');
-    exit;
+header('Location: ' . BASE_URL . '?page=login');
+exit;
 }
 
 $student = student_find_by_id($conn, (int) $studentId);
 
 if (!$student) {
-    header('Location: ' . BASE_URL . '?page=error404');
-    exit;
+header('Location: ' . BASE_URL . '?page=error404');
+exit;
 }
 
 $studentNumber = $student['student_number'] ?? '';
 
 $studentName = trim(
-    ($student['first_name'] ?? '') . ' ' .
-    ($student['middle_name'] ?? '') . ' ' .
-    ($student['last_name'] ?? '')
+($student['first_name'] ?? '') . ' ' .
+($student['middle_name'] ?? '') . ' ' .
+($student['last_name'] ?? '')
 );
 
 $userName = $studentName;
@@ -37,22 +37,20 @@ $sectionName = $student['section'] ?? '';
 
 $academicYear = '2026-2027';
 
-
 function cor_year_level(int $yearLevel): string
 {
-    return match ($yearLevel) {
-        1 => '1st Year',
-        2 => '2nd Year',
-        3 => '3rd Year',
-        4 => '4th Year',
-        default => $yearLevel . 'th Year'
-    };
+return match ($yearLevel) {
+1 => '1st Year',
+2 => '2nd Year',
+3 => '3rd Year',
+4 => '4th Year',
+default => $yearLevel . 'th Year'
+};
 }
 
-
-// Resolve the active academic period before reading COR submissions.
+ 
 $settingsStmt = $conn->prepare(
-    'SELECT enrollment_status, semester, school_year
+'SELECT enrollment_status, semester, school_year
      FROM system_settings
      WHERE setting_id = 1
      LIMIT 1'
@@ -64,112 +62,110 @@ $academicYear = $settings['school_year'] ?? $academicYear;
 
 $currentPeriodId = null;
 if ($settings) {
-    $periodStmt = $conn->prepare(
-        'SELECT period_id FROM enrollment_periods
+$periodStmt = $conn->prepare(
+'SELECT period_id FROM enrollment_periods
          WHERE semester = ? AND school_year = ? LIMIT 1'
-    );
-    $periodStmt->bind_param('ss', $settings['semester'], $settings['school_year']);
-    $periodStmt->execute();
-    $periodRow = $periodStmt->get_result()->fetch_assoc();
-    $periodStmt->close();
-    $currentPeriodId = $periodRow ? (int) $periodRow['period_id'] : null;
+);
+$periodStmt->bind_param('ss', $settings['semester'], $settings['school_year']);
+$periodStmt->execute();
+$periodRow = $periodStmt->get_result()->fetch_assoc();
+$periodStmt->close();
+$currentPeriodId = $periodRow ? (int) $periodRow['period_id'] : null;
 }
 
-// Only the current period's COR may affect this page.
+ 
 $latestCorSubmission = null;
 if ($currentPeriodId !== null) {
-    $stmt = $conn->prepare(
-        'SELECT cor_submission_id, file_name, file_path, submitted_at,
+$stmt = $conn->prepare(
+'SELECT cor_submission_id, file_name, file_path, submitted_at,
                 status, reviewed_at, rejection_reason
          FROM cor_submissions
          WHERE student_id = ? AND period_id = ?
          ORDER BY cor_submission_id DESC LIMIT 1'
-    );
-    $stmt->bind_param('ii', $studentId, $currentPeriodId);
-    $stmt->execute();
-    $latestCorSubmission = $stmt->get_result()->fetch_assoc();
-    $stmt->close();
+);
+$stmt->bind_param('ii', $studentId, $currentPeriodId);
+$stmt->execute();
+$latestCorSubmission = $stmt->get_result()->fetch_assoc();
+$stmt->close();
 }
 $corStatus = $latestCorSubmission['status'] ?? 'NOT_SUBMITTED';
 
-// Check whether Clearance has been approved
-// for the current semester and school year.
+ 
+ 
 $hasApprovedClearance = false;
 
 if ($settings) {
-    $clearanceStmt = $conn->prepare(
-        'SELECT clearance_id
+$clearanceStmt = $conn->prepare(
+'SELECT clearance_id
          FROM clearance_submissions
          WHERE student_id = ?
            AND semester = ?
            AND school_year = ?
            AND status = "APPROVED"
          LIMIT 1'
-    );
-
-    $clearanceStmt->bind_param(
-        'iss',
-        $studentId,
-        $settings['semester'],
-        $settings['school_year']
-    );
-
-    $clearanceStmt->execute();
-
-    $hasApprovedClearance = (bool)
-        $clearanceStmt->get_result()->fetch_assoc();
-
-    $clearanceStmt->close();
-}
-
-// COR becomes available only after Clearance approval.
-$corUnlocked =
-    ($student['enrollment_phase'] ?? '') === 'CLEARANCE'
-    && $hasApprovedClearance
-    && $currentPeriodId !== null
-    && ($settings['enrollment_status'] ?? '') === 'OPEN';
-
-// Download remains available after COR submission/approval, but never before clearance approval.
-$canDownloadCor = $currentPeriodId !== null
-    && $hasApprovedClearance
-    && in_array(($student['enrollment_phase'] ?? ''), ['CLEARANCE', 'COR', 'ENROLLED'], true)
-    && (($settings['enrollment_status'] ?? '') === 'OPEN' || $corStatus === 'APPROVED');
-
-// Prevent duplicate pending or approved submissions.
-$canUpload = $corUnlocked && in_array(
-    $corStatus,
-    ['NOT_SUBMITTED', 'REJECTED'],
-    true
 );
 
+$clearanceStmt->bind_param(
+'iss',
+$studentId,
+$settings['semester'],
+$settings['school_year']
+);
 
+$clearanceStmt->execute();
+
+$hasApprovedClearance = (bool)
+$clearanceStmt->get_result()->fetch_assoc();
+
+$clearanceStmt->close();
+}
+
+ 
+$corUnlocked =
+($student['enrollment_phase'] ?? '') === 'CLEARANCE'
+&& $hasApprovedClearance
+&& $currentPeriodId !== null
+&& ($settings['enrollment_status'] ?? '') === 'OPEN';
+
+ 
+$canDownloadCor = $currentPeriodId !== null
+&& $hasApprovedClearance
+&& in_array(($student['enrollment_phase'] ?? ''), ['CLEARANCE', 'COR', 'ENROLLED'], true)
+&& (($settings['enrollment_status'] ?? '') === 'OPEN' || $corStatus === 'APPROVED');
+
+ 
+$canUpload = $corUnlocked && in_array(
+$corStatus,
+['NOT_SUBMITTED', 'REJECTED'],
+true
+);
 
 $steps = [
-    ['icon' => 'fa-download', 'title' => 'Download', 'text' => 'Get your COR'],
-    ['icon' => 'fa-print', 'title' => 'Print', 'text' => 'Print the document'],
-    ['icon' => 'fa-file-signature', 'title' => 'Signature', 'text' => 'Sign the COR'],
-    ['icon' => 'fa-camera', 'title' => 'Scan/Photo', 'text' => 'Make a readable copy'],
-    ['icon' => 'fa-upload', 'title' => 'Upload', 'text' => 'Upload the signed COR'],
-    ['icon' => 'fa-paper-plane', 'title' => 'Submit', 'text' => 'Send to Registrar'],
+['icon' => 'fa-download', 'title' => 'Download', 'text' => 'Get your COR'],
+['icon' => 'fa-print', 'title' => 'Print', 'text' => 'Print the document'],
+['icon' => 'fa-file-signature', 'title' => 'Signature', 'text' => 'Sign the COR'],
+['icon' => 'fa-camera', 'title' => 'Scan/Photo', 'text' => 'Make a readable copy'],
+['icon' => 'fa-upload', 'title' => 'Upload', 'text' => 'Upload the signed COR'],
+['icon' => 'fa-paper-plane', 'title' => 'Submit', 'text' => 'Send to Registrar'],
 ];
 
 $corChecklist = [
-    'Student information is correct',
-    'Subjects and schedule are complete',
-    'Required signatures are present',
-    'The signed document is clear and readable',
+'Student information is correct',
+'Subjects and schedule are complete',
+'Required signatures are present',
+'The signed document is clear and readable',
 ];
 
 $statusMap = [
-    'NOT_SUBMITTED' => ['icon' => 'fa-file-circle-question', 'class' => '', 'text' => 'Your COR has not been submitted yet'],
-    'PENDING' => ['icon' => 'fa-clock', 'class' => 'is-pending', 'text' => 'Your COR is waiting for Registrar review'],
-    'APPROVED' => ['icon' => 'fa-circle-check', 'class' => 'is-approved', 'text' => 'Your COR has been approved'],
-    'REJECTED' => ['icon' => 'fa-circle-xmark', 'class' => 'is-rejected', 'text' => 'Your COR was rejected. Please upload a corrected copy'],
+'NOT_SUBMITTED' => ['icon' => 'fa-file-circle-question', 'class' => '', 'text' => 'Your COR has not been submitted yet'],
+'PENDING' => ['icon' => 'fa-clock', 'class' => 'is-pending', 'text' => 'Your COR is waiting for Registrar review'],
+'APPROVED' => ['icon' => 'fa-circle-check', 'class' => 'is-approved', 'text' => 'Your COR has been approved'],
+'REJECTED' => ['icon' => 'fa-circle-xmark', 'class' => 'is-rejected', 'text' => 'Your COR was rejected. Please upload a corrected copy'],
 ];
 $statusView = $statusMap[$corStatus] ?? $statusMap['NOT_SUBMITTED'];
 
 if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+$_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
 ?>

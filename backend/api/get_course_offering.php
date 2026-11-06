@@ -6,24 +6,18 @@ require_role('ADMIN');
 
 header('Content-Type: application/json');
 
-
 try {
 
     $offeringId = (int) ($_GET['offering_id'] ?? 0);
 
-
-    if ($offeringId <= 0) {
+if ($offeringId <= 0) {
         throw new Exception(
             'Invalid course offering.'
         );
     }
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Get Offering
-    |--------------------------------------------------------------------------
-    */
+
 
     $stmt = $conn->prepare(
         'SELECT
@@ -55,24 +49,18 @@ try {
 
     $stmt->close();
 
-
-    if (!$offering) {
+if (!$offering) {
         throw new Exception(
             'Course offering not found.'
         );
     }
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Get Schedules
-    |--------------------------------------------------------------------------
-    */
+
 
     $schedules = [];
 
-
-    $stmt = $conn->prepare(
+$stmt = $conn->prepare(
         'SELECT
             schedule_id,
             day_of_week,
@@ -93,8 +81,7 @@ try {
 
     $result = $stmt->get_result();
 
-
-    while ($row = $result->fetch_assoc()) {
+while ($row = $result->fetch_assoc()) {
 
         $schedules[] = [
             'schedule_id' => $row['schedule_id'],
@@ -114,16 +101,13 @@ try {
 
     }
 
+$stmt->close();
 
-    $stmt->close();
-
-
-    echo json_encode([
+echo json_encode([
         'success' => true,
         'offering' => $offering,
         'schedules' => $schedules
     ]);
-
 
 } catch (Throwable $e) {
 

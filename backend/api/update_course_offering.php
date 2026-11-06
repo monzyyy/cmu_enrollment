@@ -6,7 +6,6 @@ require_role('ADMIN');
 
 header('Content-Type: application/json');
 
-
 try {
 
     $data = json_decode(
@@ -18,27 +17,20 @@ try {
         throw new Exception('Invalid request.');
     }
 
-
-    $offeringId = (int) ($data['offering_id'] ?? 0);
+$offeringId = (int) ($data['offering_id'] ?? 0);
     $instructorName = trim($data['instructor_name'] ?? '');
     $schedules = $data['schedules'] ?? [];
 
-
-    if ($offeringId <= 0) {
+if ($offeringId <= 0) {
         throw new Exception('Invalid course offering.');
     }
 
-
-    if (!is_array($schedules)) {
+if (!is_array($schedules)) {
         throw new Exception('Invalid schedule data.');
     }
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Check Offering
-    |--------------------------------------------------------------------------
-    */
+
 
     $stmt = $conn->prepare(
         'SELECT offering_id
@@ -58,35 +50,25 @@ try {
 
     $stmt->close();
 
-
-    if (!$offering) {
+if (!$offering) {
         throw new Exception(
             'Course offering not found.'
         );
     }
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Start Transaction
-    |--------------------------------------------------------------------------
-    */
+
 
     $conn->begin_transaction();
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Update Instructor
-    |--------------------------------------------------------------------------
-    */
+
 
     $instructorValue = $instructorName !== ''
         ? $instructorName
         : null;
 
-
-    $stmt = $conn->prepare(
+$stmt = $conn->prepare(
         'UPDATE course_offerings
          SET instructor_name = ?
          WHERE offering_id = ?'
@@ -103,11 +85,7 @@ try {
     $stmt->close();
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Remove Existing Schedules
-    |--------------------------------------------------------------------------
-    */
+
 
     $stmt = $conn->prepare(
         'DELETE FROM course_offering_schedules
@@ -124,11 +102,7 @@ try {
     $stmt->close();
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Add Updated Schedules
-    |--------------------------------------------------------------------------
-    */
+
 
     foreach ($schedules as $schedule) {
 
@@ -136,16 +110,13 @@ try {
             continue;
         }
 
-
-        $day = trim($schedule['day'] ?? '');
+$day = trim($schedule['day'] ?? '');
         $startTime = trim($schedule['start_time'] ?? '');
         $endTime = trim($schedule['end_time'] ?? '');
         $room = trim($schedule['room'] ?? '');
 
 
-        /*
-         * Ignore completely empty rows.
-         */
+
 
         if (
             $day === '' &&
@@ -156,8 +127,7 @@ try {
             continue;
         }
 
-
-        if (
+if (
             $day === '' ||
             $startTime === '' ||
             $endTime === ''
@@ -167,13 +137,11 @@ try {
             );
         }
 
-
-        $roomValue = $room !== ''
+$roomValue = $room !== ''
             ? $room
             : null;
 
-
-        $stmt = $conn->prepare(
+$stmt = $conn->prepare(
             'INSERT INTO course_offering_schedules (
                 offering_id,
                 day_of_week,
@@ -200,20 +168,14 @@ try {
     }
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Commit
-    |--------------------------------------------------------------------------
-    */
+
 
     $conn->commit();
 
-
-    echo json_encode([
+echo json_encode([
         'success' => true,
         'message' => 'Course offering updated successfully.'
     ]);
-
 
 } catch (Throwable $e) {
 
@@ -221,8 +183,7 @@ try {
         $conn->rollback();
     }
 
-
-    echo json_encode([
+echo json_encode([
         'success' => false,
         'message' => $e->getMessage()
     ]);

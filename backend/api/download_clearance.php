@@ -1,5 +1,5 @@
 <?php
-/** Dynamic, original student clearance PDF. No third-party PHP library required. */
+ 
 require_once dirname(__DIR__) . '/bootstrap.php';
 require_role('STUDENT');
 require_once dirname(__DIR__) . '/models/student.php';
@@ -17,7 +17,7 @@ if (!$period || !$period['semester'] || !$period['school_year']) {
     http_response_code(409); exit('Current enrollment period is not configured.');
 }
 
-// Server-side authorization: the PDF URL must not bypass the enrollment workflow.
+ 
 $phase = (string) ($student['enrollment_phase'] ?? 'NOT_STARTED');
 if (!in_array($phase, ['EVALUATION', 'CLEARANCE', 'COR', 'ENROLLED'], true)) {
     http_response_code(403);
@@ -32,7 +32,7 @@ if (($statusRow['enrollment_status'] ?? '') !== 'OPEN') {
     exit('Enrollment is currently closed.');
 }
 
-// These offices are provisional, based on the user-supplied sample form.
+ 
 $offices = [
     'Computer Laboratory / MIS',
     'Health Services Office',
@@ -46,7 +46,7 @@ $offices = [
     'Student Affairs and Services Office',
 ];
 
-// Minimal, self-contained one-page PDF writer (standard Helvetica fonts).
+ 
 function pdfEscape(string $s): string {
     $s = iconv('UTF-8', 'Windows-1252//TRANSLIT//IGNORE', $s);
     return str_replace(["\\", '(', ')', "\r", "\n"], ["\\\\", '\\(', '\\)', ' ', ' '], $s === false ? '' : $s);
@@ -102,7 +102,7 @@ foreach ($offices as $i => $office) {
     $y = $top - ($i + 1) * 29 - 18;
     $p .= txt(53, $y, (string) ($i + 1), 9);
     $office = clipText($office, 40);
-    // Wrap long office names across two lines without truncating essential labels.
+     
     if (strlen($office) > 32 && str_contains($office, ' ')) {
         $split = strrpos(substr($office, 0, 31), ' ');
         $p .= txt(81, $y + 5, substr($office, 0, $split), 8);

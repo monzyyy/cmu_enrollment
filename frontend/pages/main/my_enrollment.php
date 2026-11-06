@@ -5,13 +5,13 @@ require_once dirname(__DIR__, 3) . '/backend/models/student.php';
 
 $studentId = (int) ($_SESSION['student_id'] ?? 0);
 if (!$studentId) {
-    header('Location: ' . BASE_URL . '?page=login');
-    exit;
+header('Location: ' . BASE_URL . '?page=login');
+exit;
 }
 $student = student_find_by_id($conn, $studentId);
 if (!$student) {
-    header('Location: ' . BASE_URL . '?page=login');
-    exit;
+header('Location: ' . BASE_URL . '?page=login');
+exit;
 }
 $userName = trim(($student['first_name'] ?? '') . ' ' . (!empty($student['middle_name']) ? $student['middle_name'] . ' ' : '') . ($student['last_name'] ?? ''));
 $currentPage = 'my_enrollment';
@@ -26,9 +26,9 @@ $phaseSteps = ['NOT_STARTED' => 0, 'EVALUATION' => 1, 'CLEARANCE' => 2, 'COR' =>
 $stepsDone = $phaseSteps[$phase] ?? 0;
 $percent = $stepsDone * 25;
 
-// Only submissions for the CURRENT semester should affect the progress tracker.
+ 
 $clearanceStmt = $conn->prepare(
-    'SELECT status, rejection_reason FROM clearance_submissions
+'SELECT status, rejection_reason FROM clearance_submissions
      WHERE student_id = ? AND semester = ?
        AND REPLACE(school_year, " ", "") = REPLACE(?, " ", "")
      ORDER BY clearance_id DESC LIMIT 1'
@@ -39,7 +39,7 @@ $clearance = $clearanceStmt->get_result()->fetch_assoc() ?: null;
 $clearanceStmt->close();
 
 $corStmt = $conn->prepare(
-    'SELECT cs.status, cs.rejection_reason FROM cor_submissions cs
+'SELECT cs.status, cs.rejection_reason FROM cor_submissions cs
      INNER JOIN enrollment_periods ep ON ep.period_id = cs.period_id
      WHERE cs.student_id = ? AND ep.semester = ?
        AND REPLACE(ep.school_year, " ", "") = REPLACE(?, " ", "")
@@ -50,9 +50,9 @@ $corStmt->execute();
 $cor = $corStmt->get_result()->fetch_assoc() ?: null;
 $corStmt->close();
 
-// Historical COR documents: approved and from a DIFFERENT period only.
+ 
 $historyStmt = $conn->prepare(
-    'SELECT cs.cor_submission_id, cs.reviewed_at, cs.submitted_at,
+'SELECT cs.cor_submission_id, cs.reviewed_at, cs.submitted_at,
             ep.semester, ep.school_year
      FROM cor_submissions cs
      INNER JOIN enrollment_periods ep ON ep.period_id = cs.period_id
@@ -71,49 +71,49 @@ $clearanceStatus = strtoupper((string) ($clearance['status'] ?? 'NOT_SUBMITTED')
 $corStatus = strtoupper((string) ($cor['status'] ?? 'NOT_SUBMITTED'));
 
 $labels = [
-    'NOT_STARTED' => 'Not Started',
-    'EVALUATION' => 'Evaluation Completed',
-    'CLEARANCE' => 'Clearance Completed',
-    'COR' => 'COR In Progress',
-    'ENROLLED' => 'Officially Enrolled',
+'NOT_STARTED' => 'Not Started',
+'EVALUATION' => 'Evaluation Completed',
+'CLEARANCE' => 'Clearance Completed',
+'COR' => 'COR In Progress',
+'ENROLLED' => 'Officially Enrolled',
 ];
 $phaseLabel = $labels[$phase] ?? 'Enrollment Status Unavailable';
 $period = 'Not set';
 if (!empty($settings['start_date']) && !empty($settings['end_date'])) {
-    $start = strtotime($settings['start_date']);
-    $end = strtotime($settings['end_date']);
-    if ($start && $end) $period = date('M j, Y', $start) . ' – ' . date('M j, Y', $end);
+$start = strtotime($settings['start_date']);
+$end = strtotime($settings['end_date']);
+if ($start && $end) $period = date('M j, Y', $start) . ' – ' . date('M j, Y', $end);
 }
 
 $stages = [
-    [
-        'title' => 'Professor Evaluation', 'icon' => 'fa-clipboard-check', 'url' => 'faculty_evaluation',
-        'done' => $stepsDone >= 1,
-        'status' => $stepsDone >= 1 ? 'Completed' : ($stepsDone === 0 ? 'To Do' : 'Not Started'),
-        'detail' => $stepsDone >= 1 ? 'Your professor evaluation requirement is complete.' : 'Complete the required professor evaluations to unlock Clearance.',
-        'reason' => '',
-    ],
-    [
-        'title' => 'Clearance', 'icon' => 'fa-file-signature', 'url' => 'clearance',
-        'done' => $stepsDone >= 2,
-        'status' => $stepsDone >= 2 ? 'Approved' : ($stepsDone < 1 ? 'Locked' : ($clearanceStatus === 'PENDING' ? 'Pending Review' : ($clearanceStatus === 'REJECTED' ? 'Rejected' : 'To Do'))),
-        'detail' => $stepsDone >= 2 ? 'Your signed Clearance has been approved by the Registrar.' : ($clearanceStatus === 'PENDING' && $stepsDone >= 1 ? 'Your Clearance is awaiting Registrar review.' : ($clearanceStatus === 'REJECTED' && $stepsDone >= 1 ? 'Please correct and resubmit your Clearance.' : 'Upload your signed Clearance after completing Evaluation.')),
-        'reason' => $stepsDone < 2 && $clearanceStatus === 'REJECTED' ? (string) ($clearance['rejection_reason'] ?? '') : '',
-    ],
-    [
-        'title' => 'Certificate of Registration (COR)', 'icon' => 'fa-file-lines', 'url' => 'cor',
-        'done' => $stepsDone >= 4,
-        'status' => $stepsDone >= 4 ? 'Approved' : ($stepsDone < 2 ? 'Locked' : ($corStatus === 'PENDING' ? 'Pending Review' : ($corStatus === 'REJECTED' ? 'Rejected' : 'To Do'))),
-        'detail' => $stepsDone >= 4 ? 'Your signed COR has been approved by the Registrar.' : ($stepsDone < 2 ? 'COR unlocks after Clearance approval.' : ($corStatus === 'PENDING' ? 'Your COR is awaiting Registrar review.' : ($corStatus === 'REJECTED' ? 'Please correct and resubmit your COR.' : 'Download, sign, and upload your COR for approval.'))),
-        'reason' => $stepsDone < 4 && $corStatus === 'REJECTED' ? (string) ($cor['rejection_reason'] ?? '') : '',
-    ],
-    [
-        'title' => 'Enrollment Completed', 'icon' => 'fa-graduation-cap', 'url' => 'my_enrollment',
-        'done' => $stepsDone === 4,
-        'status' => $stepsDone === 4 ? 'Completed' : 'Not Yet',
-        'detail' => $stepsDone === 4 ? 'You have successfully completed all enrollment requirements.' : 'Your status becomes Enrolled after the Registrar approves your COR.',
-        'reason' => '',
-    ],
+[
+'title' => 'Professor Evaluation', 'icon' => 'fa-clipboard-check', 'url' => 'faculty_evaluation',
+'done' => $stepsDone >= 1,
+'status' => $stepsDone >= 1 ? 'Completed' : ($stepsDone === 0 ? 'To Do' : 'Not Started'),
+'detail' => $stepsDone >= 1 ? 'Your professor evaluation requirement is complete.' : 'Complete the required professor evaluations to unlock Clearance.',
+'reason' => '',
+],
+[
+'title' => 'Clearance', 'icon' => 'fa-file-signature', 'url' => 'clearance',
+'done' => $stepsDone >= 2,
+'status' => $stepsDone >= 2 ? 'Approved' : ($stepsDone < 1 ? 'Locked' : ($clearanceStatus === 'PENDING' ? 'Pending Review' : ($clearanceStatus === 'REJECTED' ? 'Rejected' : 'To Do'))),
+'detail' => $stepsDone >= 2 ? 'Your signed Clearance has been approved by the Registrar.' : ($clearanceStatus === 'PENDING' && $stepsDone >= 1 ? 'Your Clearance is awaiting Registrar review.' : ($clearanceStatus === 'REJECTED' && $stepsDone >= 1 ? 'Please correct and resubmit your Clearance.' : 'Upload your signed Clearance after completing Evaluation.')),
+'reason' => $stepsDone < 2 && $clearanceStatus === 'REJECTED' ? (string) ($clearance['rejection_reason'] ?? '') : '',
+],
+[
+'title' => 'Certificate of Registration (COR)', 'icon' => 'fa-file-lines', 'url' => 'cor',
+'done' => $stepsDone >= 4,
+'status' => $stepsDone >= 4 ? 'Approved' : ($stepsDone < 2 ? 'Locked' : ($corStatus === 'PENDING' ? 'Pending Review' : ($corStatus === 'REJECTED' ? 'Rejected' : 'To Do'))),
+'detail' => $stepsDone >= 4 ? 'Your signed COR has been approved by the Registrar.' : ($stepsDone < 2 ? 'COR unlocks after Clearance approval.' : ($corStatus === 'PENDING' ? 'Your COR is awaiting Registrar review.' : ($corStatus === 'REJECTED' ? 'Please correct and resubmit your COR.' : 'Download, sign, and upload your COR for approval.'))),
+'reason' => $stepsDone < 4 && $corStatus === 'REJECTED' ? (string) ($cor['rejection_reason'] ?? '') : '',
+],
+[
+'title' => 'Enrollment Completed', 'icon' => 'fa-graduation-cap', 'url' => 'my_enrollment',
+'done' => $stepsDone === 4,
+'status' => $stepsDone === 4 ? 'Completed' : 'Not Yet',
+'detail' => $stepsDone === 4 ? 'You have successfully completed all enrollment requirements.' : 'Your status becomes Enrolled after the Registrar approves your COR.',
+'reason' => '',
+],
 ];
 $currentPage = 'myenrollment';
 $nextUrl = $stepsDone === 0 ? 'faculty_evaluation' : ($stepsDone === 1 ? 'clearance' : ($stepsDone < 4 ? 'cor' : ''));

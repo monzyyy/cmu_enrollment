@@ -2,7 +2,7 @@
 require_once dirname(__DIR__, 2) . '/backend/bootstrap.php';
 
 $userName    = $_SESSION['username'] ?? 'Customer';
-$currentPage = 'home';   // change based on page home | services | cart | requests | profile | faqs | settings
+$currentPage = 'home';    
 ?>
 
 <!DOCTYPE html>
@@ -33,7 +33,7 @@ $currentPage = 'home';   // change based on page home | services | cart | reques
             <p>Welcome, <?= $userName ?>!</p>
             <?php
               echo password_hash('monzy', PASSWORD_BCRYPT);
-              ?>
+?>
         </div>
     </div>
 <<<<<<< HEAD
@@ -41,7 +41,7 @@ $currentPage = 'home';   // change based on page home | services | cart | reques
       <p>Welcome, <?= $userName ?>!</p>
       <?php
         echo password_hash('whosgab', PASSWORD_BCRYPT);
-        ?>
+?>
 =======
 
     

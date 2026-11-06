@@ -5,7 +5,6 @@ require_once __DIR__ . '/../models/user.php';
 
 header('Content-Type: application/json');
 
-
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
     http_response_code(405);
@@ -18,9 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-
 require_login();
-
 
 if (
     empty($_SESSION['user_id']) ||
@@ -38,9 +35,7 @@ if (
     exit;
 }
 
-
 $action = $_POST['action'] ?? '';
-
 
 if (!in_array($action, ['OPEN', 'CLOSED'], true)) {
 
@@ -54,13 +49,11 @@ if (!in_array($action, ['OPEN', 'CLOSED'], true)) {
     exit;
 }
 
-
 try {
 
     $conn->begin_transaction();
 
-
-    $stmt = $conn->prepare(
+$stmt = $conn->prepare(
         'SELECT enrollment_status, semester, school_year
          FROM system_settings
          WHERE setting_id = 1
@@ -76,8 +69,7 @@ try {
 
     $stmt->close();
 
-
-    if (!$settings) {
+if (!$settings) {
 
         throw new RuntimeException(
             'Enrollment settings were not found.'
@@ -85,11 +77,9 @@ try {
 
     }
 
+$currentStatus = $settings['enrollment_status'];
 
-    $currentStatus = $settings['enrollment_status'];
-
-
-    if ($currentStatus === $action) {
+if ($currentStatus === $action) {
 
         $conn->rollback();
 
@@ -102,8 +92,7 @@ try {
         exit;
     }
 
-
-    $stmt = $conn->prepare(
+$stmt = $conn->prepare(
         'UPDATE system_settings
          SET enrollment_status = ?
          WHERE setting_id = 1'
@@ -115,16 +104,13 @@ try {
 
     $stmt->close();
 
-
-    $historyStatus = $action === 'OPEN'
+$historyStatus = $action === 'OPEN'
         ? 'OPENED'
         : 'CLOSED';
 
+$adminUserId = (int) $_SESSION['user_id'];
 
-    $adminUserId = (int) $_SESSION['user_id'];
-
-
-    $stmt = $conn->prepare(
+$stmt = $conn->prepare(
         'INSERT INTO enrollment_status_history (
             status,
             changed_by
@@ -142,8 +128,7 @@ try {
 
     $stmt->close();
 
-
-    $stmt = $conn->prepare('UPDATE enrollment_periods SET status=?, closed_at=CASE WHEN ?="CLOSED" THEN COALESCE(closed_at,NOW()) ELSE NULL END WHERE semester=? AND REPLACE(school_year," ","")=REPLACE(?," ","")');
+$stmt = $conn->prepare('UPDATE enrollment_periods SET status=?, closed_at=CASE WHEN ?="CLOSED" THEN COALESCE(closed_at,NOW()) ELSE NULL END WHERE semester=? AND REPLACE(school_year," ","")=REPLACE(?," ","")');
     $stmt->bind_param('ssss', $action, $action, $settings['semester'], $settings['school_year']);
     $stmt->execute();
     $stmt->close();
@@ -154,8 +139,7 @@ try {
 
     $conn->commit();
 
-
-    echo json_encode([
+echo json_encode([
         'success' => true,
         'message' => $action === 'OPEN'
             ? 'Enrollment has been opened.'
@@ -166,13 +150,13 @@ try {
 } catch (Throwable $e) {
 
     if ($conn->errno === 0) {
-        // Nothing needed here.
+         
     }
 
     try {
         $conn->rollback();
     } catch (Throwable $rollbackError) {
-        // Nothing needed here.
+         
     }
 
     error_log($e->getMessage());

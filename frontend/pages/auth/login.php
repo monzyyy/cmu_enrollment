@@ -1,8 +1,8 @@
 <?php
 
 if (!empty($_SESSION['student_id'])) {
-    header('Location: ' . BASE_URL . '?page=home_main');
-    exit;
+header('Location: ' . BASE_URL . '?page=home_main');
+exit;
 }
 
 ?>

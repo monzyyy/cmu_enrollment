@@ -29,7 +29,7 @@ if ($current === '' || strlen($new) < 8 || strlen($new) > 72 || !preg_match('/[A
 if (!hash_equals($new, $confirm)) password_response(422, 'New passwords do not match.');
 if (hash_equals($current, $new)) password_response(422, 'Choose a different password.');
 
-// Limit incorrect current-password attempts per logged-in session.
+ 
 if (($_SESSION['student_pw_lock_until'] ?? 0) > time()) {
     password_response(429, 'Too many incorrect attempts. Please try again in five minutes.');
 }

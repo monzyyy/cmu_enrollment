@@ -9,8 +9,8 @@ if (!$studentId || !$submissionId || $submissionId < 1) {
     exit('Invalid request.');
 }
 
-// Authorization is enforced in the database query: only the student's own
-// APPROVED COR from a previous period can be retrieved.
+ 
+ 
 $stmt = $conn->prepare(
     'SELECT cs.file_name, cs.file_path
      FROM cor_submissions cs

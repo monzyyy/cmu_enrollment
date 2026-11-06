@@ -35,7 +35,6 @@ function student_find_by_number(mysqli $conn, string $student_number): ?array
     return $row ?: null;
 }
 
-
 function student_find_by_id(mysqli $conn, int $student_id): ?array
 {
     $stmt = $conn->prepare(

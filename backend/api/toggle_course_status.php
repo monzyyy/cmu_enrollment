@@ -24,13 +24,10 @@ if ($courseId <= 0 || !in_array($action, ['activate', 'deactivate'], true)) {
     exit;
 }
 
-
 $newStatus = $action === 'activate' ? 1 : 0;
 
 
-/*
- * Check that the course exists.
- */
+
 
 $stmt = $conn->prepare(
     'SELECT course_id, is_active
@@ -52,7 +49,6 @@ $course = $result->fetch_assoc();
 
 $stmt->close();
 
-
 if (!$course) {
 
     echo json_encode([
@@ -64,9 +60,7 @@ if (!$course) {
 }
 
 
-/*
- * Update status.
- */
+
 
 $stmt = $conn->prepare(
     'UPDATE courses
@@ -93,7 +87,6 @@ if (!$stmt->execute()) {
 }
 
 $stmt->close();
-
 
 echo json_encode([
     'success' => true,

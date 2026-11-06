@@ -2,10 +2,8 @@
 
 declare(strict_types=1);
 
-/**
- * Sends a transactional email through Brevo's HTTPS API.
- * Never log API keys, verification codes, or full email bodies.
- */
+
+
 function send_transactional_email(string $recipientEmail, string $subject, string $textBody): bool
 {
     $config = require dirname(__DIR__) . '/config/brevo.php';

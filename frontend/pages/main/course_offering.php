@@ -8,43 +8,43 @@ require_once dirname(__DIR__, 3) . '/backend/models/student.php';
 $studentId = $_SESSION['student_id'] ?? null;
 
 if (!$studentId) {
-    header('Location: ' . BASE_URL . '?page=login');
-    exit;
+header('Location: ' . BASE_URL . '?page=login');
+exit;
 }
 
 $student = student_find_by_id($conn, (int) $studentId);
 
 if (!$student) {
-    header('Location: ' . BASE_URL . '?page=login');
-    exit;
+header('Location: ' . BASE_URL . '?page=login');
+exit;
 }
 
 $userName = trim(
-    $student['first_name'] . ' ' .
-    ($student['middle_name'] ? $student['middle_name'] . ' ' : '') .
-    $student['last_name']
+$student['first_name'] . ' ' .
+($student['middle_name'] ? $student['middle_name'] . ' ' : '') .
+$student['last_name']
 );
 
 $currentPage = 'course_offering';
 
-/* ---------------------------------------------------------
-   STUDENT INFO
-   TODO: replace the fallbacks with your real column names.
---------------------------------------------------------- */
+
+
+
+
 $semester = '';
 $schoolYear = '';
 
 $settingsResult = $conn->query(
-    'SELECT semester, school_year
+'SELECT semester, school_year
      FROM system_settings
      LIMIT 1'
 );
 
 if ($settingsResult && $settingsResult->num_rows > 0) {
-    $settings = $settingsResult->fetch_assoc();
+$settings = $settingsResult->fetch_assoc();
 
-    $semester = $settings['semester'];
-    $schoolYear = $settings['school_year'];
+$semester = $settings['semester'];
+$schoolYear = $settings['school_year'];
 }
 
 $semesterLabel = $semester . ', S.Y. ' . $schoolYear;
@@ -54,36 +54,36 @@ $programName = $student['program'];
 $yearLevelNumber = (int) $student['year_level'];
 
 if ($yearLevelNumber === 1) {
-    $yearLevelLabel = '1st Year';
+$yearLevelLabel = '1st Year';
 } elseif ($yearLevelNumber === 2) {
-    $yearLevelLabel = '2nd Year';
+$yearLevelLabel = '2nd Year';
 } elseif ($yearLevelNumber === 3) {
-    $yearLevelLabel = '3rd Year';
+$yearLevelLabel = '3rd Year';
 } elseif ($yearLevelNumber === 4) {
-    $yearLevelLabel = '4th Year';
+$yearLevelLabel = '4th Year';
 } else {
-    $yearLevelLabel = $yearLevelNumber . 'th Year';
+$yearLevelLabel = $yearLevelNumber . 'th Year';
 }
 
 $sectionName = $student['section'];
 
-/* ---------------------------------------------------------
-   COURSES
-   TODO: replace this sample array with a query on the
-   student's block section, e.g.
 
-   $stmt = $conn->prepare(
-       'SELECT course_code, course_name, day, time_start, time_end,
-               room, instructor, units
-        FROM course_offerings
-        WHERE section_id = ?
-        ORDER BY course_code'
-   );
---------------------------------------------------------- */
+
+
+
+
+
+
+
+
+
+
+
+
 $courses = [];
 
 $stmt = $conn->prepare(
-    'SELECT
+'SELECT
         co.offering_id,
         c.course_code,
         c.course_name,
@@ -138,12 +138,12 @@ $stmt = $conn->prepare(
 );
 
 $stmt->bind_param(
-    'sisss',
-    $student['program'],
-    $student['year_level'],
-    $student['section'],
-    $semester,
-    $schoolYear
+'sisss',
+$student['program'],
+$student['year_level'],
+$student['section'],
+$semester,
+$schoolYear
 );
 
 $stmt->execute();
@@ -152,11 +152,11 @@ $result = $stmt->get_result();
 
 while ($row = $result->fetch_assoc()) {
 
-    $row['schedules'] = $row['schedules'] !== null
-        ? explode('||', $row['schedules'])
-        : [];
+$row['schedules'] = $row['schedules'] !== null
+? explode('||', $row['schedules'])
+: [];
 
-    $courses[] = $row;
+$courses[] = $row;
 }
 
 $stmt->close();

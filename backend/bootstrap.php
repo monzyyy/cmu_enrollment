@@ -28,8 +28,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-
-# Helper
+ 
 
 function require_login(): void
 {
@@ -38,7 +37,6 @@ function require_login(): void
         exit;
     }
 }
-
 
 function require_role(string $required_role): void
 {
@@ -52,6 +50,5 @@ function require_role(string $required_role): void
         exit;
     }
 }
-
 
 require_once BACKEND_PATH . '/config/database.php';

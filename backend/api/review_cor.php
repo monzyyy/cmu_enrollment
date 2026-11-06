@@ -62,23 +62,20 @@ try {
 
     $stmt->close();
 
-
-    if (!$submission) {
+if (!$submission) {
         throw new Exception(
             'COR submission not found.'
         );
     }
 
-
-    if ($submission['status'] !== 'PENDING') {
+if ($submission['status'] !== 'PENDING') {
         throw new Exception(
             'This COR submission has already been reviewed.'
         );
     }
 
-
-    // Review only submissions explicitly linked to the active period.
-    // Older NULL-period submissions must be verified and assigned manually.
+ 
+     
     $stmt = $conn->prepare(
         'SELECT ep.period_id
          FROM system_settings ss
@@ -96,8 +93,7 @@ try {
     $studentId =
         (int) $submission['student_id'];
 
-
-    if ($action === 'APPROVE') {
+if ($action === 'APPROVE') {
 
         $stmt = $conn->prepare(
             'UPDATE cor_submissions
@@ -172,16 +168,13 @@ try {
 
         $stmt->close();
 
-
-        $message =
+$message =
             'COR rejected successfully.';
     }
 
+$conn->commit();
 
-    $conn->commit();
-
-
-    echo json_encode([
+echo json_encode([
         'success' => true,
         'message' => $message
     ]);

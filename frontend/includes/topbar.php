@@ -1,27 +1,26 @@
 <?php
-/**
- * Reusable topbar / header.
- *
- * Usage (from ANY page, after bootstrap.php):
- *     require FRONTEND_PATH . 'components/header.php';
- *
- * Optional, set before the require:
- *     $userName   overrides the session name
- *
- * Requires: BASE_URL (config/app.php)
- */
+
+
+
+
+
+
+
+
+
+
+
 
 if (!function_exists('e')) {
-    function e($value)
-    {
-        return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
-    }
+function e($value)
+{
+return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+}
 }
 
 $userName = $userName ?? ($_SESSION['username'] ?? 'User');
 
-
-// Folder that holds the customer pages. Keep in sync with sidebar.php.
+ 
 $headerPagesUrl = BASE_URL;
 ?>
 

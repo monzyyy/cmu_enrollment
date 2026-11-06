@@ -9,17 +9,16 @@ $currentPage = 'course_management';
 $coursesPerPage = 7;
 
 $currentCoursePage = max(
-    1,
-    (int) ($_GET['course_page'] ?? 1)
+1,
+(int) ($_GET['course_page'] ?? 1)
 );
 
 $search = trim($_GET['search'] ?? '');
 
-
-/* TOTAL COURSES */
+ 
 
 $result = $conn->query(
-    'SELECT COUNT(*) AS total
+'SELECT COUNT(*) AS total
      FROM courses'
 );
 
@@ -27,78 +26,75 @@ $totalCourses = 0;
 
 if ($result) {
 
-    $row = $result->fetch_assoc();
+$row = $result->fetch_assoc();
 
-    $totalCourses =
-        (int) ($row['total'] ?? 0);
+$totalCourses =
+(int) ($row['total'] ?? 0);
 }
 
-
-/* COUNT FILTERED COURSES */
+ 
 
 if ($search !== '') {
 
-    $countStmt = $conn->prepare(
-        'SELECT COUNT(*) AS total
+$countStmt = $conn->prepare(
+'SELECT COUNT(*) AS total
          FROM courses
          WHERE
             course_code LIKE ?
             OR course_name LIKE ?'
-    );
+);
 
-    $searchValue = '%' . $search . '%';
+$searchValue = '%' . $search . '%';
 
-    $countStmt->bind_param(
-        'ss',
-        $searchValue,
-        $searchValue
-    );
+$countStmt->bind_param(
+'ss',
+$searchValue,
+$searchValue
+);
 
 } else {
 
-    $countStmt = $conn->prepare(
-        'SELECT COUNT(*) AS total
+$countStmt = $conn->prepare(
+'SELECT COUNT(*) AS total
          FROM courses'
-    );
+);
 }
 
 $countStmt->execute();
 
 $countResult =
-    $countStmt->get_result()->fetch_assoc();
+$countStmt->get_result()->fetch_assoc();
 
 $totalFilteredCourses =
-    (int) ($countResult['total'] ?? 0);
+(int) ($countResult['total'] ?? 0);
 
 $countStmt->close();
 
-
-/* PAGINATION */
+ 
 
 $totalCoursePages = max(
-    1,
-    (int) ceil(
-        $totalFilteredCourses /
-        $coursesPerPage
-    )
+1,
+(int) ceil(
+$totalFilteredCourses /
+$coursesPerPage
+)
 );
 
 $currentCoursePage = min(
-    $currentCoursePage,
-    $totalCoursePages
+$currentCoursePage,
+$totalCoursePages
 );
 
 $courseOffset =
-    ($currentCoursePage - 1) *
-    $coursesPerPage;
+($currentCoursePage - 1) *
+$coursesPerPage;
 
-
-/* GET COURSES */
+ 
 
 if ($search !== '') {
 
-    $stmt = $conn->prepare(
-        'SELECT
+$stmt = $conn->prepare(
+'SELECT
             course_id,
             course_code,
             course_name,
@@ -112,20 +108,20 @@ if ($search !== '') {
             is_active DESC,
             course_code ASC
          LIMIT ? OFFSET ?'
-    );
+);
 
-    $stmt->bind_param(
-        'ssii',
-        $searchValue,
-        $searchValue,
-        $coursesPerPage,
-        $courseOffset
-    );
+$stmt->bind_param(
+'ssii',
+$searchValue,
+$searchValue,
+$coursesPerPage,
+$courseOffset
+);
 
 } else {
 
-    $stmt = $conn->prepare(
-        'SELECT
+$stmt = $conn->prepare(
+'SELECT
             course_id,
             course_code,
             course_name,
@@ -136,19 +132,19 @@ if ($search !== '') {
             is_active DESC,
             course_code ASC
          LIMIT ? OFFSET ?'
-    );
+);
 
-    $stmt->bind_param(
-        'ii',
-        $coursesPerPage,
-        $courseOffset
-    );
+$stmt->bind_param(
+'ii',
+$coursesPerPage,
+$courseOffset
+);
 }
 
 $stmt->execute();
 
 $courses =
-    $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
 $stmt->close();
 
@@ -310,15 +306,15 @@ $stmt->close();
 
                         <?php
 
-                        $displayStart =
-                            $courseOffset + 1;
+$displayStart =
+$courseOffset + 1;
 
-                        $displayEnd = min(
-                            $courseOffset + $coursesPerPage,
-                            $totalFilteredCourses
-                        );
+$displayEnd = min(
+$courseOffset + $coursesPerPage,
+$totalFilteredCourses
+);
 
-                        ?>
+?>
 
                         <div class="admin-cor-table-info">
 
@@ -476,12 +472,12 @@ $stmt->close();
 
                     <a
                         href="<?= e(
-                            BASE_URL
-                            . '?page=course_management'
-                            . '&search=' . urlencode($search)
-                            . '&course_page='
-                            . ($currentCoursePage - 1)
-                        ) ?>"
+BASE_URL
+. '?page=course_management'
+. '&search=' . urlencode($search)
+. '&course_page='
+. ($currentCoursePage - 1)
+) ?>"
                         class="<?= $currentCoursePage <= 1 ? 'disabled' : '' ?>"
                     >
                         <i class="fa-solid fa-chevron-left"></i>
@@ -492,22 +488,22 @@ $stmt->close();
                     <div class="admin-student-enrollment-page-numbers">
 
                         <?php for (
-                            $pageNumber = 1;
-                            $pageNumber <= $totalCoursePages;
-                            $pageNumber++
-                        ): ?>
+$pageNumber = 1;
+$pageNumber <= $totalCoursePages;
+$pageNumber++
+): ?>
 
                             <a
                                 href="<?= e(
-                                    BASE_URL
-                                    . '?page=course_management'
-                                    . '&search=' . urlencode($search)
-                                    . '&course_page='
-                                    . $pageNumber
-                                ) ?>"
+BASE_URL
+. '?page=course_management'
+. '&search=' . urlencode($search)
+. '&course_page='
+. $pageNumber
+) ?>"
                                 class="<?= $pageNumber === $currentCoursePage
-                                    ? 'active'
-                                    : '' ?>"
+? 'active'
+: '' ?>"
                             >
                                 <?= $pageNumber ?>
                             </a>
@@ -519,15 +515,15 @@ $stmt->close();
 
                     <a
                         href="<?= e(
-                            BASE_URL
-                            . '?page=course_management'
-                            . '&search=' . urlencode($search)
-                            . '&course_page='
-                            . ($currentCoursePage + 1)
-                        ) ?>"
+BASE_URL
+. '?page=course_management'
+. '&search=' . urlencode($search)
+. '&course_page='
+. ($currentCoursePage + 1)
+) ?>"
                         class="<?= $currentCoursePage >= $totalCoursePages
-                            ? 'disabled'
-                            : '' ?>"
+? 'disabled'
+: '' ?>"
                     >
                         Next
                         <i class="fa-solid fa-chevron-right"></i>

@@ -1,10 +1,10 @@
 <?php
 if (!empty($_SESSION['user_id'])) {
-    header('Location: ' . BASE_URL . (($_SESSION['role'] ?? '') === 'ADMIN' ? '?page=admin_home' : '?page=home_main'));
-    exit;
+header('Location: ' . BASE_URL . (($_SESSION['role'] ?? '') === 'ADMIN' ? '?page=admin_home' : '?page=home_main'));
+exit;
 }
 if (empty($_SESSION['registration_csrf'])) {
-    $_SESSION['registration_csrf'] = bin2hex(random_bytes(32));
+$_SESSION['registration_csrf'] = bin2hex(random_bytes(32));
 }
 $csrf = htmlspecialchars($_SESSION['registration_csrf'], ENT_QUOTES);
 $api  = fn(string $file) => htmlspecialchars(BASE_URL . 'backend/api/' . $file, ENT_QUOTES);

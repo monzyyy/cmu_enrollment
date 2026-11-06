@@ -4,12 +4,9 @@ require_once dirname(__DIR__) . '/bootstrap.php';
 
 require_role('STUDENT');
 
-
 header('Content-Type: application/json');
 
-
 $studentId = $_SESSION['student_id'] ?? null;
-
 
 if (!$studentId) {
 
@@ -21,10 +18,7 @@ if (!$studentId) {
     exit;
 }
 
-
-
-
-// Only accept POST requests.
+ 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
 
@@ -35,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// Check the current enrollment period.
+ 
 $stmt = $conn->prepare(
     'SELECT enrollment_status, semester, school_year
      FROM system_settings
@@ -57,7 +51,7 @@ if (!$settings || $settings['enrollment_status'] !== 'OPEN') {
     exit;
 }
 
-// Find the current period record. Never assign a submission to an unknown period.
+ 
 $stmt = $conn->prepare(
     'SELECT period_id FROM enrollment_periods
      WHERE semester = ? AND school_year = ? LIMIT 1'
@@ -76,7 +70,7 @@ if (!$periodRow) {
 }
 $currentPeriodId = (int) $periodRow['period_id'];
 
-// Verify the student's enrollment phase.
+ 
 $stmt = $conn->prepare(
     'SELECT enrollment_phase
      FROM students
@@ -103,7 +97,7 @@ if (
     exit;
 }
 
-// Verify approved Clearance for the active semester.
+ 
 $stmt = $conn->prepare(
     'SELECT clearance_id
      FROM clearance_submissions
@@ -136,9 +130,8 @@ if (!$approvedClearance) {
     exit;
 }
 
-/*
- * Make sure the request contains a file.
- */
+
+
 
 if (
     !isset($_FILES['cor_file']) ||
@@ -153,16 +146,12 @@ if (
     exit;
 }
 
-
 $file = $_FILES['cor_file'];
 
 
-/*
- * Maximum file size: 10 MB
- */
+
 
 $maxFileSize = 10 * 1024 * 1024;
-
 
 if ($file['size'] > $maxFileSize) {
 
@@ -175,9 +164,7 @@ if ($file['size'] > $maxFileSize) {
 }
 
 
-/*
- * Allowed file types.
- */
+
 
 $allowedMimeTypes = [
     'image/jpeg',
@@ -185,11 +172,9 @@ $allowedMimeTypes = [
     'application/pdf'
 ];
 
-
 $finfo = new finfo(FILEINFO_MIME_TYPE);
 
 $fileMimeType = $finfo->file($file['tmp_name']);
-
 
 if (!in_array($fileMimeType, $allowedMimeTypes, true)) {
 
@@ -202,10 +187,7 @@ if (!in_array($fileMimeType, $allowedMimeTypes, true)) {
 }
 
 
-/*
- * Check if the student already has
- * a pending COR submission.
- */
+
 
 $stmt = $conn->prepare(
     'SELECT cor_submission_id
@@ -224,7 +206,6 @@ $existingSubmission = $stmt->get_result()->fetch_assoc();
 
 $stmt->close();
 
-
 if ($existingSubmission) {
 
     echo json_encode([
@@ -236,12 +217,9 @@ if ($existingSubmission) {
 }
 
 
-/*
- * Create upload directory.
- */
+
 
 $uploadDirectory = dirname(__DIR__, 2) . '/uploads/cor/';
-
 
 if (!is_dir($uploadDirectory)) {
 
@@ -257,18 +235,14 @@ if (!is_dir($uploadDirectory)) {
 }
 
 
-/*
- * Get the original file extension.
- */
+
 
 $originalExtension = strtolower(
     pathinfo($file['name'], PATHINFO_EXTENSION)
 );
 
 
-/*
- * Generate a unique file name.
- */
+
 
 $uniqueFileName =
     'COR_' .
@@ -280,13 +254,10 @@ $uniqueFileName =
     '.' .
     $originalExtension;
 
-
 $filePath = $uploadDirectory . $uniqueFileName;
 
 
-/*
- * Move uploaded file.
- */
+
 
 if (!move_uploaded_file($file['tmp_name'], $filePath)) {
 
@@ -299,17 +270,13 @@ if (!move_uploaded_file($file['tmp_name'], $filePath)) {
 }
 
 
-/*
- * Path stored in the database.
- */
+
 
 $databaseFilePath =
     'uploads/cor/' . $uniqueFileName;
 
 
-/*
- * Insert submission into database.
- */
+
 
 $stmt = $conn->prepare(
     'INSERT INTO cor_submissions (
@@ -323,7 +290,6 @@ $stmt = $conn->prepare(
      VALUES (?, ?, ?, ?, NOW(), "PENDING")'
 );
 
-
 $stmt->bind_param(
     'iiss',
     $studentId,
@@ -332,15 +298,12 @@ $stmt->bind_param(
     $databaseFilePath
 );
 
-
 if (!$stmt->execute()) {
 
     $stmt->close();
 
-    /*
-     * Remove the uploaded file if
-     * the database insertion fails.
-     */
+    
+
 
     if (file_exists($filePath)) {
         unlink($filePath);
@@ -354,9 +317,7 @@ if (!$stmt->execute()) {
     exit;
 }
 
-
 $stmt->close();
-
 
 echo json_encode([
     'success' => true,

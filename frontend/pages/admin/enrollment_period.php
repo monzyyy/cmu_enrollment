@@ -5,9 +5,8 @@ require_role('ADMIN');
 $currentPage = 'enrollment_period';
 if (empty($_SESSION['csrf_token'])) $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 
-
 $stmt = $conn->prepare(
-    'SELECT
+'SELECT
         enrollment_status,
         semester,
         school_year,
@@ -26,24 +25,22 @@ $settings = $result->fetch_assoc();
 
 $stmt->close();
 
-
 $enrollmentStatus = $settings['enrollment_status'] ?? 'CLOSED';
 
 $isEnrollmentOpen = $enrollmentStatus === 'OPEN';
 
 $statusClass = $isEnrollmentOpen
-    ? 'admin-status-open'
-    : 'admin-status-closed';
+? 'admin-status-open'
+: 'admin-status-closed';
 
 $statusMessage = $isEnrollmentOpen
-    ? 'Enrollment is currently open'
-    : 'Enrollment is currently closed';
-
+? 'Enrollment is currently open'
+: 'Enrollment is currently closed';
 
 $history = [];
 
 $result = $conn->query(
-    "SELECT
+"SELECT
         h.status,
         h.changed_at,
         CASE
@@ -58,7 +55,7 @@ $result = $conn->query(
 );
 
 while ($row = $result->fetch_assoc()) {
-    $history[] = $row;
+$history[] = $row;
 }
 ?>
 
@@ -130,10 +127,10 @@ while ($row = $result->fetch_assoc()) {
                         <span class="admin-status-dot"></span>
 
                         <?= htmlspecialchars(
-                            $enrollmentStatus,
-                            ENT_QUOTES,
-                            'UTF-8'
-                        ) ?>
+$enrollmentStatus,
+ENT_QUOTES,
+'UTF-8'
+) ?>
 
                     </span>
 
@@ -143,8 +140,8 @@ while ($row = $result->fetch_assoc()) {
 
                     <p>
                         <?= $isEnrollmentOpen
-                            ? 'Students can now proceed with the enrollment process.'
-                            : 'Students cannot proceed with the enrollment process.' ?>
+? 'Students can now proceed with the enrollment process.'
+: 'Students cannot proceed with the enrollment process.' ?>
                     </p>
 
                     <?php if ($isEnrollmentOpen): ?>
@@ -212,10 +209,10 @@ while ($row = $result->fetch_assoc()) {
 
                         <strong>
                             <?= htmlspecialchars(
-                                $settings['semester'] ?? 'Not set',
-                                ENT_QUOTES,
-                                'UTF-8'
-                            ) ?>
+$settings['semester'] ?? 'Not set',
+ENT_QUOTES,
+'UTF-8'
+) ?>
                         </strong>
 
                     </div>
@@ -229,10 +226,10 @@ while ($row = $result->fetch_assoc()) {
 
                         <strong>
                             <?= htmlspecialchars(
-                                $settings['school_year'] ?? 'Not set',
-                                ENT_QUOTES,
-                                'UTF-8'
-                            ) ?>
+$settings['school_year'] ?? 'Not set',
+ENT_QUOTES,
+'UTF-8'
+) ?>
                         </strong>
 
                     </div>
@@ -246,11 +243,11 @@ while ($row = $result->fetch_assoc()) {
 
                         <strong>
                             <?= !empty($settings['start_date'])
-                                ? date(
-                                    'F j, Y',
-                                    strtotime($settings['start_date'])
-                                )
-                                : 'Not set' ?>
+? date(
+'F j, Y',
+strtotime($settings['start_date'])
+)
+: 'Not set' ?>
                         </strong>
 
                     </div>
@@ -264,11 +261,11 @@ while ($row = $result->fetch_assoc()) {
 
                         <strong>
                             <?= !empty($settings['end_date'])
-                                ? date(
-                                    'F j, Y',
-                                    strtotime($settings['end_date'])
-                                )
-                                : 'Not set' ?>
+? date(
+'F j, Y',
+strtotime($settings['end_date'])
+)
+: 'Not set' ?>
                         </strong>
 
                     </div>
@@ -313,24 +310,24 @@ while ($row = $result->fetch_assoc()) {
                             <?php
                             $isOpened = $item['status'] === 'OPENED';
 
-                            $historyStatus = $isOpened
-                                ? 'Opened'
-                                : 'Closed';
+$historyStatus = $isOpened
+? 'Opened'
+: 'Closed';
 
-                            $historyClass = $isOpened
-                                ? 'admin-history-opened'
-                                : 'admin-history-closed';
+$historyClass = $isOpened
+? 'admin-history-opened'
+: 'admin-history-closed';
 
-                            $historyDate = date(
-                                'F j, Y',
-                                strtotime($item['changed_at'])
-                            );
+$historyDate = date(
+'F j, Y',
+strtotime($item['changed_at'])
+);
 
-                            $historyTime = date(
-                                'g:i A',
-                                strtotime($item['changed_at'])
-                            );
-                            ?>
+$historyTime = date(
+'g:i A',
+strtotime($item['changed_at'])
+);
+?>
 
                             <div class="admin-history-item">
 
@@ -370,10 +367,10 @@ while ($row = $result->fetch_assoc()) {
 
                                     <strong>
                                         <?= htmlspecialchars(
-                                            $item['changed_by_name'],
-                                            ENT_QUOTES,
-                                            'UTF-8'
-                                        ) ?>
+$item['changed_by_name'],
+ENT_QUOTES,
+'UTF-8'
+) ?>
                                     </strong>
 
                                 </div>
@@ -402,23 +399,23 @@ while ($row = $result->fetch_assoc()) {
 
         <h2 id="enrollmentModalTitle">
             <?= $isEnrollmentOpen
-                ? 'Close Enrollment Period?'
-                : 'Open Enrollment Period?' ?>
+? 'Close Enrollment Period?'
+: 'Open Enrollment Period?' ?>
         </h2>
 
 
         <p>
             <?= $isEnrollmentOpen
-                ? 'Are you sure you want to close the current enrollment period?'
-                : 'Are you sure you want to open the current enrollment period?' ?>
+? 'Are you sure you want to close the current enrollment period?'
+: 'Are you sure you want to open the current enrollment period?' ?>
         </p>
 
 
         <strong class="admin-modal-warning">
 
             <?= $isEnrollmentOpen
-                ? 'Students will no longer be able to start or continue enrollment actions.'
-                : 'Students will be able to start or continue enrollment actions.' ?>
+? 'Students will no longer be able to start or continue enrollment actions.'
+: 'Students will be able to start or continue enrollment actions.' ?>
 
         </strong>
 
@@ -431,8 +428,8 @@ while ($row = $result->fetch_assoc()) {
                 id="cancelEnrollmentAction">
 
                 <?= $isEnrollmentOpen
-                    ? "No, Don't Close It"
-                    : "No, Don't Open It" ?>
+? "No, Don't Close It"
+: "No, Don't Open It" ?>
 
             </button>
 
@@ -443,8 +440,8 @@ while ($row = $result->fetch_assoc()) {
                 id="confirmEnrollmentAction">
 
                 <?= $isEnrollmentOpen
-                    ? 'Yes, Close It'
-                    : 'Yes, Open It' ?>
+? 'Yes, Close It'
+: 'Yes, Open It' ?>
 
             </button>
 
@@ -486,10 +483,10 @@ while ($row = $result->fetch_assoc()) {
                         type="date"
                         id="editStartDate"
                         value="<?= htmlspecialchars(
-                            $settings['start_date'] ?? '',
-                            ENT_QUOTES,
-                            'UTF-8'
-                        ) ?>">
+$settings['start_date'] ?? '',
+ENT_QUOTES,
+'UTF-8'
+) ?>">
 
                 </div>
 
@@ -504,10 +501,10 @@ while ($row = $result->fetch_assoc()) {
                         type="date"
                         id="editEndDate"
                         value="<?= htmlspecialchars(
-                            $settings['end_date'] ?? '',
-                            ENT_QUOTES,
-                            'UTF-8'
-                        ) ?>">
+$settings['end_date'] ?? '',
+ENT_QUOTES,
+'UTF-8'
+) ?>">
 
                 </div>
 

@@ -7,21 +7,21 @@ require_role('STUDENT');
 $studentId = $_SESSION['student_id'] ?? null;
 
 if (!$studentId) {
-    header('Location: ' . BASE_URL . '?page=login');
-    exit;
+header('Location: ' . BASE_URL . '?page=login');
+exit;
 }
 
 function evalEscape($value) {
-    return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }
 
 function evalRedirect() {
-    header('Location: ' . BASE_URL . '?page=faculty_evaluation');
-    exit;
+header('Location: ' . BASE_URL . '?page=faculty_evaluation');
+exit;
 }
 
 $studentStmt = $conn->prepare(
-    "SELECT * FROM students WHERE student_id = ?"
+"SELECT * FROM students WHERE student_id = ?"
 );
 $studentStmt->bind_param("i", $studentId);
 $studentStmt->execute();
@@ -29,48 +29,47 @@ $student = $studentStmt->get_result()->fetch_assoc();
 $studentStmt->close();
 
 if (!$student) {
-    evalRedirect();
+evalRedirect();
 }
 
 $offeringId = filter_input(
-    INPUT_GET,
-    'course',
-    FILTER_VALIDATE_INT
+INPUT_GET,
+'course',
+FILTER_VALIDATE_INT
 );
 
 if (!$offeringId || $offeringId < 1) {
-    evalRedirect();
+evalRedirect();
 }
 
-// Find the current enrollment term.
+ 
 $settings = $conn->query(
-    "SELECT semester, school_year, enrollment_status
+"SELECT semester, school_year, enrollment_status
      FROM system_settings
      WHERE setting_id = 1"
 )->fetch_assoc();
 
 if (!$settings) {
-    http_response_code(503);
-    exit('Enrollment settings are unavailable.');
+http_response_code(503);
+exit('Enrollment settings are unavailable.');
 }
 
-// Do not allow students to open an evaluation form outside the open period.
-// POST requests are still checked below, so direct submissions remain blocked.
+ 
+ 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST' && $settings['enrollment_status'] !== 'OPEN') {
-    evalRedirect();
+evalRedirect();
 }
 
 try {
-    [$previousSemester, $previousSchoolYear] = evaluationPreviousTerm(
-        $settings['semester'], $settings['school_year']
-    );
+[$previousSemester, $previousSchoolYear] = evaluationPreviousTerm(
+$settings['semester'], $settings['school_year']
+);
 } catch (RuntimeException $e) {
-    http_response_code(503);
-    exit('The enrollment term is not configured correctly.');
+http_response_code(503);
+exit('The enrollment term is not configured correctly.');
 }
 
-
-// Verify that this offering belongs to the student.
+ 
 $offeringSql = "
     SELECT
         co.offering_id,
@@ -96,15 +95,14 @@ $offeringSql = "
     LIMIT 1
 ";
 
-
 $offeringStmt = $conn->prepare($offeringSql);
 
 $offeringStmt->bind_param(
-    "iiss",
-    $studentId,
-    $offeringId,
-    $previousSemester,
-    $previousSchoolYear
+"iiss",
+$studentId,
+$offeringId,
+$previousSemester,
+$previousSchoolYear
 );
 
 $offeringStmt->execute();
@@ -112,18 +110,18 @@ $offering = $offeringStmt->get_result()->fetch_assoc();
 $offeringStmt->close();
 
 if (!$offering) {
-    http_response_code(403);
-    exit('This subject is not assigned to your section.');
+http_response_code(403);
+exit('This subject is not assigned to your section.');
 }
 
 if (trim($offering['instructor_name'] ?? '') === '') {
-    http_response_code(403);
-    exit('This subject is awaiting faculty assignment.');
+http_response_code(403);
+exit('This subject is awaiting faculty assignment.');
 }
 
-// Check whether already evaluated.
+ 
 $checkStmt = $conn->prepare(
-    "SELECT evaluation_id
+"SELECT evaluation_id
      FROM professor_evaluations
      WHERE student_id = ? AND offering_id = ?
      LIMIT 1"
@@ -134,14 +132,14 @@ $checkStmt->execute();
 $alreadyEvaluated = $checkStmt->get_result()->num_rows > 0;
 $checkStmt->close();
 
-// Prevent opening a new form after progressing beyond evaluation.
+ 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST' && !$alreadyEvaluated && $student['enrollment_phase'] !== 'NOT_STARTED') {
-    evalRedirect();
+evalRedirect();
 }
 
-// Load questionnaire.
+ 
 $questionResult = $conn->query(
-    "SELECT question_id, section_number,
+"SELECT question_id, section_number,
             section_title, question_order,
             question_text, is_temporary
      FROM evaluation_questions
@@ -153,177 +151,172 @@ $sections = [];
 $questionIds = [];
 
 while ($question = $questionResult->fetch_assoc()) {
-    $sectionNumber = (int)$question['section_number'];
+$sectionNumber = (int)$question['section_number'];
 
-    if (!isset($sections[$sectionNumber])) {
-        $sections[$sectionNumber] = [
-            'title' => $question['section_title'],
-            'questions' => []
-        ];
-    }
+if (!isset($sections[$sectionNumber])) {
+$sections[$sectionNumber] = [
+'title' => $question['section_title'],
+'questions' => []
+];
+}
 
-    $sections[$sectionNumber]['questions'][] = $question;
-    $questionIds[] = (int)$question['question_id'];
+$sections[$sectionNumber]['questions'][] = $question;
+$questionIds[] = (int)$question['question_id'];
 }
 
 $error = '';
 $submittedRatings = [];
 
-
 if (empty($_SESSION['evaluation_csrf'])) {
-    $_SESSION['evaluation_csrf'] = bin2hex(random_bytes(32));
+$_SESSION['evaluation_csrf'] = bin2hex(random_bytes(32));
 }
 
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $submittedRatings = $_POST['ratings'] ?? [];
+$submittedRatings = $_POST['ratings'] ?? [];
 
-    
-    if (
-        !hash_equals(
-            $_SESSION['evaluation_csrf'],
-            (string)($_POST['csrf_token'] ?? '')
-        )
-    ) {
-        $error = 'Invalid request. Please refresh the page.';
-    } elseif ($alreadyEvaluated) {
-        $error = 'You have already evaluated this subject.';
-    } elseif ($settings['enrollment_status'] !== 'OPEN') {
-        $error = 'The enrollment period is currently closed.';
-    } elseif ($student['enrollment_phase'] !== 'NOT_STARTED') {
-        $error = 'Faculty evaluation is not available in your current enrollment phase.';
-    } elseif (count($questionIds) !== 20) {
-        $error = 'The evaluation questionnaire is incomplete.';
-    } elseif (!is_array($submittedRatings)) {
-        $error = 'Invalid evaluation submission.';
-        $submittedRatings = [];
-    } else {
-        // Validate every rating on the server.
-        foreach ($questionIds as $questionId) {
-            $value = $submittedRatings[$questionId] ?? null;
+if (
+!hash_equals(
+$_SESSION['evaluation_csrf'],
+(string)($_POST['csrf_token'] ?? '')
+)
+) {
+$error = 'Invalid request. Please refresh the page.';
+} elseif ($alreadyEvaluated) {
+$error = 'You have already evaluated this subject.';
+} elseif ($settings['enrollment_status'] !== 'OPEN') {
+$error = 'The enrollment period is currently closed.';
+} elseif ($student['enrollment_phase'] !== 'NOT_STARTED') {
+$error = 'Faculty evaluation is not available in your current enrollment phase.';
+} elseif (count($questionIds) !== 20) {
+$error = 'The evaluation questionnaire is incomplete.';
+} elseif (!is_array($submittedRatings)) {
+$error = 'Invalid evaluation submission.';
+$submittedRatings = [];
+} else {
+ 
+foreach ($questionIds as $questionId) {
+$value = $submittedRatings[$questionId] ?? null;
 
-            if (
-                !is_string($value) ||
-                !in_array($value, ['1', '2', '3', '4', '5'], true)
-            ) {
-                $error = 'Please answer every question using ratings 1 to 5.';
-                break;
-            }
-        }
+if (
+!is_string($value) ||
+!in_array($value, ['1', '2', '3', '4', '5'], true)
+) {
+$error = 'Please answer every question using ratings 1 to 5.';
+break;
+}
+}
 
-        // Reject unexpected question IDs.
-        if (!$error) {
-            $expected = array_map('strval', $questionIds);
-            $received = array_map('strval', array_keys($submittedRatings));
+ 
+if (!$error) {
+$expected = array_map('strval', $questionIds);
+$received = array_map('strval', array_keys($submittedRatings));
 
-            sort($expected);
-            sort($received);
+sort($expected);
+sort($received);
 
-            if ($expected !== $received) {
-                $error = 'Invalid questionnaire answers.';
-            }
-        }
+if ($expected !== $received) {
+$error = 'Invalid questionnaire answers.';
+}
+}
 
-        if (!$error) {
-            try {
-                $conn->begin_transaction();
+if (!$error) {
+try {
+$conn->begin_transaction();
 
-                // Recheck the professor and enrollment
-                // state inside the transaction.
-                $lockStmt = $conn->prepare(
-                    "SELECT co.instructor_name
+ 
+ 
+$lockStmt = $conn->prepare(
+"SELECT co.instructor_name
                      FROM course_offerings co
                      WHERE co.offering_id = ?
                        AND co.semester = ?
                        AND co.school_year = ?
                      FOR UPDATE"
-                );
-                $lockStmt->bind_param("iss", $offeringId, $previousSemester, $previousSchoolYear);
-                $lockStmt->execute();
-                $lockedOffering = $lockStmt->get_result()->fetch_assoc();
-                $lockStmt->close();
+);
+$lockStmt->bind_param("iss", $offeringId, $previousSemester, $previousSchoolYear);
+$lockStmt->execute();
+$lockedOffering = $lockStmt->get_result()->fetch_assoc();
+$lockStmt->close();
 
-                if (
-                    !$lockedOffering ||
-                    trim($lockedOffering['instructor_name'] ?? '') === ''
-                ) {
-                    throw new RuntimeException(
-                        'Faculty assignment is no longer available.'
-                    );
-                }
+if (
+!$lockedOffering ||
+trim($lockedOffering['instructor_name'] ?? '') === ''
+) {
+throw new RuntimeException(
+'Faculty assignment is no longer available.'
+);
+}
 
-                $professor = $lockedOffering['instructor_name'];
+$professor = $lockedOffering['instructor_name'];
 
-                $insertEval = $conn->prepare(
-                    "INSERT INTO professor_evaluations
+$insertEval = $conn->prepare(
+"INSERT INTO professor_evaluations
                      (student_id, offering_id,
                       instructor_name_at_submission)
                      VALUES (?, ?, ?)"
-                );
+);
 
-                $insertEval->bind_param(
-                    "iis",
-                    $studentId,
-                    $offeringId,
-                    $professor
-                );
+$insertEval->bind_param(
+"iis",
+$studentId,
+$offeringId,
+$professor
+);
 
-                $insertEval->execute();
-                $evaluationId = $conn->insert_id;
-                $insertEval->close();
+$insertEval->execute();
+$evaluationId = $conn->insert_id;
+$insertEval->close();
 
-                $insertAnswer = $conn->prepare(
-                    "INSERT INTO professor_evaluation_answers
+$insertAnswer = $conn->prepare(
+"INSERT INTO professor_evaluation_answers
                      (evaluation_id, question_id, rating)
                      VALUES (?, ?, ?)"
-                );
+);
 
-                foreach ($questionIds as $questionId) {
-                    $rating = (int)$submittedRatings[$questionId];
+foreach ($questionIds as $questionId) {
+$rating = (int)$submittedRatings[$questionId];
 
-                    $insertAnswer->bind_param(
-                        "iii",
-                        $evaluationId,
-                        $questionId,
-                        $rating
-                    );
+$insertAnswer->bind_param(
+"iii",
+$evaluationId,
+$questionId,
+$rating
+);
 
-                    $insertAnswer->execute();
-                }
+$insertAnswer->execute();
+}
 
-                
-                    $insertAnswer->close();
+$insertAnswer->close();
 
-
-                    // Lock the student record before phase progression.
-                    $phaseStmt = $conn->prepare("
+ 
+$phaseStmt = $conn->prepare("
                         SELECT enrollment_phase
                         FROM students
                         WHERE student_id = ?
                         FOR UPDATE
                     ");
 
-                    $phaseStmt->bind_param("i", $studentId);
-                    $phaseStmt->execute();
-                    $phaseRow = $phaseStmt->get_result()->fetch_assoc();
-                    $phaseStmt->close();
+$phaseStmt->bind_param("i", $studentId);
+$phaseStmt->execute();
+$phaseRow = $phaseStmt->get_result()->fetch_assoc();
+$phaseStmt->close();
 
-                    if (!$phaseRow) {
-                        throw new RuntimeException('Student record not found.');
-                    }
+if (!$phaseRow) {
+throw new RuntimeException('Student record not found.');
+}
 
-                    $progress = checkEvaluationCompletion(
-                        $conn,
-                        $studentId,
-                        $previousSemester,
-                        $previousSchoolYear
-                    );
+$progress = checkEvaluationCompletion(
+$conn,
+$studentId,
+$previousSemester,
+$previousSchoolYear
+);
 
-                    if (
-                        $phaseRow['enrollment_phase'] === 'NOT_STARTED' &&
-                        $progress['all_evaluated']
-                    ) {
-                        $updateStmt = $conn->prepare("
+if (
+$phaseRow['enrollment_phase'] === 'NOT_STARTED' &&
+$progress['all_evaluated']
+) {
+$updateStmt = $conn->prepare("
                             UPDATE students
                             SET enrollment_phase = 'EVALUATION',
                                 enrollment_status = 'Evaluation'
@@ -331,36 +324,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             AND enrollment_phase = 'NOT_STARTED'
                         ");
 
-                        $updateStmt->bind_param("i", $studentId);
-                        $updateStmt->execute();
-                        $updateStmt->close();
-                    }
-
-                    $conn->commit();
-
-
-                header(
-                    'Location: ' . BASE_URL .
-                    '?page=faculty_evaluation&submitted=1'
-                );
-                exit;
-
-            } catch (Throwable $exception) {
-                $conn->rollback();
-                error_log($exception->getMessage());
-                $error = 'Unable to save the evaluation. Please try again.';
-            }
-        }
-    }
+$updateStmt->bind_param("i", $studentId);
+$updateStmt->execute();
+$updateStmt->close();
 }
 
+$conn->commit();
+
+header(
+'Location: ' . BASE_URL .
+'?page=faculty_evaluation&submitted=1'
+);
+exit;
+
+} catch (Throwable $exception) {
+$conn->rollback();
+error_log($exception->getMessage());
+$error = 'Unable to save the evaluation. Please try again.';
+}
+}
+}
+}
 
 $userName = trim(
-    $student['first_name'] . ' ' .
-    (!empty($student['middle_name'])
-        ? $student['middle_name'] . ' '
-        : '') .
-    $student['last_name']
+$student['first_name'] . ' ' .
+(!empty($student['middle_name'])
+? $student['middle_name'] . ' '
+: '') .
+$student['last_name']
 );
 
 $currentPage = 'faculty_evaluation';
@@ -571,8 +562,8 @@ $currentPage = 'faculty_evaluation';
                                     <div class="eval-rating-options" role="radiogroup" aria-labelledby="eval-question-<?= $questionId ?>">
                                         <?php
                                         $ratingLabels = [5 => 'Outstanding', 4 => 'Very Satisfactory', 3 => 'Satisfactory', 2 => 'Unsatisfactory', 1 => 'Very Unsatisfactory'];
-                                        for ($rating = 5; $rating >= 1; $rating--):
-                                        ?>
+for ($rating = 5; $rating >= 1; $rating--):
+?>
                                             <label class="eval-rating-choice">
                                                 <input type="radio" name="ratings[<?= $questionId ?>]" value="<?= $rating ?>" required
                                                     <?= ((string)($submittedRatings[$questionId] ?? '') === (string)$rating) ? 'checked' : '' ?>

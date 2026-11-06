@@ -9,29 +9,29 @@ require_once dirname(__DIR__, 3) . '/backend/helpers/evaluation_completion.php';
 $studentId = $_SESSION['student_id'] ?? null;
 
 if (!$studentId) {
-    header('Location: ' . BASE_URL . '?page=login');
-    exit;
+header('Location: ' . BASE_URL . '?page=login');
+exit;
 }
 
-// Recover completed evaluations from before the phase update was fixed.
+ 
 syncCompletedEvaluationPhase($conn, (int) $studentId);
 $student = student_find_by_id($conn, (int) $studentId);
 
 if (!$student) {
-    header('Location: ' . BASE_URL . '?page=login');
-    exit;
+header('Location: ' . BASE_URL . '?page=login');
+exit;
 }
 
 $userName = trim(
-    $student['first_name'] . ' ' .
-    ($student['middle_name'] ? $student['middle_name'] . ' ' : '') .
-    $student['last_name']
+$student['first_name'] . ' ' .
+($student['middle_name'] ? $student['middle_name'] . ' ' : '') .
+$student['last_name']
 );
 
 $currentPage = 'home_main';
 
 $settingsStmt = $conn->prepare(
-    'SELECT
+'SELECT
         enrollment_status,
         semester,
         school_year,
@@ -56,14 +56,14 @@ $schoolYear = $settings['school_year'] ?? '';
 $startDate = $settings['start_date'] ?? null;
 $endDate = $settings['end_date'] ?? null;
 
-// Use the same course offering and schedule tables as My Schedule.
-// PHP timezone is explicit so "today" follows Philippine campus time.
+ 
+ 
 $today = new DateTimeImmutable('now', new DateTimeZone('Asia/Manila'));
 $todayDayName = $today->format('l');
 $todaySchedules = [];
 
 $todayStmt = $conn->prepare(
-    'SELECT c.course_code, c.course_name, co.instructor_name,
+'SELECT c.course_code, c.course_name, co.instructor_name,
             cos.start_time, cos.end_time, cos.room
      FROM course_offerings co
      INNER JOIN courses c ON c.course_id = co.course_id
@@ -77,27 +77,26 @@ $todayStmt = $conn->prepare(
      ORDER BY cos.start_time ASC, c.course_code ASC'
 );
 $todayStmt->bind_param(
-    'sissss',
-    $student['program'],
-    $student['year_level'],
-    $student['section'],
-    $semester,
-    $schoolYear,
-    $todayDayName
+'sissss',
+$student['program'],
+$student['year_level'],
+$student['section'],
+$semester,
+$schoolYear,
+$todayDayName
 );
 $todayStmt->execute();
 $todayResult = $todayStmt->get_result();
 while ($todayRow = $todayResult->fetch_assoc()) {
-    $todaySchedules[] = $todayRow;
+$todaySchedules[] = $todayRow;
 }
 $todayStmt->close();
-
 
 $latestCorSubmission = null;
 $corStatus = 'NOT_SUBMITTED';
 
 $corStmt = $conn->prepare(
-    'SELECT
+'SELECT
         status,
         rejection_reason
      FROM cor_submissions
@@ -119,23 +118,23 @@ $enrollmentPeriod = '';
 
 if ($startDate && $endDate) {
 
-    $startTimestamp = strtotime($startDate);
-    $endTimestamp = strtotime($endDate);
+$startTimestamp = strtotime($startDate);
+$endTimestamp = strtotime($endDate);
 
-    if (date('Y-m', $startTimestamp) === date('Y-m', $endTimestamp)) {
+if (date('Y-m', $startTimestamp) === date('Y-m', $endTimestamp)) {
 
-        $enrollmentPeriod =
-            date('F j', $startTimestamp) .
-            '–' .
-            date('j', $endTimestamp);
+$enrollmentPeriod =
+date('F j', $startTimestamp) .
+'–' .
+date('j', $endTimestamp);
 
-    } else {
+} else {
 
-        $enrollmentPeriod =
-            date('F j', $startTimestamp) .
-            '–' .
-            date('F j', $endTimestamp);
-    }
+$enrollmentPeriod =
+date('F j', $startTimestamp) .
+'–' .
+date('F j', $endTimestamp);
+}
 }
 
 ?>
@@ -507,19 +506,19 @@ if ($startDate && $endDate) {
 
                     <div class="enrollment-info-status
                         <?= $enrollmentStatus === 'OPEN'
-                            ? 'is-open'
-                            : 'is-closed' ?>">
+? 'is-open'
+: 'is-closed' ?>">
 
                         <i class="fa-solid
                             <?= $enrollmentStatus === 'OPEN'
-                                ? 'fa-circle-check'
-                                : 'fa-circle-xmark' ?>"></i>
+? 'fa-circle-check'
+: 'fa-circle-xmark' ?>"></i>
 
                         <span>
                             Enrollment is
                             <?= $enrollmentStatus === 'OPEN'
-                                ? 'Open'
-                                : 'Closed' ?>
+? 'Open'
+: 'Closed' ?>
                         </span>
 
                     </div>
@@ -537,8 +536,8 @@ if ($startDate && $endDate) {
 
                 <div class="progress-item
                     <?= in_array($enrollmentPhase, ['EVALUATION', 'CLEARANCE', 'COR', 'ENROLLED'])
-                        ? 'completed'
-                        : ($enrollmentPhase === 'NOT_STARTED' ? 'current' : '') ?>">
+? 'completed'
+: ($enrollmentPhase === 'NOT_STARTED' ? 'current' : '') ?>">
 
                     <div class="progress-number">
                         <?php if (in_array($enrollmentPhase, ['EVALUATION', 'CLEARANCE', 'COR', 'ENROLLED'])): ?>
@@ -557,8 +556,8 @@ if ($startDate && $endDate) {
 
                 <div class="progress-item
                     <?= in_array($enrollmentPhase, ['CLEARANCE', 'COR', 'ENROLLED'])
-                        ? 'completed'
-                        : ($enrollmentPhase === 'EVALUATION' ? 'current' : '') ?>">
+? 'completed'
+: ($enrollmentPhase === 'EVALUATION' ? 'current' : '') ?>">
 
                     <div class="progress-number">
                         <?php if (in_array($enrollmentPhase, ['CLEARANCE', 'COR', 'ENROLLED'])): ?>
@@ -577,10 +576,10 @@ if ($startDate && $endDate) {
 
                 <div class="progress-item
                     <?= $enrollmentPhase === 'ENROLLED'
-                        ? 'completed'
-                        : (in_array($enrollmentPhase, ['CLEARANCE', 'COR'])
-                            ? 'current'
-                            : '') ?>">
+? 'completed'
+: (in_array($enrollmentPhase, ['CLEARANCE', 'COR'])
+? 'current'
+: '') ?>">
 
                     <div class="progress-number">
                         <?php if ($enrollmentPhase === 'ENROLLED'): ?>
@@ -677,29 +676,29 @@ if ($startDate && $endDate) {
                         <h2>
                             <?php
                             $phaseLabels = [
-                                'NOT_STARTED' => 'Not Started',
-                                'EVALUATION'  => 'Evaluation Completed',
-                                'CLEARANCE'   => 'Clearance Completed',
-                                'COR'         => 'COR Submitted',
-                                'ENROLLED'    => 'Enrolled'
-                            ];
+'NOT_STARTED' => 'Not Started',
+'EVALUATION'  => 'Evaluation Completed',
+'CLEARANCE'   => 'Clearance Completed',
+'COR'         => 'COR Submitted',
+'ENROLLED'    => 'Enrolled'
+];
 
-                            echo e($phaseLabels[$enrollmentPhase] ?? 'Unknown');
-                            ?>
+echo e($phaseLabels[$enrollmentPhase] ?? 'Unknown');
+?>
                         </h2>
 
                         <span>
                             <?php
                             $phaseProgress = [
-                                'NOT_STARTED' => '0 out of 4',
-                                'EVALUATION'  => '1 out of 4',
-                                'CLEARANCE'   => '2 out of 4',
-                                'COR'         => '3 out of 4',
-                                'ENROLLED'    => '4 out of 4'
-                            ];
+'NOT_STARTED' => '0 out of 4',
+'EVALUATION'  => '1 out of 4',
+'CLEARANCE'   => '2 out of 4',
+'COR'         => '3 out of 4',
+'ENROLLED'    => '4 out of 4'
+];
 
-                            echo $phaseProgress[$enrollmentPhase] ?? '0 out of 4';
-                            ?>
+echo $phaseProgress[$enrollmentPhase] ?? '0 out of 4';
+?>
                         </span>
 
                     </div>
@@ -762,8 +761,8 @@ if ($startDate && $endDate) {
                             </div>
                             <p class="enrollment-status-message">
                                 <?= strtoupper(trim($enrollmentStatus)) === 'OPEN'
-                                    ? 'Complete your faculty evaluations to begin the enrollment process.'
-                                    : 'Enrollment activities are currently unavailable. Please wait for the Registrar to open enrollment.' ?>
+? 'Complete your faculty evaluations to begin the enrollment process.'
+: 'Enrollment activities are currently unavailable. Please wait for the Registrar to open enrollment.' ?>
                             </p>
                             <?php if (strtoupper(trim($enrollmentStatus)) === 'OPEN'): ?>
                                 <a class="enrollment-status-link" href="<?= BASE_URL ?>?page=faculty_evaluation">

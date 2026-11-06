@@ -1,21 +1,16 @@
 <?php
 declare(strict_types=1);
 
-/**
- * Step 2 of registration: check the emailed verification code.
- *
- * Success marks the code as verified and remembers (in the session) which
- * masterlist record was verified. The account itself is created by
- * complete_registration.php.
- */
+
+
 
 require_once dirname(__DIR__) . '/bootstrap.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 
-const MAX_CODE_ATTEMPTS = 5;      // wrong guesses allowed per code
-const VERIFIED_WINDOW   = 900;    // seconds to set a password after verifying (15 min)
+const MAX_CODE_ATTEMPTS = 5;       
+const VERIFIED_WINDOW   = 900;     
 
 function respond(int $status, string $message): never {
     http_response_code($status);
@@ -43,8 +38,8 @@ if ($studentNumber === '' || strlen($studentNumber) > 50 || !preg_match('/^\d{6}
     respond(422, 'Enter your student number and the 6-digit code.');
 }
 
-// One message for every failure (unknown student, wrong code, expired, locked),
-// so this endpoint cannot be used to find out which students exist.
+ 
+ 
 $invalid = 'That code is incorrect or has expired. Check the code, or go back and request a new one.';
 
 try {
@@ -59,7 +54,7 @@ try {
 
     $row = null;
     if ($master && $master['registration_status'] === 'UNREGISTERED' && $master['user_id'] === null) {
-        // Lock the row so concurrent guesses cannot bypass the attempt counter.
+         
         $id = (int)$master['masterlist_id'];
         $stmt = $conn->prepare('SELECT verification_id, code_hash, expires_at, attempts, consumed_at
             FROM registration_verifications WHERE masterlist_id = ? FOR UPDATE');
@@ -70,7 +65,7 @@ try {
     }
 
     if (!$row || $row['consumed_at'] !== null) {
-        // Spend similar time as a real check.
+         
         password_hash($code, PASSWORD_DEFAULT);
         $conn->rollback();
         respond(422, $invalid);
@@ -90,7 +85,7 @@ try {
         $stmt->bind_param('i', $verificationId);
         $stmt->execute();
         $stmt->close();
-        $conn->commit(); // keep the failed attempt on record
+        $conn->commit();  
         respond(422, $invalid);
     }
 

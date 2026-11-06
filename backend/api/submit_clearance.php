@@ -30,7 +30,7 @@ if ($studentId <= 0) {
     clearanceResponse(false, 'Student not identified.', 401);
 }
 
-// Require a valid CSRF token created in the form.
+ 
 $submittedToken = $_POST['csrf_token'] ?? '';
 $sessionToken = $_SESSION['csrf_token'] ?? '';
 
@@ -43,7 +43,7 @@ if (
     clearanceResponse(false, 'Invalid security token.', 403);
 }
 
-// Get current enrollment period.
+ 
 $stmt = $conn->prepare("
     SELECT semester, school_year
     FROM system_settings
@@ -96,8 +96,8 @@ if (!isset($allowedTypes[$mime])) {
 
 $extension = $allowedTypes[$mime];
 
-// Store outside the public project directory.
-// Configure this directory with restricted permissions.
+ 
+ 
 $uploadDirectory = dirname(__DIR__, 4) . '/cmu_private_uploads/clearance/';
 
 if (
@@ -112,7 +112,7 @@ $filename = 'CLR_' . $studentId . '_'
 
 $absolutePath = $uploadDirectory . $filename;
 
-// Store a relative reference, not a public URL.
+ 
 $storedPath = 'clearance/' . $filename;
 
 $transactionStarted = false;
@@ -122,7 +122,7 @@ try {
     $conn->begin_transaction();
     $transactionStarted = true;
 
-    // Lock student record to prevent concurrent submissions.
+     
     $stmt = $conn->prepare("
         SELECT enrollment_phase
         FROM students
@@ -143,7 +143,7 @@ try {
         );
     }
 
-    // Check latest submission for the active period.
+     
     $stmt = $conn->prepare("
         SELECT status
         FROM clearance_submissions

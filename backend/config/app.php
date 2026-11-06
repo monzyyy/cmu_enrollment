@@ -10,18 +10,14 @@ $isLocalHost = $host === 'localhost'
 
 define('APP_ENV', $isLocalHost ? 'local' : 'production');
 
-/*
- * Detect the project's URL folder.
- * This allows the project to work on localhost
- * and on the production server without hardcoding
- * the project folder.
- */
+
+
 $scriptFile = str_replace('\\', '/', realpath($_SERVER['SCRIPT_FILENAME']));
 $rootPath   = str_replace('\\', '/', realpath(ROOT_PATH));
 $scriptName = str_replace('\\', '/', $_SERVER['SCRIPT_NAME']);
 
-$relative = substr($scriptFile, strlen($rootPath));                     // e.g. /backend/api/register.php
-$base     = substr($scriptName, 0, strlen($scriptName) - strlen($relative)); // e.g. /cool_freeze
+$relative = substr($scriptFile, strlen($rootPath));                      
+$base     = substr($scriptName, 0, strlen($scriptName) - strlen($relative));  
 
 define('BASE_URL', rtrim($base, '/') . '/');
 

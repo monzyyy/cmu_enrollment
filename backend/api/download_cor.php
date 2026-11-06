@@ -1,5 +1,5 @@
 <?php
-/** Project-generated COR; original layout, current-period course offerings. No PDF dependency. */
+ 
 require_once dirname(__DIR__) . '/bootstrap.php';
 require_role('STUDENT');
 require_once dirname(__DIR__) . '/models/student.php';
@@ -13,7 +13,7 @@ $stmt = $conn->prepare('SELECT semester, school_year, enrollment_status FROM sys
 $stmt->execute(); $period = $stmt->get_result()->fetch_assoc(); $stmt->close();
 if (!$period || !$period['semester'] || !$period['school_year']) { http_response_code(409); exit('Current enrollment period is not configured.'); }
 
-// Server-side phase and approval checks prevent direct-URL bypass.
+ 
 if (!in_array((string) ($student['enrollment_phase'] ?? 'NOT_STARTED'), ['CLEARANCE', 'COR', 'ENROLLED'], true)) {
     http_response_code(403); exit('Complete the required enrollment steps before downloading COR.');
 }
@@ -34,7 +34,7 @@ if (($period['enrollment_status'] ?? '') !== 'OPEN') {
     if (!$hasApprovedCor) { http_response_code(403); exit('Enrollment is currently closed.'); }
 }
 
-// Match the same section/semester/year rules used by the student's My Schedule page.
+ 
 $stmt = $conn->prepare('SELECT co.offering_id, c.course_code, c.course_name, c.units, co.section, co.instructor_name
  FROM course_offerings co JOIN courses c ON c.course_id = co.course_id
  WHERE co.program = ? AND co.year_level = ? AND co.section = ? AND co.semester = ? AND co.school_year = ?
@@ -150,7 +150,7 @@ $content .= corPdfText(40, $top - 51, 'Student Signature: ______________________
 $content .= corPdfText(458, $top - 51, 'Date: ______________________', 9);
 $pages[] = $content;
 
-// Minimal multi-page PDF writer using built-in Helvetica fonts.
+ 
 $objects = [];
 $objects[1] = '<< /Type /Catalog /Pages 2 0 R >>';
 $objects[3] = '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>';

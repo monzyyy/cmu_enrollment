@@ -9,39 +9,39 @@ require_once dirname(__DIR__, 3) . '/backend/helpers/evaluation_completion.php';
 $studentId = $_SESSION['student_id'] ?? null;
 
 if (!$studentId) {
-    header('Location: ' . BASE_URL . '?page=login');
-    exit;
+header('Location: ' . BASE_URL . '?page=login');
+exit;
 }
 
-// Recover completed evaluations from before the phase update was fixed.
+ 
 syncCompletedEvaluationPhase($conn, (int) $studentId);
 $student = student_find_by_id($conn, (int) $studentId);
 
 if (!$student) {
-    header('Location: ' . BASE_URL . '?page=login');
-    exit;
+header('Location: ' . BASE_URL . '?page=login');
+exit;
 }
 
 $userName = trim(
-    $student['first_name'] . ' ' .
-    ($student['middle_name'] ? $student['middle_name'] . ' ' : '') .
-    $student['last_name']
+$student['first_name'] . ' ' .
+($student['middle_name'] ? $student['middle_name'] . ' ' : '') .
+$student['last_name']
 );
 
 $currentPage = 'clearance_main';
 
-/* ---------------------------------------------------------
-   STUDENT INFO
-   TODO: replace the fallbacks with your real column names.
---------------------------------------------------------- */
+
+
+
+
 $studentNumber = $student['student_number'] ?? '2024-1234';
 $programName   = $student['program']        ?? 'BS Information Technology';
 $yearLevel     = $student['year_level']     ?? '3rd Year';
 $sectionName   = $student['section']        ?? 'BSIT - 3D';
 
-/* -----------------------------------------
-   ACTIVE ENROLLMENT PERIOD
------------------------------------------ */
+
+
+
 
 $periodStmt = $conn->prepare("
     SELECT semester, school_year, enrollment_status
@@ -57,32 +57,32 @@ $periodStmt->close();
 $academicYear = $period['school_year'] ?? 'Not Set';
 $currentSemester = $period['semester'] ?? '';
 $enrollmentOpen = (
-    ($period['enrollment_status'] ?? '') === 'OPEN'
+($period['enrollment_status'] ?? '') === 'OPEN'
 );
 
-/* -----------------------------------------
-   STUDENT ENROLLMENT PHASE
------------------------------------------ */
+
+
+
 
 $enrollmentPhase = $student['enrollment_phase']
-    ?? 'NOT_STARTED';
+?? 'NOT_STARTED';
 
 $clearanceUnlocked = in_array(
-    $enrollmentPhase,
-    ['EVALUATION', 'CLEARANCE', 'COR', 'ENROLLED'],
-    true
+$enrollmentPhase,
+['EVALUATION', 'CLEARANCE', 'COR', 'ENROLLED'],
+true
 );
 
-/* -----------------------------------------
-   CLEARANCE SUBMISSION STATUS
------------------------------------------ */
+
+
+
 
 $clearanceStatus = 'NOT_SUBMITTED';
 $rejectionReason = '';
 
 if ($currentSemester !== '' && $academicYear !== 'Not Set') {
 
-    $clearanceStmt = $conn->prepare("
+$clearanceStmt = $conn->prepare("
         SELECT status, rejection_reason
         FROM clearance_submissions
         WHERE student_id = ?
@@ -92,106 +92,105 @@ if ($currentSemester !== '' && $academicYear !== 'Not Set') {
         LIMIT 1
     ");
 
-    $clearanceStmt->bind_param(
-        'iss',
-        $studentId,
-        $currentSemester,
-        $academicYear
-    );
+$clearanceStmt->bind_param(
+'iss',
+$studentId,
+$currentSemester,
+$academicYear
+);
 
-    $clearanceStmt->execute();
-    $clearanceRecord = $clearanceStmt
-        ->get_result()
-        ->fetch_assoc();
+$clearanceStmt->execute();
+$clearanceRecord = $clearanceStmt
+->get_result()
+->fetch_assoc();
 
-    $clearanceStmt->close();
+$clearanceStmt->close();
 
-    if ($clearanceRecord) {
-        $clearanceStatus = $clearanceRecord['status'];
-        $rejectionReason =
-            $clearanceRecord['rejection_reason'] ?? '';
-    }
+if ($clearanceRecord) {
+$clearanceStatus = $clearanceRecord['status'];
+$rejectionReason =
+$clearanceRecord['rejection_reason'] ?? '';
+}
 }
 
-/* -----------------------------------------
-   STATUS DISPLAY
------------------------------------------ */
+
+
+
 
 $statusMap = [
-    'NOT_SUBMITTED' => [
-        'icon' => 'fa-file-circle-question',
-        'class' => '',
-        'text' => 'Your clearance form has not been submitted yet'
-    ],
-    'PENDING' => [
-        'icon' => 'fa-clock',
-        'class' => 'is-pending',
-        'text' => 'Your clearance form is waiting for review'
-    ],
-    'APPROVED' => [
-        'icon' => 'fa-circle-check',
-        'class' => 'is-approved',
-        'text' => 'Your clearance form has been approved'
-    ],
-    'REJECTED' => [
-        'icon' => 'fa-circle-xmark',
-        'class' => 'is-rejected',
-        'text' => 'Your clearance form was rejected. Please upload a new copy'
-    ]
+'NOT_SUBMITTED' => [
+'icon' => 'fa-file-circle-question',
+'class' => '',
+'text' => 'Your clearance form has not been submitted yet'
+],
+'PENDING' => [
+'icon' => 'fa-clock',
+'class' => 'is-pending',
+'text' => 'Your clearance form is waiting for review'
+],
+'APPROVED' => [
+'icon' => 'fa-circle-check',
+'class' => 'is-approved',
+'text' => 'Your clearance form has been approved'
+],
+'REJECTED' => [
+'icon' => 'fa-circle-xmark',
+'class' => 'is-rejected',
+'text' => 'Your clearance form was rejected. Please upload a new copy'
+]
 ];
 
 $statusView = $statusMap[$clearanceStatus]
-    ?? $statusMap['NOT_SUBMITTED'];
+?? $statusMap['NOT_SUBMITTED'];
 
-/* -----------------------------------------
-   UPLOAD PERMISSION
------------------------------------------ */
+
+
+
 
 $canUpload = (
-    $enrollmentOpen &&
-    $enrollmentPhase === 'EVALUATION' &&
-    in_array(
-        $clearanceStatus,
-        ['NOT_SUBMITTED', 'REJECTED'],
-        true
-    )
+$enrollmentOpen &&
+$enrollmentPhase === 'EVALUATION' &&
+in_array(
+$clearanceStatus,
+['NOT_SUBMITTED', 'REJECTED'],
+true
+)
 );
 
-/* -----------------------------------------
-   CSRF TOKEN
------------------------------------------ */
+
+
+
 
 if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] =
-        bin2hex(random_bytes(32));
+$_SESSION['csrf_token'] =
+bin2hex(random_bytes(32));
 }
 
 
-/* ---------------------------------------------------------
-   REQUIRED SIGNATURES
-   Names follow the official project-generated clearance PDF.
-   Signatures are collected manually and verified on submission.
---------------------------------------------------------- */
+
+
+
+
 $signatures = [
-    ['office' => 'Computer Laboratory / MIS'],
-    ['office' => 'Health Services Office'],
-    ['office' => 'University Library'],
-    ['office' => 'Program Chair'],
-    ['office' => 'College Dean'],
-    ['office' => 'National Service Training Program Office'],
-    ['office' => 'Registrar’s Office'],
-    ['office' => 'Student Values Formation Unit'],
-    ['office' => 'Student Organization and Activity Unit'],
-    ['office' => 'Student Affairs and Services Office'],
+['office' => 'Computer Laboratory / MIS'],
+['office' => 'Health Services Office'],
+['office' => 'University Library'],
+['office' => 'Program Chair'],
+['office' => 'College Dean'],
+['office' => 'National Service Training Program Office'],
+['office' => 'Registrar’s Office'],
+['office' => 'Student Values Formation Unit'],
+['office' => 'Student Organization and Activity Unit'],
+['office' => 'Student Affairs and Services Office'],
 ];
 
 $steps = [
-    ['icon' => 'fa-download',      'title' => 'Download',   'text' => 'Get the form from the system'],
-    ['icon' => 'fa-print',         'title' => 'Print',     'text' => 'Print on the required paper'],
-    ['icon' => 'fa-file-signature','title' => 'Signature', 'text' => 'Acquire their signatures'],
-    ['icon' => 'fa-camera',        'title' => 'Scan/Photo','text' => 'Make sure it\'s clear and readable'],
-    ['icon' => 'fa-upload',        'title' => 'Upload',    'text' => 'Upload the completed form'],
-    ['icon' => 'fa-paper-plane',   'title' => 'Submit',    'text' => 'Send the verification'],
+['icon' => 'fa-download',      'title' => 'Download',   'text' => 'Get the form from the system'],
+['icon' => 'fa-print',         'title' => 'Print',     'text' => 'Print on the required paper'],
+['icon' => 'fa-file-signature','title' => 'Signature', 'text' => 'Acquire their signatures'],
+['icon' => 'fa-camera',        'title' => 'Scan/Photo','text' => 'Make sure it\'s clear and readable'],
+['icon' => 'fa-upload',        'title' => 'Upload',    'text' => 'Upload the completed form'],
+['icon' => 'fa-paper-plane',   'title' => 'Submit',    'text' => 'Send the verification'],
 ];
 
 ?>
@@ -409,10 +408,10 @@ $steps = [
                                 type="hidden"
                                 name="csrf_token"
                                 value="<?= htmlspecialchars(
-                                    $_SESSION['csrf_token'],
-                                    ENT_QUOTES,
-                                    'UTF-8'
-                                ) ?>"
+$_SESSION['csrf_token'],
+ENT_QUOTES,
+'UTF-8'
+) ?>"
                             >
 
                             <label class="cl-dropzone <?= $canUpload ? '' : 'is-disabled' ?>"
@@ -465,9 +464,9 @@ $steps = [
                         </div>
                         
                         <?php if (
-                            $clearanceStatus === 'REJECTED' &&
-                            !empty($rejectionReason)
-                        ): ?>
+$clearanceStatus === 'REJECTED' &&
+!empty($rejectionReason)
+): ?>
                             <p style="
                                 color: #dc3545;
                                 margin-top: 12px;

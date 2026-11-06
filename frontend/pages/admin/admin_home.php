@@ -4,9 +4,8 @@ require_role('ADMIN');
 
 $currentPage = 'admin_home';
 
-
 $stmt = $conn->prepare(
-    'SELECT
+'SELECT
         enrollment_status,
         semester,
         school_year,
@@ -24,28 +23,25 @@ $settings = $result->fetch_assoc();
 
 $stmt->close();
 
-
 $enrollmentStatus = $settings['enrollment_status'] ?? 'CLOSED';
 
 $isEnrollmentOpen = $enrollmentStatus === 'OPEN';
 
 $statusClass = $isEnrollmentOpen
-    ? 'admin-status-open'
-    : 'admin-status-closed';
+? 'admin-status-open'
+: 'admin-status-closed';
 
 $statusMessage = $isEnrollmentOpen
-    ? 'Enrollment is currently open'
-    : 'Enrollment is currently closed';
-
+? 'Enrollment is currently open'
+: 'Enrollment is currently closed';
 
 $totalStudents = 0;
 $notStartedStudents = 0;
 $corStudents = 0;
 $enrolledStudents = 0;
 
-
 $result = $conn->query(
-    "SELECT
+"SELECT
         COUNT(*) AS total_students,
         SUM(enrollment_phase = 'NOT_STARTED') AS not_started_students,
         SUM(enrollment_phase = 'COR') AS cor_students,
@@ -55,7 +51,6 @@ $result = $conn->query(
 
 $studentCounts = $result->fetch_assoc();
 
-
 $totalStudents = (int) $studentCounts['total_students'];
 $notStartedStudents = (int) $studentCounts['not_started_students'];
 $corStudents = (int) $studentCounts['cor_students'];
@@ -64,52 +59,49 @@ $enrolledStudents = (int) $studentCounts['enrolled_students'];
 $studentsPerPage = 5;
 
 $currentStudentPage = max(
-    1,
-    (int) ($_GET['student_page'] ?? 1)
+1,
+(int) ($_GET['student_page'] ?? 1)
 );
 
-
-/* TOTAL STUDENTS */
+ 
 
 $totalStudentResult = $conn->query(
-    'SELECT COUNT(*) AS total
+'SELECT COUNT(*) AS total
      FROM students'
 );
 
 $totalStudentRecords = 0;
 
 if ($totalStudentResult) {
-    $row = $totalStudentResult->fetch_assoc();
+$row = $totalStudentResult->fetch_assoc();
 
-    $totalStudentRecords =
-        (int) ($row['total'] ?? 0);
+$totalStudentRecords =
+(int) ($row['total'] ?? 0);
 }
 
-
-/* PAGINATION */
+ 
 
 $totalStudentPages = max(
-    1,
-    (int) ceil(
-        $totalStudentRecords /
-        $studentsPerPage
-    )
+1,
+(int) ceil(
+$totalStudentRecords /
+$studentsPerPage
+)
 );
 
 $currentStudentPage = min(
-    $currentStudentPage,
-    $totalStudentPages
+$currentStudentPage,
+$totalStudentPages
 );
 
 $studentOffset =
-    ($currentStudentPage - 1) *
-    $studentsPerPage;
+($currentStudentPage - 1) *
+$studentsPerPage;
 
-
-/* GET STUDENTS */
+ 
 
 $stmt = $conn->prepare(
-    'SELECT
+'SELECT
         student_number,
         first_name,
         middle_name,
@@ -121,15 +113,15 @@ $stmt = $conn->prepare(
 );
 
 $stmt->bind_param(
-    'ii',
-    $studentsPerPage,
-    $studentOffset
+'ii',
+$studentsPerPage,
+$studentOffset
 );
 
 $stmt->execute();
 
 $students =
-    $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
 $stmt->close();
 ?>
@@ -253,10 +245,10 @@ $stmt->close();
 
                         <strong>
                             <?= htmlspecialchars(
-                            $settings['semester'] ?? 'Not set',
-                            ENT_QUOTES,
-                            'UTF-8'
-                            ) ?>
+$settings['semester'] ?? 'Not set',
+ENT_QUOTES,
+'UTF-8'
+) ?>
                         </strong>
 
                     </div>
@@ -267,10 +259,10 @@ $stmt->close();
 
                         <strong>
                             <?= htmlspecialchars(
-                            $settings['school_year'] ?? 'Not set',
-                            ENT_QUOTES,
-                            'UTF-8'
-                            ) ?>
+$settings['school_year'] ?? 'Not set',
+ENT_QUOTES,
+'UTF-8'
+) ?>
                         </strong>
 
                     </div>
@@ -281,8 +273,8 @@ $stmt->close();
 
                         <strong>
                             <?= !empty($settings['start_date'])
-                            ? date('F j, Y', strtotime($settings['start_date']))
-                            : 'Not set' ?>
+? date('F j, Y', strtotime($settings['start_date']))
+: 'Not set' ?>
                         </strong>
 
                     </div>
@@ -293,8 +285,8 @@ $stmt->close();
 
                         <strong>
                             <?= !empty($settings['end_date'])
-                            ? date('F j, Y', strtotime($settings['end_date']))
-                            : 'Not set' ?>
+? date('F j, Y', strtotime($settings['end_date']))
+: 'Not set' ?>
                         </strong>
 
                     </div>
@@ -417,13 +409,13 @@ $stmt->close();
 
                     <?php
                     $displayStart =
-                        $studentOffset + 1;
+$studentOffset + 1;
 
-                    $displayEnd = min(
-                        $studentOffset + $studentsPerPage,
-                        $totalStudentRecords
-                    );
-                    ?>
+$displayEnd = min(
+$studentOffset + $studentsPerPage,
+$totalStudentRecords
+);
+?>
 
                     <div class="admin-cor-table-info">
 
@@ -451,21 +443,21 @@ $stmt->close();
 
                     <?php
 
-                    $studentName = trim(
-                        $student['first_name'] . ' ' .
-                        ($student['middle_name']
-                            ? $student['middle_name'] . ' '
-                            : '') .
-                        $student['last_name']
-                    );
+$studentName = trim(
+$student['first_name'] . ' ' .
+($student['middle_name']
+? $student['middle_name'] . ' '
+: '') .
+$student['last_name']
+);
 
-                    $progress = ucwords(
-                        strtolower(
-                            str_replace('_', ' ', $student['enrollment_phase'])
-                        )
-                    );
+$progress = ucwords(
+strtolower(
+str_replace('_', ' ', $student['enrollment_phase'])
+)
+);
 
-                    ?>
+?>
 
                     <div class="admin-table-row">
 
@@ -475,26 +467,26 @@ $stmt->close();
 
                         <span>
                             <?= htmlspecialchars(
-                                $student['student_number'],
-                                ENT_QUOTES,
-                                'UTF-8'
-                            ) ?>
+$student['student_number'],
+ENT_QUOTES,
+'UTF-8'
+) ?>
                         </span>
 
                         <span>
                             <?= htmlspecialchars(
-                                $studentName,
-                                ENT_QUOTES,
-                                'UTF-8'
-                            ) ?>
+$studentName,
+ENT_QUOTES,
+'UTF-8'
+) ?>
                         </span>
 
                         <span>
                             <?= htmlspecialchars(
-                                $progress,
-                                ENT_QUOTES,
-                                'UTF-8'
-                            ) ?>
+$progress,
+ENT_QUOTES,
+'UTF-8'
+) ?>
                         </span>
 
                         <span>
@@ -515,11 +507,11 @@ $stmt->close();
 
                     <a
                         href="<?= e(
-                            BASE_URL
-                            . '?page=admin_home'
-                            . '&student_page='
-                            . ($currentStudentPage - 1)
-                        ) ?>"
+BASE_URL
+. '?page=admin_home'
+. '&student_page='
+. ($currentStudentPage - 1)
+) ?>"
                         class="<?= $currentStudentPage <= 1 ? 'disabled' : '' ?>"
                     >
                         <i class="fa-solid fa-chevron-left"></i>
@@ -530,21 +522,21 @@ $stmt->close();
                     <div class="admin-student-enrollment-page-numbers">
 
                         <?php for (
-                            $pageNumber = 1;
-                            $pageNumber <= $totalStudentPages;
-                            $pageNumber++
-                        ): ?>
+$pageNumber = 1;
+$pageNumber <= $totalStudentPages;
+$pageNumber++
+): ?>
 
                             <a
                                 href="<?= e(
-                                    BASE_URL
-                                    . '?page=admin_home'
-                                    . '&student_page='
-                                    . $pageNumber
-                                ) ?>"
+BASE_URL
+. '?page=admin_home'
+. '&student_page='
+. $pageNumber
+) ?>"
                                 class="<?= $pageNumber === $currentStudentPage
-                                    ? 'active'
-                                    : '' ?>"
+? 'active'
+: '' ?>"
                             >
                                 <?= $pageNumber ?>
                             </a>
@@ -556,14 +548,14 @@ $stmt->close();
 
                     <a
                         href="<?= e(
-                            BASE_URL
-                            . '?page=admin_home'
-                            . '&student_page='
-                            . ($currentStudentPage + 1)
-                        ) ?>"
+BASE_URL
+. '?page=admin_home'
+. '&student_page='
+. ($currentStudentPage + 1)
+) ?>"
                         class="<?= $currentStudentPage >= $totalStudentPages
-                            ? 'disabled'
-                            : '' ?>"
+? 'disabled'
+: '' ?>"
                     >
                         Next
                         <i class="fa-solid fa-chevron-right"></i>

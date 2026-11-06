@@ -2,7 +2,7 @@
 require_role('ADMIN');
 
 if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+$_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
 $currentPage = 'clearance_submissions';
@@ -10,10 +10,10 @@ $currentPage = 'clearance_submissions';
 $search = trim((string) ($_GET['search'] ?? ''));
 $statusFilter = (string) ($_GET['status'] ?? '');
 if (!in_array($statusFilter, ['', 'PENDING', 'APPROVED', 'REJECTED'], true)) {
-    $statusFilter = '';
+$statusFilter = '';
 }
 
-// By default show submissions from the latest enrollment period.
+ 
 $periodResult = $conn->query('SELECT semester, school_year FROM system_settings ORDER BY setting_id DESC LIMIT 1');
 $period = $periodResult ? $periodResult->fetch_assoc() : null;
 $semester = $period['semester'] ?? '';
@@ -23,21 +23,21 @@ $where = ['1=1'];
 $types = '';
 $params = [];
 if ($semester !== '' && $schoolYear !== '') {
-    $where[] = 'c.semester = ? AND c.school_year = ?';
-    $types .= 'ss';
-    $params[] = $semester;
-    $params[] = $schoolYear;
+$where[] = 'c.semester = ? AND c.school_year = ?';
+$types .= 'ss';
+$params[] = $semester;
+$params[] = $schoolYear;
 }
 if ($search !== '') {
-    $where[] = '(s.student_number LIKE ? OR s.first_name LIKE ? OR s.middle_name LIKE ? OR s.last_name LIKE ? OR s.program LIKE ? OR s.section LIKE ?)';
-    $term = '%' . $search . '%';
-    $types .= 'ssssss';
-    array_push($params, $term, $term, $term, $term, $term, $term);
+$where[] = '(s.student_number LIKE ? OR s.first_name LIKE ? OR s.middle_name LIKE ? OR s.last_name LIKE ? OR s.program LIKE ? OR s.section LIKE ?)';
+$term = '%' . $search . '%';
+$types .= 'ssssss';
+array_push($params, $term, $term, $term, $term, $term, $term);
 }
 if ($statusFilter !== '') {
-    $where[] = 'c.status = ?';
-    $types .= 's';
-    $params[] = $statusFilter;
+$where[] = 'c.status = ?';
+$types .= 's';
+$params[] = $statusFilter;
 }
 $whereSql = implode(' AND ', $where);
 
@@ -71,32 +71,32 @@ $summarySql = 'SELECT status, COUNT(*) AS total FROM clearance_submissions';
 $summaryTypes = '';
 $summaryParams = [];
 if ($semester !== '' && $schoolYear !== '') {
-    $summarySql .= ' WHERE semester = ? AND school_year = ?';
-    $summaryTypes = 'ss';
-    $summaryParams = [$semester, $schoolYear];
+$summarySql .= ' WHERE semester = ? AND school_year = ?';
+$summaryTypes = 'ss';
+$summaryParams = [$semester, $schoolYear];
 }
 $summarySql .= ' GROUP BY status';
 $summaryStmt = $conn->prepare($summarySql);
 if ($summaryTypes !== '') $summaryStmt->bind_param($summaryTypes, ...$summaryParams);
 $summaryStmt->execute();
 foreach ($summaryStmt->get_result()->fetch_all(MYSQLI_ASSOC) as $row) {
-    if (isset($counts[$row['status']])) $counts[$row['status']] = (int) $row['total'];
+if (isset($counts[$row['status']])) $counts[$row['status']] = (int) $row['total'];
 }
 $summaryStmt->close();
 
 if (empty($_SESSION['csrf_token'])) $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 
 function clearance_status_class(string $status): string {
-    return match ($status) {
-        'PENDING' => 'admin-cor-status-pending',
-        'APPROVED' => 'admin-cor-status-approved',
-        'REJECTED' => 'admin-cor-status-rejected',
-        default => ''
-    };
+return match ($status) {
+'PENDING' => 'admin-cor-status-pending',
+'APPROVED' => 'admin-cor-status-approved',
+'REJECTED' => 'admin-cor-status-rejected',
+default => ''
+};
 }
 function clearance_url(int $page): string {
-    return BASE_URL . '?page=clearance_submissions&search=' . urlencode((string) ($_GET['search'] ?? ''))
-        . '&status=' . urlencode((string) ($_GET['status'] ?? '')) . '&clearance_page=' . $page;
+return BASE_URL . '?page=clearance_submissions&search=' . urlencode((string) ($_GET['search'] ?? ''))
+. '&status=' . urlencode((string) ($_GET['status'] ?? '')) . '&clearance_page=' . $page;
 }
 ?>
 <!DOCTYPE html>
@@ -168,8 +168,8 @@ function clearance_url(int $page): string {
                         <?php if (!$submissions): ?>
                             <tr><td colspan="7" class="admin-cor-empty">No clearance submissions found.</td></tr>
                         <?php else: foreach ($submissions as $submission):
-                            $fullName = trim($submission['first_name'] . ' ' . ($submission['middle_name'] ?? '') . ' ' . $submission['last_name']);
-                        ?>
+$fullName = trim($submission['first_name'] . ' ' . ($submission['middle_name'] ?? '') . ' ' . $submission['last_name']);
+?>
                             <tr>
                                 <td><?= e($submission['student_number']) ?></td>
                                 <td><?= e($fullName) ?></td>

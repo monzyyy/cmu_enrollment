@@ -1,4 +1,4 @@
-/* MY ENROLLMENT — append to the end of student.css */
+
 .myen-page{display:flex;flex-direction:column;gap:14px}
 .myen-overview,.myen-card{border:1px solid var(--border);border-radius:var(--radius-md);background:var(--white);padding:18px}
 .myen-overview{background:linear-gradient(110deg,#eaf4ff 0%,#f6faff 100%)}

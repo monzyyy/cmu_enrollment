@@ -83,7 +83,7 @@ try {
         throw new RuntimeException('This submission has already been reviewed.');
     }
 
-    // Only review a submission belonging to the active period.
+     
     $periodStmt = $conn->prepare("
         SELECT semester, school_year
         FROM system_settings

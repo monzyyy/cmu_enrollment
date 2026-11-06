@@ -7,11 +7,10 @@ require_role('ADMIN');
 $currentPage = 'course_offerings';
 
 
-/*
-|--------------------------------------------------------------------------
-| Current Filters
-|--------------------------------------------------------------------------
-*/
+
+
+
+
 
 $semester = $_GET['semester'] ?? '1st Semester';
 $schoolYear = $_GET['school_year'] ?? '2026 - 2027';
@@ -20,16 +19,15 @@ $yearLevel = $_GET['year_level'] ?? '';
 $section = $_GET['section'] ?? '';
 
 
-/*
-|--------------------------------------------------------------------------
-| Program Options
-|--------------------------------------------------------------------------
-*/
+
+
+
+
 
 $programs = [];
 
 $stmt = $conn->prepare(
-    'SELECT DISTINCT program
+'SELECT DISTINCT program
      FROM students
      WHERE program IS NOT NULL
        AND program <> ""
@@ -41,57 +39,55 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 while ($row = $result->fetch_assoc()) {
-    $programs[] = $row['program'];
+$programs[] = $row['program'];
 }
 
 $stmt->close();
 
 
-/*
-|--------------------------------------------------------------------------
-| Section Options
-|--------------------------------------------------------------------------
-*/
+
+
+
+
 
 $sections = [];
 
 if ($program !== '' && $yearLevel !== '') {
 
-    $yearLevelValue = (int) $yearLevel;
+$yearLevelValue = (int) $yearLevel;
 
-    $stmt = $conn->prepare(
-        'SELECT DISTINCT section
+$stmt = $conn->prepare(
+'SELECT DISTINCT section
          FROM students
          WHERE program = ?
            AND year_level = ?
            AND section IS NOT NULL
            AND section <> ""
          ORDER BY section ASC'
-    );
+);
 
-    $stmt->bind_param(
-        'si',
-        $program,
-        $yearLevelValue
-    );
+$stmt->bind_param(
+'si',
+$program,
+$yearLevelValue
+);
 
-    $stmt->execute();
+$stmt->execute();
 
-    $result = $stmt->get_result();
+$result = $stmt->get_result();
 
-    while ($row = $result->fetch_assoc()) {
-        $sections[] = $row['section'];
-    }
+while ($row = $result->fetch_assoc()) {
+$sections[] = $row['section'];
+}
 
-    $stmt->close();
+$stmt->close();
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| Course Offerings
-|--------------------------------------------------------------------------
-*/
+
+
+
+
 
 $courseOfferings = [];
 
@@ -145,42 +141,38 @@ $sql = '
 ';
 
 $params = [
-    $semester,
-    $schoolYear
+$semester,
+$schoolYear
 ];
 
 $types = 'ss';
 
-
 if ($program !== '') {
 
-    $sql .= ' AND co.program = ?';
+$sql .= ' AND co.program = ?';
 
-    $params[] = $program;
+$params[] = $program;
 
-    $types .= 's';
+$types .= 's';
 }
-
 
 if ($yearLevel !== '') {
 
-    $sql .= ' AND co.year_level = ?';
+$sql .= ' AND co.year_level = ?';
 
-    $params[] = (int) $yearLevel;
+$params[] = (int) $yearLevel;
 
-    $types .= 'i';
+$types .= 'i';
 }
-
 
 if ($section !== '') {
 
-    $sql .= ' AND co.section = ?';
+$sql .= ' AND co.section = ?';
 
-    $params[] = $section;
+$params[] = $section;
 
-    $types .= 's';
+$types .= 's';
 }
-
 
 $sql .= '
     GROUP BY
@@ -202,33 +194,27 @@ $sql .= '
         c.course_code ASC
 ';
 
-
 $stmt = $conn->prepare($sql);
 
-
 $stmt->bind_param(
-    $types,
-    ...$params
+$types,
+...$params
 );
-
 
 $stmt->execute();
 
-
 $result = $stmt->get_result();
-
 
 while ($row = $result->fetch_assoc()) {
 
-    $row['schedules'] =
-        $row['schedules'] !== null
-            ? explode('||', $row['schedules'])
-            : [];
+$row['schedules'] =
+$row['schedules'] !== null
+? explode('||', $row['schedules'])
+: [];
 
-    $courseOfferings[] = $row;
+$courseOfferings[] = $row;
 
 }
-
 
 $stmt->close();
 
@@ -383,8 +369,8 @@ $stmt->close();
                             <option
                                 value="1st Semester"
                                 <?= $semester === '1st Semester'
-                                    ? 'selected'
-                                    : '' ?>
+? 'selected'
+: '' ?>
                             >
                                 1st Semester
                             </option>
@@ -392,8 +378,8 @@ $stmt->close();
                             <option
                                 value="2nd Semester"
                                 <?= $semester === '2nd Semester'
-                                    ? 'selected'
-                                    : '' ?>
+? 'selected'
+: '' ?>
                             >
                                 2nd Semester
                             </option>
@@ -401,8 +387,8 @@ $stmt->close();
                             <option
                                 value="Summer"
                                 <?= $semester === 'Summer'
-                                    ? 'selected'
-                                    : '' ?>
+? 'selected'
+: '' ?>
                             >
                                 Summer
                             </option>
@@ -449,8 +435,8 @@ $stmt->close();
                                 <option
                                     value="<?= e($programOption) ?>"
                                     <?= $program === $programOption
-                                        ? 'selected'
-                                        : '' ?>
+? 'selected'
+: '' ?>
                                 >
                                     <?= e($programOption) ?>
                                 </option>
@@ -480,8 +466,8 @@ $stmt->close();
                             <option
                                 value="1"
                                 <?= $yearLevel === '1'
-                                    ? 'selected'
-                                    : '' ?>
+? 'selected'
+: '' ?>
                             >
                                 1st Year
                             </option>
@@ -489,8 +475,8 @@ $stmt->close();
                             <option
                                 value="2"
                                 <?= $yearLevel === '2'
-                                    ? 'selected'
-                                    : '' ?>
+? 'selected'
+: '' ?>
                             >
                                 2nd Year
                             </option>
@@ -498,8 +484,8 @@ $stmt->close();
                             <option
                                 value="3"
                                 <?= $yearLevel === '3'
-                                    ? 'selected'
-                                    : '' ?>
+? 'selected'
+: '' ?>
                             >
                                 3rd Year
                             </option>
@@ -507,8 +493,8 @@ $stmt->close();
                             <option
                                 value="4"
                                 <?= $yearLevel === '4'
-                                    ? 'selected'
-                                    : '' ?>
+? 'selected'
+: '' ?>
                             >
                                 4th Year
                             </option>
@@ -538,8 +524,8 @@ $stmt->close();
                                 <option
                                     value="<?= e($sectionOption) ?>"
                                     <?= $section === $sectionOption
-                                        ? 'selected'
-                                        : '' ?>
+? 'selected'
+: '' ?>
                                 >
                                     <?= e($sectionOption) ?>
                                 </option>
@@ -574,10 +560,10 @@ $stmt->close();
                         <p>
 
                             <?php if (
-                                $program !== '' &&
-                                $yearLevel !== '' &&
-                                $section !== ''
-                            ): ?>
+$program !== '' &&
+$yearLevel !== '' &&
+$section !== ''
+): ?>
 
                                 <?= e($program) ?>
                                 ·
@@ -603,8 +589,8 @@ $stmt->close();
                         <?= count($courseOfferings) ?>
 
                         <?= count($courseOfferings) === 1
-                            ? 'Course'
-                            : 'Courses' ?>
+? 'Course'
+: 'Courses' ?>
 
                     </span>
 
@@ -679,9 +665,9 @@ $stmt->close();
                             <tbody>
 
                             <?php foreach (
-                                $courseOfferings
-                                as $offering
-                            ): ?>
+$courseOfferings
+as $offering
+): ?>
 
                                 <tr>
 
@@ -690,8 +676,8 @@ $stmt->close();
 
                                         <strong>
                                             <?= e(
-                                                $offering['course_code']
-                                            ) ?>
+$offering['course_code']
+) ?>
                                         </strong>
 
                                     </td>
@@ -700,8 +686,8 @@ $stmt->close();
                                     <td>
 
                                         <?= e(
-                                            $offering['course_name']
-                                        ) ?>
+$offering['course_name']
+) ?>
 
                                     </td>
 
@@ -709,8 +695,8 @@ $stmt->close();
                                     <td>
 
                                         <?= e(
-                                            $offering['units']
-                                        ) ?>
+$offering['units']
+) ?>
 
                                     </td>
 
@@ -718,16 +704,16 @@ $stmt->close();
                                     <td>
 
                                         <?php if (
-                                            !empty(
-                                                $offering['instructor_name']
-                                            )
-                                        ): ?>
+!empty(
+$offering['instructor_name']
+)
+): ?>
 
                                             <?= e(
-                                                $offering[
-                                                    'instructor_name'
-                                                ]
-                                            ) ?>
+$offering[
+'instructor_name'
+]
+) ?>
 
                                         <?php else: ?>
 
@@ -897,10 +883,10 @@ $stmt->close();
 
                             <?php
 
-                            $activeCourses = [];
+$activeCourses = [];
 
-                            $stmt = $conn->prepare(
-                                'SELECT
+$stmt = $conn->prepare(
+'SELECT
                                     course_id,
                                     course_code,
                                     course_name,
@@ -908,44 +894,44 @@ $stmt->close();
                                  FROM courses
                                  WHERE is_active = 1
                                  ORDER BY course_code ASC'
-                            );
+);
 
-                            $stmt->execute();
+$stmt->execute();
 
-                            $result = $stmt->get_result();
+$result = $stmt->get_result();
 
-                            while ($row = $result->fetch_assoc()) {
-                                $activeCourses[] = $row;
-                            }
+while ($row = $result->fetch_assoc()) {
+$activeCourses[] = $row;
+}
 
-                            $stmt->close();
+$stmt->close();
 
-                            ?>
+?>
 
 
                             <?php foreach (
-                                $activeCourses
-                                as $course
-                            ): ?>
+$activeCourses
+as $course
+): ?>
 
                                 <option
                                     value="<?= e(
-                                        $course['course_id']
-                                    ) ?>"
+$course['course_id']
+) ?>"
                                 >
 
                                     <?= e(
-                                        $course['course_code']
-                                    ) ?>
+$course['course_code']
+) ?>
 
                                     —
                                     <?= e(
-                                        $course['course_name']
-                                    ) ?>
+$course['course_name']
+) ?>
 
                                     (<?= e(
-                                        $course['units']
-                                    ) ?> units)
+$course['units']
+) ?> units)
 
                                 </option>
 
@@ -994,18 +980,18 @@ $stmt->close();
                             </option>
 
                             <?php foreach (
-                                $programs
-                                as $programOption
-                            ): ?>
+$programs
+as $programOption
+): ?>
 
                                 <option
                                     value="<?= e(
-                                        $programOption
-                                    ) ?>"
+$programOption
+) ?>"
                                 >
                                     <?= e(
-                                        $programOption
-                                    ) ?>
+$programOption
+) ?>
                                 </option>
 
                             <?php endforeach; ?>
@@ -1070,10 +1056,10 @@ $stmt->close();
 
                             <?php
 
-                            $allSections = [];
+$allSections = [];
 
-                            $stmt = $conn->prepare(
-                                'SELECT DISTINCT
+$stmt = $conn->prepare(
+'SELECT DISTINCT
                                     program,
                                     year_level,
                                     section
@@ -1084,41 +1070,41 @@ $stmt->close();
                                     program ASC,
                                     year_level ASC,
                                     section ASC'
-                            );
+);
 
-                            $stmt->execute();
+$stmt->execute();
 
-                            $result = $stmt->get_result();
+$result = $stmt->get_result();
 
-                            while ($row = $result->fetch_assoc()) {
-                                $allSections[] = $row;
-                            }
+while ($row = $result->fetch_assoc()) {
+$allSections[] = $row;
+}
 
-                            $stmt->close();
+$stmt->close();
 
-                            ?>
+?>
 
 
                             <?php foreach (
-                                $allSections
-                                as $sectionOption
-                            ): ?>
+$allSections
+as $sectionOption
+): ?>
 
                                 <option
                                     value="<?= e(
-                                        $sectionOption['section']
-                                    ) ?>"
+$sectionOption['section']
+) ?>"
                                     data-program="<?= e(
-                                        $sectionOption['program']
-                                    ) ?>"
+$sectionOption['program']
+) ?>"
                                     data-year="<?= e(
-                                        $sectionOption['year_level']
-                                    ) ?>"
+$sectionOption['year_level']
+) ?>"
                                 >
 
                                     <?= e(
-                                        $sectionOption['section']
-                                    ) ?>
+$sectionOption['section']
+) ?>
 
                                 </option>
 

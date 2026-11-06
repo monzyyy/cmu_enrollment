@@ -27,8 +27,7 @@ if (
     exit;
 }
 
-
-/* Check if another course already uses this code */
+ 
 
 $stmt = $conn->prepare(
     'SELECT course_id
@@ -62,8 +61,7 @@ if ($result->num_rows > 0) {
 
 $stmt->close();
 
-
-/* Update course */
+ 
 
 $stmt = $conn->prepare(
     'UPDATE courses
@@ -95,7 +93,6 @@ if (!$stmt->execute()) {
 }
 
 $stmt->close();
-
 
 echo json_encode([
     'success' => true,

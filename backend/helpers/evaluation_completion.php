@@ -1,12 +1,8 @@
 
 <?php
 
-/**
- * Checks whether all recorded previous-semester
- * faculty evaluations are complete.
- *
- * This function does not change enrollment phases.
- */
+
+
 function checkEvaluationCompletion(
     mysqli $conn,
     int $studentId,
@@ -79,10 +75,7 @@ function checkEvaluationCompletion(
 }
 
 
-/**
- * Checks whether all historical sections represented
- * in the student's records have been finalized.
- */
+
 function checkFacultyFinalization(
     mysqli $conn,
     int $studentId,
@@ -133,8 +126,7 @@ function checkFacultyFinalization(
     );
 }
 
-
-/** Determine the term whose instructors must be evaluated. */
+ 
 function evaluationPreviousTerm(string $semester, string $schoolYear): array
 {
     if (!preg_match('/^(\d{4})\s*-\s*(\d{4})$/', trim($schoolYear), $m)) {
@@ -154,12 +146,8 @@ function evaluationPreviousTerm(string $semester, string $schoolYear): array
     };
 }
 
-/**
- * Reconcile completed previous-term evaluations with the student's phase.
- * Safe to call when opening a student page, including after evaluations
- * were submitted before the phase-progression bug was fixed.
- * Never resets a later enrollment phase.
- */
+
+
 function syncCompletedEvaluationPhase(mysqli $conn, int $studentId): void
 {
     $settingsResult = $conn->query(

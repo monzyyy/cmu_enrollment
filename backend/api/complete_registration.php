@@ -1,12 +1,8 @@
 <?php
 declare(strict_types=1);
 
-/**
- * Step 3 of registration: create the account.
- *
- * Only works for a masterlist record whose emailed code was verified by
- * verify_registration_code.php in this same browser session.
- */
+
+
 
 require_once dirname(__DIR__) . '/bootstrap.php';
 
@@ -45,7 +41,7 @@ if ($password !== $confirm) {
     respond(422, 'The passwords do not match.');
 }
 if (strlen($password) < 8 || strlen($password) > 72) {
-    // bcrypt only uses the first 72 bytes, so longer passwords are rejected.
+     
     respond(422, 'Password must be 8 to 72 characters long.');
 }
 if (!preg_match('/[A-Za-z]/', $password) || !preg_match('/\d/', $password)) {
@@ -58,7 +54,7 @@ $verificationId = (int)$verified['verification_id'];
 try {
     $conn->begin_transaction();
 
-    // Lock the masterlist record and re-check everything inside the transaction.
+     
     $stmt = $conn->prepare('SELECT student_number, first_name, middle_name, last_name, email,
             program, year_level, section, registration_status, user_id
         FROM student_masterlist WHERE masterlist_id = ? FOR UPDATE');
@@ -81,7 +77,7 @@ try {
         respond(403, 'This registration can no longer be completed. Please start again.', ['restart' => true]);
     }
 
-    // Defensive duplicate checks (the unique keys would also reject these).
+     
     $stmt = $conn->prepare('SELECT 1 FROM users WHERE account_number = ? LIMIT 1');
     $stmt->bind_param('s', $m['student_number']);
     $stmt->execute();

@@ -1,5 +1,5 @@
 <?php
-/** Secure inline preview for uploaded Clearance documents (PDF, JPG, PNG). */
+ 
 require_once dirname(__DIR__) . '/bootstrap.php';
 require_role('ADMIN');
 
@@ -24,8 +24,8 @@ if (!$submission) {
     clearancePreviewError(404, 'Clearance submission not found.');
 }
 
-// This must match submit_clearance.php exactly. The private folder is
-// outside the web-accessible project, so files are only served through this API.
+ 
+ 
 $primaryDirectory = dirname(__DIR__, 4) . '/cmu_private_uploads/clearance/';
 $projectRoot = dirname(__DIR__, 2);
 $legacyDirectories = [
@@ -58,7 +58,7 @@ if (!in_array($mimeType, $allowed, true)) {
     clearancePreviewError(415, 'This Clearance file is not a supported PDF, JPG, or PNG.');
 }
 
-// Prevent any prior output from corrupting binary image/PDF data.
+ 
 while (ob_get_level() > 0) {
     ob_end_clean();
 }
